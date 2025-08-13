@@ -1,15 +1,10 @@
-// import { LoginForm } from "@/components/login-form"
-import { LoginForm } from "@/components/login-form"
-import { LayoutDashboard } from "lucide-react"
+import Landingpage from '@/app/landingpage/page';
 
 
 
 
 export default function page() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      {/* <LoginForm/> */}
-      <LoginForm />
-          </div>
+    <Landingpage/>
   )
 }

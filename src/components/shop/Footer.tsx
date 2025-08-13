@@ -10,7 +10,7 @@ const Footer = () => {
           
           {/* Kolom 1: Logo & Social Media */}
           <div className="lg:col-span-2">
-            <Link href="/" className="text-3xl font-bold text-blue-500">
+            <Link href="/" className="text-3xl font-bold text-orange-600">
               SportZone
             </Link>
             <p className="mt-4 text-gray-400 max-w-xs">

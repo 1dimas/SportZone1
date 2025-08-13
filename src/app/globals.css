@@ -120,3 +120,41 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* app/globals.css */
+
+/* ... (kode tailwind Anda) ... */
+
+/* Kustomisasi untuk Hero Slider */
+.hero-slider .swiper-button-next,
+.hero-slider .swiper-button-prev {
+  color: #ffffff !important;
+  background-color: rgba(0, 0, 0, 0.3);
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50%;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.hero-slider .swiper-button-next:hover,
+.hero-slider .swiper-button-prev:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+    transform: scale(1.1);
+}
+
+.hero-slider .swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.7) !important;
+  width: 12px !important;
+  height: 12px !important;
+  opacity: 1 !important;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.hero-slider .swiper-pagination-bullet-active {
+  background: #2563EB !important; /* Warna biru */
+  border: 2px solid white;
+  transform: scale(1.2);
+}
+
+/* ... (CSS untuk Product Carousel bisa diletakkan di bawahnya) ... */
