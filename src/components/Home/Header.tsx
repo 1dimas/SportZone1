@@ -3,7 +3,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { FiSearch, FiMapPin, FiHeart, FiShoppingCart, FiMenu, FiX, FiUser } from "react-icons/fi";
+import {
+  FiSearch,
+  FiMapPin,
+  FiHeart,
+  FiShoppingCart,
+  FiMenu,
+  FiX,
+  FiUser,
+} from "react-icons/fi";
 import { CascadingMenu } from "./CascadingMenu";
 import { menuData } from "@/app/data/menuData";
 
@@ -53,33 +61,6 @@ export default function Header() {
 
           {/* Icon dan Tombol Login */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              className="p-2 rounded-full hover:bg-slate-100 transition-all hover:scale-110 hidden sm:flex"
-              title="Lacak Pesanan"
-              aria-label="Lacak Pesanan"
-            >
-              <FiMapPin size={22} />
-            </button>
-
-            <button
-              className="p-2 rounded-full hover:bg-slate-100 transition-all hover:scale-110 hidden sm:flex"
-              title="Wishlist"
-              aria-label="Wishlist"
-            >
-              <FiHeart size={22} />
-            </button>
-
-            <button
-              className="relative p-2 rounded-full hover:bg-slate-100 transition-all hover:scale-110"
-              title="Keranjang"
-              aria-label="Keranjang Belanja"
-            >
-              <FiShoppingCart size={22} />
-              <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-red-500 rounded-full border-2 border-white">
-                3
-              </span>
-            </button>
-
             {/* Tombol Login */}
             <Link
               href="/login"
