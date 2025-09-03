@@ -53,18 +53,23 @@ const data = {
     },
     {
       title: "Petugas",
-      url: "#",
-      icon: IconChartBar,
+      url: "/dashboardadmin/petugas",
+      icon: IconUsers,
     },
     {
-      title: "olahraga",
-      url: "#",
+      title: "Olahraga",
+      url: "/dashboardadmin/olahraga",
       icon: IconFileWord,
     },
     {
       title: "Order",
       url: "#",
       icon: IconUsers,
+    },
+    {
+      title: "Subkategori Peralatan",
+      url: "/dashboardadmin/subkategori-peralatan",
+      icon: IconChartBar,
     },
   ],
   navClouds: [
