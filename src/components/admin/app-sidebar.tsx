@@ -47,8 +47,8 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Costomer",
-      url: "#",
+      title: "Customer",
+      url: "/dashboardadmin/customers",
       icon: IconListDetails,
     },
     {
