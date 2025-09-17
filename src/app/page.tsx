@@ -1,10 +1,12 @@
-import Landingpage from '@/app/landingpage/page';
+import HomePage from '@/app/homepage/page'
+
+
 
 
 
 
 export default function page() {
   return (
-    <Landingpage/>
+    <HomePage/>
   )
 }

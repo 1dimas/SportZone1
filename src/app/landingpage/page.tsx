@@ -1,6 +1,8 @@
+
 // app/page.tsx
 
 import Header from "@/components/Landing/header";
+import HeroBanner from "@/components/Landing/HeroBanner";
 import { ValueProps } from "@/components/Landing/ValueProps";
 import { FeaturedCategories } from "@/components/Landing/FeaturedCategories";
 // import { ProductCarousel } from "@/components/landingpage/ProductCarouselClient";
@@ -14,27 +16,23 @@ export default function HomePage() {
     <>
       <Header />
       
+      {/* Hero Banner */}
+      <HeroBanner />
       
       {/* Bagian utama halaman */}
-      
       <main className="bg-white">
-        
-        {/* Section 1: Banner Utama */}
-        
-
         {/* Section 2: Keunggulan Toko */}
-        <ValueProps  />
+        <ValueProps />
         
         {/* Section 3: Kategori Unggulan */}
         <FeaturedCategories />
 
-         <Testimonials />
+        <Testimonials />
 
         {/* Section 4: Produk Terlaris (Komponen ini mengambil datanya sendiri dari server)
         <ProductCarousel /> */}
 
         {/* Anda bisa menambahkan section lain di sini, seperti Testimoni atau Brand Carousel */}
-        
       </main>
 
       <Footer />

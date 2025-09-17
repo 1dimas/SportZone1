@@ -2,20 +2,15 @@
 
 import * as React from "react"
 import {
-  IconCamera,
   IconChartBar,
   IconDashboard,
   IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
   IconFolder,
   IconHelp,
   IconInnerShadowTop,
-  IconListDetails,
   IconReport,
-  IconSearch,
   IconSettings,
+  IconShoppingCart,
   IconUsers,
 } from "@tabler/icons-react"
 
@@ -35,20 +30,30 @@ import {
 
 const data = {
   user: {
-    name: "Oficcer",
-    email: "m@example.com",
+    name: "Petugas",
+    email: "petugas@sportzone.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboardpetugas",
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
+      title: "Produk",
+      url: "/dashboardpetugas/produk",
+      icon: IconDatabase,
+    },
+    {
+      title: "Pesanan",
       url: "#",
-      icon: IconListDetails,
+      icon: IconShoppingCart,
+    },
+    {
+      title: "Pelanggan",
+      url: "#",
+      icon: IconUsers,
     },
     {
       title: "Analytics",
@@ -56,59 +61,47 @@ const data = {
       icon: IconChartBar,
     },
     {
-      title: "Projects",
+      title: "Laporan",
       url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
+      icon: IconReport,
     },
   ],
   navClouds: [
     {
-      title: "Capture",
-      icon: IconCamera,
+      title: "Kategori Olahraga",
+      icon: IconFolder,
       isActive: true,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "Sepak Bola",
           url: "#",
         },
         {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
+          title: "Basket",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Bulu Tangkis",
           url: "#",
         },
       ],
     },
     {
-      title: "Prompts",
-      icon: IconFileAi,
+      title: "Brand",
+      icon: IconDatabase,
       url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "Nike",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Adidas",
+          url: "#",
+        },
+        {
+          title: "Puma",
           url: "#",
         },
       ],
@@ -116,36 +109,26 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
+      title: "Pengaturan",
       url: "#",
       icon: IconSettings,
     },
     {
-      title: "Get Help",
+      title: "Bantuan",
       url: "#",
       icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
     },
   ],
   documents: [
     {
-      name: "Data Library",
+      name: "Data Produk",
       url: "#",
       icon: IconDatabase,
     },
     {
-      name: "Reports",
+      name: "Laporan Penjualan",
       url: "#",
       icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
     },
   ],
 }
@@ -162,7 +145,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Oficcer</span>
+                <span className="text-base font-semibold">SportZone</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -19,18 +19,21 @@ const StarRating = ({ rating }: { rating: number }) => {
 // Komponen untuk satu kartu testimonial
 const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col h-full shadow-sm hover:shadow-lg transition-shadow duration-300">
-      <FaQuoteLeft className="text-blue-500 text-3xl mb-4" />
-      <p className="text-slate-600 italic mb-6 flex-grow">{testimonial.quote}</p>
+    <div className="bg-white rounded-xl border border-gray-100 p-8 flex flex-col h-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <FaQuoteLeft className="text-orange-500 text-4xl mb-6" />
+      <p className="text-gray-700 italic mb-8 flex-grow text-lg">"{testimonial.quote}"</p>
       
-      <div className="mt-auto pt-4 border-t">
+      <div className="mt-auto pt-6 border-t border-gray-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-             {/* Ganti 'Image' dari 'next/image' untuk optimasi */}
-            <img src={testimonial.avatarUrl} alt={testimonial.name} className="w-12 h-12 rounded-full mr-4 object-cover" />
+            <img 
+              src={testimonial.avatarUrl} 
+              alt={testimonial.name} 
+              className="w-16 h-16 rounded-full mr-4 object-cover border-2 border-orange-100" 
+            />
             <div>
-              <p className="font-bold text-slate-800">{testimonial.name}</p>
-              <p className="text-sm text-slate-500">{testimonial.title}</p>
+              <p className="font-bold text-gray-900 text-lg">{testimonial.name}</p>
+              <p className="text-gray-600">{testimonial.title}</p>
             </div>
           </div>
           <StarRating rating={testimonial.rating} />
@@ -40,18 +43,19 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => {
   );
 };
 
-
 // Komponen utama yang akan diekspor
 export const Testimonials = () => {
   return (
-    <section className="py-12 md:py-20 bg-slate-50">
+    <section className="py-20 bg-gradient-to-br from-blue-50 to-orange-50">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-slate-800">
-          Dipercaya oleh Ribuan Pelanggan
-        </h2>
-        <p className="text-slate-600 text-center mt-3 mb-10 max-w-2xl mx-auto">
-          Lihat apa kata mereka yang sudah merasakan kualitas produk dan layanan kami.
-        </p>
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Dipercaya oleh Ribuan Pelanggan
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Lihat apa kata mereka yang sudah merasakan kualitas produk dan layanan kami.
+          </p>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonialData.map(testimonial => (

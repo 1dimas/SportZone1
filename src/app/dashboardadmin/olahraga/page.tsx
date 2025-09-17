@@ -12,6 +12,7 @@ import { getAllKategoriOlahraga } from "@/components/lib/services/olahraga.servi
 import { kategoriOlahragaSchema } from "@/components/admin/olahraga-table"
 import { z } from "zod"
 import { toast } from "sonner"
+import { addKategoriOlahragaRefreshListener } from "@/components/lib/utils/kategori-olahraga-refresh"
 
 export default function KategoriOlahragaListPage() {
   const [kategoriData, setKategoriData] = useState<z.infer<typeof kategoriOlahragaSchema>[]>([])
@@ -34,6 +35,10 @@ export default function KategoriOlahragaListPage() {
 
   useEffect(() => {
     fetchKategori()
+    
+    // Listen for kategori olahraga refresh events
+    const removeListener = addKategoriOlahragaRefreshListener(fetchKategori)
+    return removeListener
   }, [])
 
   if (loading) {

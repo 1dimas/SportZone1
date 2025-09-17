@@ -8,15 +8,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createKategoriOlahraga, updateKategoriOlahraga } from "@/components/lib/services/olahraga.service"
+import { triggerKategoriOlahragaRefresh } from "@/components/lib/utils/kategori-olahraga-refresh"
 
 interface KategoriOlahragaFormProps {
   initialData?: {
     id?: string
     nama?: string
   }
+  onSuccess?: () => void
 }
 
-export function KategoriOlahragaForm({ initialData }: KategoriOlahragaFormProps) {
+export function KategoriOlahragaForm({ initialData, onSuccess }: KategoriOlahragaFormProps) {
   const router = useRouter()
   
   const [nama, setNama] = useState(initialData?.nama || "")
@@ -35,16 +37,23 @@ export function KategoriOlahragaForm({ initialData }: KategoriOlahragaFormProps)
           nama: nama || undefined,
         })
         toast.success("Kategori olahraga updated successfully")
+        triggerKategoriOlahragaRefresh()
       } else {
         // Create new kategori olahraga
         await createKategoriOlahraga({
           nama,
         })
         toast.success("Kategori olahraga created successfully")
+        triggerKategoriOlahragaRefresh()
       }
       
-      // Redirect to kategori olahraga list
-      router.push("/dashboardadmin/olahraga")
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        // Redirect to kategori olahraga list only if no onSuccess callback
+        router.push("/dashboardadmin/olahraga")
+      }
     } catch (error: any) {
       console.error(error)
       setErrorMsg(`Failed to ${initialData?.id ? 'update' : 'create'} kategori olahraga: ${error.message}`)

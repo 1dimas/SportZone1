@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar"
 import { getKategoriOlahragaById } from "@/components/lib/services/olahraga.service"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 
 export default function EditKategoriOlahragaPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -34,6 +35,11 @@ export default function EditKategoriOlahragaPage({ params }: { params: { id: str
 
     fetchKategori()
   }, [params.id])
+
+  const handleSuccess = () => {
+    // Stay on the same page after successful update
+    toast.success("Kategori olahraga updated successfully!")
+  }
 
   if (loading) {
     return (
@@ -67,12 +73,19 @@ export default function EditKategoriOlahragaPage({ params }: { params: { id: str
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
               <div className="px-4 lg:px-6">
-                <h1 className="text-2xl font-bold">Edit Kategori Olahraga</h1>
-                <p className="text-muted-foreground">Update the details for this sports category</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-2xl font-bold">Edit Kategori Olahraga</h1>
+                    <p className="text-muted-foreground">Update the details for this sports category</p>
+                  </div>
+                  <Button onClick={() => router.push("/dashboardadmin/olahraga")}>
+                    Back to List
+                  </Button>
+                </div>
               </div>
               <div className="px-4 lg:px-6">
                 <div className="bg-card rounded-lg border p-6">
-                  <KategoriOlahragaForm initialData={kategoriData} />
+                  <KategoriOlahragaForm initialData={kategoriData} onSuccess={handleSuccess} />
                 </div>
               </div>
             </div>
