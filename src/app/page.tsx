@@ -1,4 +1,5 @@
-import HomePage from '@/app/homepage/page'
+
+import Home from './home/page';
 
 
 
@@ -7,6 +8,6 @@ import HomePage from '@/app/homepage/page'
 
 export default function page() {
   return (
-    <HomePage/>
+    <Home/>
   )
 }

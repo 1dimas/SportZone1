@@ -15,7 +15,7 @@ const products: Product[] = [
   {
     id: 1,
     name: "FeatherLite Carbon X1",
-    category: "Running",
+    
     price: 2800000,
     oldPrice: 3500000,
     imageUrl: "/products/kao.jpeg",
