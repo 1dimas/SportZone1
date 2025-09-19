@@ -47,7 +47,7 @@ const data = {
     },
     {
       title: "Pesanan",
-      url: "#",
+      url: "/dashboardpetugas/pesanan",
       icon: IconShoppingCart,
     },
     {

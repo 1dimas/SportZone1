@@ -1,36 +1,38 @@
-# TODO - Produk Form Alignment with Backend
+# TODO: Implement Pesanan Features for Petugas Dashboard
 
-## ✅ Completed Tasks
+## Step 1: Create API Service for Pesanan ✅
+- Create src/components/lib/services/pesanan.service.ts
+- Implement methods for:
+  - fetchAllPesanan(): GET /pesanan (list all orders)
+  - fetchPesananById(id: string): GET /pesanan/:id (get order details)
+  - updatePesananStatus(id: string, status: string): PUT /pesanan/:id/status (update status)
 
-### 1. Added Missing Produk Service Methods
-- [x] `getProdukByKategori(kategoriId: string)`
-- [x] `getProdukBySubkategori(subkategoriId: string)`
-- [x] `getProdukByBrand(brandId: string)`
-- [x] `deleteGambarProduk(id: string, gambarUrl: string)`
+## Step 2: Create Pesanan List Page ✅
+- Create src/app/dashboardpetugas/pesanan/page.tsx
+- Display list of orders in a table format
+- Include columns: ID, Customer, Date, Total, Status
+- Add click handler to navigate to order details
+- Use existing UI components for consistency
 
-### 2. Updated Produk Form
-- [x] Added kategori olahraga selection input
-- [x] Implemented filtering of subkategori based on selected kategori
-- [x] Updated form schema to include kategori_id (for filtering only)
-- [x] Changed image deletion to use immediate API calls instead of deleted_images array
-- [x] Removed deleted_images state and related logic
-- [x] Updated form interfaces and default values
-- [x] Fixed TypeScript errors
+## Step 3: Create Pesanan Detail Component ✅
+- Create src/components/petugas/pesanan-detail.tsx
+- Display order details: items, customer info, shipping address
+- Include status update dropdown/button (only for petugas role)
+- Handle status update API call
+- Show success/error messages
 
-### 3. Key Changes Made
-- **produk.service.ts**: Added new methods for backend API endpoints
-- **produk-form.tsx**: Added kategori selection, filtered subkategori, immediate image deletion
-- **Form Logic**: Kategori is used for filtering subkategori but not saved to produk (produk only saves subkategori_id)
+## Step 4: Update Sidebar Menu ✅
+- Update src/components/petugas/app-sidebar.tsx
+- Change "Pesanan" menu item URL from "#" to "/dashboardpetugas/pesanan"
 
-## 🔄 Current Status
-- Form now includes kategori olahraga selection
-- Subkategori options are filtered based on selected kategori
-- Image deletion happens immediately via API call
-- All TypeScript errors resolved
-- Form is ready for testing
+## Step 5: Test and Verify
+- Test order list loading
+- Test order detail view
+- Test status update functionality
+- Verify role-based access control
+- Ensure proper error handling
 
-## 📋 Next Steps (if needed)
-- [ ] Test the form with actual backend API
-- [ ] Verify kategori filtering works correctly
-- [ ] Test image upload and deletion functionality
-- [ ] Check form validation and error handling
+## Step 6: Final Review
+- Check code quality and consistency
+- Ensure responsive design
+- Verify integration with backend API
