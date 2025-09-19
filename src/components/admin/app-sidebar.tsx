@@ -72,6 +72,11 @@ const data = {
       icon: IconListDetails,
     },
     {
+      title: "Pesanan",
+      url: "/dashboardadmin/pesanan",
+      icon: IconListDetails,
+    },
+    {
       title: "Order",
       url: "#",
       icon: IconUsers,
