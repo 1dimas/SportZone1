@@ -67,6 +67,11 @@ const data = {
       icon: IconFileWord,
     },
     {
+      title: "Produk",
+      url: "/dashboardadmin/produk",
+      icon: IconListDetails,
+    },
+    {
       title: "Order",
       url: "#",
       icon: IconUsers,
