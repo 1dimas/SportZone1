@@ -14,8 +14,11 @@ import {
   VisibilityState,
 } from "@tanstack/react-table"
 import { z } from "zod"
+import { Eye } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -125,9 +128,9 @@ const columns: ColumnDef<Produk>[] = [
     ),
   },
   {
-    id: "varian",
-    header: "Varian",
-    cell: ({ row }) => <VarianList produkId={row.original.id} />,
+    id: "actions",
+    header: "Aksi",
+    cell: ({ row }) => <ActionsCell produkId={row.original.id} />,
   },
 ]
 
@@ -168,6 +171,20 @@ function VarianList({ produkId }: { produkId: string }) {
         </li>
       ))}
     </ul>
+  )
+}
+
+function ActionsCell({ produkId }: { produkId: string }) {
+  const router = useRouter()
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => router.push(`/dashboardadmin/produk/${produkId}`)}
+    >
+      <Eye className="w-4 h-4 mr-2" />
+      Lihat Detail
+    </Button>
   )
 }
 
