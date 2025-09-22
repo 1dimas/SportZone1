@@ -1,3 +1,10 @@
+// Definisikan tipe untuk Varian
+export type ProductVariant = {
+  size: string | number;
+  stock: number;
+};
+
+// Definisikan tipe untuk Produk
 export type Product = {
   id: number;
   name: string;
@@ -5,14 +12,12 @@ export type Product = {
   category: string;
   imageUrl: string;
   isNew?: boolean;
-  stock: number;
-  sold: number;
   description: string;
+  variants: ProductVariant[];
 };
 
-
-
 const products: Product[] = [
+  // --- Kategori Basket ---
   {
     id: 1,
     name: "FeatherLite Carbon X1",
@@ -20,9 +25,12 @@ const products: Product[] = [
     category: "Basketball",
     imageUrl: "/products/kao.jpeg",
     isNew: true,
-    stock: 15,
-    sold: 120,
     description: "Sepatu basket dengan material carbon ringan, cocok untuk pemain profesional.",
+    variants: [
+      { size: 42, stock: 10 },
+      { size: 43, stock: 5 },
+      { size: 44, stock: 8 },
+    ],
   },
   {
     id: 2,
@@ -30,10 +38,13 @@ const products: Product[] = [
     category: "Basketball",
     price: 650000,
     imageUrl: "/products/kao.jpeg",
-    stock: 40,
-    sold: 320,
     description: "Sepatu basket dengan grip kuat dan desain modern.",
+    variants: [
+      { size: 40, stock: 20 },
+      { size: 41, stock: 15 },
+    ],
   },
+  // --- Kategori Sepak Bola ---
   {
     id: 3,
     name: "FeatherLite Carbon X3",
@@ -41,100 +52,83 @@ const products: Product[] = [
     price: 999000,
     imageUrl: "/products/kao.jpeg",
     isNew: true,
-    stock: 25,
-    sold: 210,
     description: "Sepatu bola ringan dengan sol anti slip, nyaman untuk semua kondisi lapangan.",
+    variants: [
+      { size: 41, stock: 12 },
+      { size: 42, stock: 0 },
+      { size: 43, stock: 18 },
+    ],
   },
+  // --- Kategori Badminton ---
   {
     id: 4,
     name: "FeatherLite Carbon X4",
     category: "Badminton",
     price: 1200000,
     imageUrl: "/products/kao.jpeg",
-    stock: 10,
-    sold: 150,
     description: "Sepatu badminton dengan bantalan empuk untuk mengurangi benturan.",
+    variants: [
+      { size: 39, stock: 5 },
+      { size: 40, stock: 10 },
+      { size: 41, stock: 7 },
+    ],
+  },
+  // --- Kategori Lari ---
+  {
+    id: 13,
+    name: "AeroRun Swift Z1",
+    price: 1750000,
+    category: "Running",
+    imageUrl: "/products/kao.jpeg",
+    isNew: true,
+    description: "Sepatu lari ultra-ringan dengan teknologi Aero-cushion untuk lari jarak jauh.",
+    variants: [
+      { size: 42, stock: 11 },
+      { size: 43, stock: 9 },
+      { size: 44, stock: 0 },
+    ],
+  },
+  // --- Kategori Lifestyle ---
+  {
+    id: 20,
+    name: "UrbanWalk Classic",
+    price: 750000,
+    category: "Lifestyle",
+    imageUrl: "/products/kao.jpeg",
+    isNew: true,
+    description: "Sneakers kasual yang nyaman untuk dipakai sehari-hari.",
+    variants: [
+      { size: 40, stock: 30 },
+      { size: 41, stock: 25 },
+      { size: 42, stock: 22 },
+    ],
   },
   {
-    id: 5,
-    name: "FeatherLite Carbon X5",
-    category: "Badminton",
-    price: 1200000,
+    id: 26, // Contoh produk dengan ukuran S, M, L
+    name: "SportZone Performance Tee",
+    price: 350000,
+    category: "Lifestyle",
     imageUrl: "/products/kao.jpeg",
-    stock: 30,
-    sold: 90,
-    description: "Sepatu serbaguna untuk pemain pemula maupun profesional.",
+    description: "Kaos olahraga dengan bahan dry-fit yang menyerap keringat.",
+    variants: [
+      { size: "S", stock: 20 },
+      { size: "M", stock: 30 },
+      { size: "L", stock: 15 },
+      { size: "XL", stock: 5 },
+    ],
   },
   {
-    id: 6,
-    name: "FeatherLite Carbon X6",
-    category: "Badminton",
-    price: 1200000,
+    id: 27, // Contoh produk tanpa ukuran spesifik
+    name: "Pro-Grip Basketball",
+    price: 450000,
+    category: "Basketball",
     imageUrl: "/products/kao.jpeg",
-    stock: 18,
-    sold: 60,
-    description: "Sepatu badminton dengan desain ringan dan breathable.",
+    description: "Bola basket standar FIBA dengan grip yang optimal.",
+    variants: [
+      { size: "One Size", stock: 50 },
+    ],
   },
-  {
-    id: 7,
-    name: "FeatherLite Carbon X7",
-    category: "Badminton",
-    price: 1200000,
-    imageUrl: "/products/kao.jpeg",
-    stock: 12,
-    sold: 110,
-    description: "Sepatu premium dengan daya tahan tinggi untuk latihan intensif.",
-  },
-  {
-    id: 8,
-    name: "FeatherLite Carbon X8",
-    category: "Badminton",
-    price: 1200000,
-    imageUrl: "/products/kao.jpeg",
-    stock: 22,
-    sold: 95,
-    description: "Sepatu badminton dengan support ankle ekstra.",
-  },
-  {
-    id: 9,
-    name: "FeatherLite Carbon X9",
-    category: "Badminton",
-    price: 1200000,
-    imageUrl: "/products/kao.jpeg",
-    stock: 8,
-    sold: 140,
-    description: "Sepatu ringan dengan fleksibilitas tinggi.",
-  },
-  {
-    id: 10,
-    name: "FeatherLite Carbon X10",
-    category: "Badminton",
-    price: 1200000,
-    imageUrl: "/products/kao.jpeg",
-    stock: 35,
-    sold: 170,
-    description: "Sepatu dengan desain modern dan performa optimal.",
-  },
-  {
-    id: 11,
-    name: "FeatherLite Carbon X11",
-    category: "Badminton",
-    price: 1200000,
-    imageUrl: "/products/kao.jpeg",
-    stock: 20,
-    sold: 75,
-    description: "Sepatu dengan grip kuat dan nyaman dipakai lama.",
-  },
-  {
-    id: 12,
-    name: "FeatherLite Carbon X12",
-    category: "Badminton",
-    price: 1200000,
-    imageUrl: "/products/kao.jpeg",
-    stock: 28,
-    sold: 60,
-    description: "Sepatu all-rounder untuk latihan maupun turnamen.",
-  },
+  // ... (Sisa produk lainnya bisa kamu tambahkan variannya sendiri dengan pola yang sama)
 ];
 
 export default products;
