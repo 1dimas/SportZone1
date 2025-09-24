@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { type Product } from "@/app/data/products";
+
 
 export default function ProductDetail({ product }: { product: Product }) {
   return (

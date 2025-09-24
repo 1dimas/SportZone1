@@ -15,6 +15,7 @@ export type MenuItem = {
   title: string;
   href: string;
   columns: MenuColumn[];
+  slug?: string; // tambahkan property slug (opsional)
 };
 
 // Data hanya berisi satu item utama: SPORTS
@@ -22,6 +23,7 @@ export const menuData: MenuItem[] = [
   {
     title: 'SPORTS', // Hanya item ini yang ada di level atas
     href: '/sports',
+    slug: 'sports', // tambahkan slug pada item utama
     columns: [
       {
         heading: 'BADMINTON',
