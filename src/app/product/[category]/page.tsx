@@ -6,7 +6,7 @@ import products from "@/app/data/products"; // Pastikan path ini benar
 import { Product, ProductVariant } from "@/app/data/products"; // Import tipe baru
 import Image from "next/image";
 
-// Fungsi format Rupiah (tidak berubah)
+// Fungsi format Rupiah
 const formatRupiah = (price: number) => {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -16,30 +16,33 @@ const formatRupiah = (price: number) => {
 };
 
 type ProductPageProps = {
-  params: { id: string };
+  params: { name: string };
 };
 
 // BAGIAN 1: KOMPONEN HALAMAN UTAMA
 export default function ProductPage({ params }: ProductPageProps) {
-  // --- Logika Pencarian Data (tidak berubah) ---
-  const productId = Number(params.id);
-  const product = products.find((p) => p.id === productId);
+  // --- Ambil nama produk dari URL ---
+  const productName = decodeURIComponent(params.name).toLowerCase();
+
+  // --- Cari produk berdasarkan name (case insensitive) ---
+  const product: Product | undefined = products.find(
+    (p) => p.name.toLowerCase() === productName
+  );
 
   // --- State untuk menyimpan ukuran yang dipilih ---
-  // Defaultnya adalah varian pertama yang tersedia
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
-    product?.variants.find(v => v.stock > 0) || product?.variants[0]
+    product?.variants.find((v) => v.stock > 0) || product?.variants[0]
   );
 
   if (!product) {
     return (
       <div className="flex h-screen items-center justify-center text-center text-red-600">
-        <h1>Produk dengan ID {params.id} tidak ditemukan.</h1>
+        <h1>Produk dengan nama {params.name} tidak ditemukan.</h1>
       </div>
     );
   }
-  
-  // BAGIAN 2: TAMPILAN UI YANG SUDAH DIUPDATE
+
+  // BAGIAN 2: TAMPILAN UI
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
@@ -68,7 +71,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               <p className="text-3xl text-gray-800">{formatRupiah(product.price)}</p>
             </div>
 
-            {/* --- BAGIAN BARU: PEMILIHAN UKURAN --- */}
+            {/* Pilih Ukuran */}
             <div className="mt-8">
               <h3 className="text-sm font-semibold text-gray-800">Pilih Ukuran:</h3>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -78,8 +81,16 @@ export default function ProductPage({ params }: ProductPageProps) {
                     onClick={() => setSelectedVariant(variant)}
                     disabled={variant.stock === 0}
                     className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors 
-                      ${variant.stock === 0 ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 line-through' : ''}
-                      ${selectedVariant?.size === variant.size ? 'border-transparent bg-indigo-600 text-white ring-2 ring-indigo-500' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}`}
+                      ${
+                        variant.stock === 0
+                          ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 line-through"
+                          : ""
+                      }
+                      ${
+                        selectedVariant?.size === variant.size
+                          ? "border-transparent bg-indigo-600 text-white ring-2 ring-indigo-500"
+                          : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
                   >
                     {variant.size}
                   </button>
@@ -87,21 +98,29 @@ export default function ProductPage({ params }: ProductPageProps) {
               </div>
             </div>
 
+            {/* Deskripsi */}
             <div className="mt-6 border-t border-gray-200 pt-6">
               <h3 className="text-lg font-semibold text-gray-800">Deskripsi</h3>
               <p className="mt-2 text-base text-gray-600">{product.description}</p>
             </div>
 
-            {/* --- UPDATE TAMPILAN STOK --- */}
+            {/* Stok */}
             <div className="mt-6">
               <p className="text-sm font-medium text-gray-700">
-                Stok Ukuran {selectedVariant?.size}: 
-                <span className={selectedVariant && selectedVariant.stock > 0 ? "text-green-600" : "text-red-600"}>
+                Stok Ukuran {selectedVariant?.size}:
+                <span
+                  className={
+                    selectedVariant && selectedVariant.stock > 0
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
                   {` ${selectedVariant?.stock || 0} Tersisa`}
                 </span>
               </p>
             </div>
 
+            {/* Tombol */}
             <div className="mt-8">
               <button
                 type="button"

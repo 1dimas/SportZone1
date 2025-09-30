@@ -34,7 +34,7 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
           Rp{price.toLocaleString("id-ID")}
         </p>
         <Link
-          href={`/product/${id}`}
+          href={`/product/${name}`}
           className="block text-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 shadow hover:shadow-md"
         >
           Lihat Detail
