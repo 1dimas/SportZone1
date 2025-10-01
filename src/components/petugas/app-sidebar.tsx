@@ -6,10 +6,8 @@ import {
   IconDashboard,
   IconDatabase,
   IconFolder,
-  IconHelp,
   IconInnerShadowTop,
   IconReport,
-  IconSettings,
   IconShoppingCart,
   IconUsers,
 } from "@tabler/icons-react"
@@ -49,21 +47,6 @@ const data = {
       title: "Pesanan",
       url: "/dashboardpetugas/pesanan",
       icon: IconShoppingCart,
-    },
-    {
-      title: "Pelanggan",
-      url: "#",
-      icon: IconUsers,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Laporan",
-      url: "#",
-      icon: IconReport,
     },
   ],
   navClouds: [
@@ -107,18 +90,7 @@ const data = {
       ],
     },
   ],
-  navSecondary: [
-    {
-      title: "Pengaturan",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Bantuan",
-      url: "#",
-      icon: IconHelp,
-    },
-  ],
+  navSecondary: [],
   documents: [
     {
       name: "Data Produk",
