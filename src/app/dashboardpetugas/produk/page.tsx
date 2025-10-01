@@ -10,6 +10,12 @@ import { Button } from "@/components/ui/button"
 import { ProdukTable, produkSchema } from "@/components/petugas/produk-table"
 import { getAllProduk } from "@/components/lib/services/produk.service"
 import { addProductRefreshListener } from "@/components/lib/utils/product-refresh"
+import { AppSidebar } from "@/components/petugas/app-sidebar"
+import { SiteHeader } from "@/components/petugas/site-header"
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar"
 
 type Produk = z.infer<typeof produkSchema>
 
@@ -78,36 +84,49 @@ export default function ProdukPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold md:text-3xl">Manajemen Produk</h1>
-          <p className="text-muted-foreground">
-            Kelola produk dan varian produk di toko Anda
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={fetchProduk}
-            className="gap-2"
-          >
-            <IconRefreshDot className="h-4 w-4" />
-            <span className="hidden sm:inline">Refresh</span>
-          </Button>
-          <Button 
-            onClick={() => window.location.href = "/dashboardpetugas/produk/create"}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Tambah Produk
-          </Button>
-        </div>
-      </div>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl font-bold md:text-3xl">Manajemen Produk</h1>
+              <p className="text-muted-foreground">
+                Kelola produk dan varian produk di toko Anda
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={fetchProduk}
+                className="gap-2"
+              >
+                <IconRefreshDot className="h-4 w-4" />
+                <span className="hidden sm:inline">Refresh</span>
+              </Button>
+              <Button 
+                onClick={() => window.location.href = "/dashboardpetugas/produk/create"}
+                className="gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Tambah Produk
+              </Button>
+            </div>
+          </div>
 
-      <div className="rounded-lg border bg-card p-1">
-        <ProdukTable data={produk} />
-      </div>
-    </div>
+          <div className="rounded-lg border bg-card p-1">
+            <ProdukTable data={produk} />
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
