@@ -1,42 +1,50 @@
+// BAGIAN 0: WAJIB ADA UNTUK INTERAKTIVITAS
 "use client";
-import products from "@/app/data/products";
-import type { Product } from "@/app/data/products";
-import Link from "next/link";
+
+import products from "@/app/data/products"; // Pastikan path ini benar
+import { Product } from "@/app/data/products"; // Import tipe produk
 import Image from "next/image";
 
-type CategoryPageProps = {
-  params: { name: string };
-};
-
-const formatRupiah = (price: number) =>
-  new Intl.NumberFormat("id-ID", {
+// Fungsi format Rupiah
+const formatRupiah = (price: number) => {
+  return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
     minimumFractionDigits: 0,
   }).format(price);
+};
 
-export default function CategoryPage({ params }: CategoryPageProps) {
+type CategoryProductPageProps = {
+  params: { name: string };
+};
+
+// BAGIAN 1: KOMPONEN HALAMAN UTAMA
+export default function CategoryProductPage({ params }: CategoryProductPageProps) {
+  // --- Ambil nama kategori dari URL ---
   const categoryName = decodeURIComponent(params.name).toLowerCase();
-  const filteredProducts = products.filter(
-    (p: Product) => p.category.toLowerCase() === categoryName
+
+  // --- Filter produk berdasarkan kategori ---
+  const categoryProducts = products.filter(
+    (p) => p.category.toLowerCase() === categoryName
   );
 
-  if (filteredProducts.length === 0) {
+  if (categoryProducts.length === 0) {
     return (
       <div className="flex h-screen items-center justify-center text-center text-red-600">
-        <h1>Tidak ada produk untuk kategori {params.name}.</h1>
+        <h1>Tidak ada produk dalam kategori {params.name}.</h1>
       </div>
     );
   }
 
+  // BAGIAN 2: TAMPILAN UI
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
         <h1 className="mb-8 text-3xl font-bold text-gray-900">
-          Kategori: {params.name}
+          Produk dalam Kategori: {params.name}
         </h1>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {filteredProducts.map((product) => (
+          {categoryProducts.map((product) => (
             <Link
               key={product.name}
               href={`/product/${encodeURIComponent(product.slug)}`}
@@ -60,3 +68,5 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     </div>
   );
 }
+
+import Link from "next/link";
