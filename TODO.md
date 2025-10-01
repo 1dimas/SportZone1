@@ -1,17 +1,11 @@
-# TODO: Create Read-Only Product List View in Admin Dashboard
+# TODO: Implement Forgot Password Feature in Frontend
 
 ## Steps to Complete:
-- [x] Update src/components/admin/app-sidebar.tsx to add "Produk" menu item
-- [x] Create src/app/dashboardadmin/produk/page.tsx
-- [x] Create src/components/admin/produk-table-readonly.tsx with real data fetching and good UI
-- [x] Test the new page (TypeScript check passed, no errors in new files)
-- [x] Verify read-only functionality (no edit/delete/add buttons)
-
-# TODO: Create Read-Only Order List View in Admin Dashboard
-
-## Steps to Complete:
-- [x] Update src/components/admin/app-sidebar.tsx to add "Pesanan" menu item
-- [x] Create src/app/dashboardadmin/pesanan/page.tsx
-- [x] Create src/components/admin/pesanan-table-readonly.tsx with real data fetching and good UI
-- [x] Test the new page (TypeScript check passed, no errors in new files)
-- [x] Verify read-only functionality (no edit/delete/add buttons)
+- [x] Add forgotPassword, verifyOtp, resetPassword methods in src/components/lib/services/auth.service.ts
+- [x] Create multi-step forgot password page in src/app/forgot-password/page.tsx
+  - Step 1: Input email to request OTP
+  - Step 2: Input OTP to verify
+  - Step 3: Input new password to reset
+  - Step 4: Success message and link back to login
+- [x] Update src/components/login-form.tsx to link "Forgot your password?" to /forgot-password page
+- [ ] Test the forgot password flow end-to-end in the frontend

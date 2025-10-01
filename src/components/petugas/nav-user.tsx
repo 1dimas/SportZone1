@@ -29,6 +29,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useRouter } from "next/navigation"
+import { logout } from "@/components/lib/services/auth.service"
 
 export function NavUser({
   user,
@@ -40,6 +42,18 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      router.push("/login")
+    } catch (err) {
+      console.error("Logout failed", err)
+      // Still redirect even if API fails
+      router.push("/login")
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -99,7 +113,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <IconLogout className="mr-2 h-4 w-4" />
               Keluar
             </DropdownMenuItem>

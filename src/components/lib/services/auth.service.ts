@@ -102,3 +102,54 @@ export async function getProfile() {
 export function googleLogin() {
   window.location.href = `${API_URL}/auth/google`;
 }
+
+// =====================
+// FORGOT PASSWORD
+// =====================
+export async function forgotPassword(email: string) {
+  const response = await fetch(`${API_URL}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Gagal kirim OTP");
+  }
+
+  return response.json();
+}
+
+// =====================
+// VERIFY OTP
+// =====================
+export async function verifyOtp(email: string, otp: string) {
+  const response = await fetch(`${API_URL}/auth/verify-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp }),
+  });
+
+  if (!response.ok) {
+    throw new Error("OTP tidak valid");
+  }
+
+  return response.json();
+}
+
+// =====================
+// RESET PASSWORD
+// =====================
+export async function resetPassword(email: string, otp: string, newPassword: string) {
+  const response = await fetch(`${API_URL}/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp, newPassword }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Gagal reset password");
+  }
+
+  return response.json();
+}
