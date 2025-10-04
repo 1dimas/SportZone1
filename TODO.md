@@ -1,12 +1,13 @@
-# TODO: Remove Bantuan and Pengaturan from Petugas Sidebar
+# TODO: Update Home Page to Use Real Product Data from Auth Service
 
-- [x] Remove IconSettings and IconHelp from imports in src/components/petugas/app-sidebar.tsx
-- [x] Remove "Pengaturan" and "Bantuan" items from navSecondary array in src/components/petugas/app-sidebar.tsx
+## Tasks
+- [x] Create a public product service function for fetching products without authentication
+- [x] Update src/app/home/page.tsx to use real data instead of dummy data
+- [x] Add loading and error states to the home page
+- [ ] Test the home page to ensure it displays real products
 
-# TODO: Add Dashboard to Petugas Sidebar
-
-- [x] Add "Dashboard" item to navMain array in src/components/petugas/app-sidebar.tsx
-
-# TODO: Fix Produk Page Layout to Match Pesanan
-
-- [ ] Update src/app/dashboardpetugas/produk/page.tsx to include sidebar layout
+## Current Status
+- Home page now fetches real product data from the backend API using the existing getAllProduk service function
+- Added loading and error states to handle API responses
+- Replaced dummy data usage with real API data
+- Fixed TypeScript errors by adding proper types

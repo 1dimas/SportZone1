@@ -103,7 +103,7 @@ const columns: ColumnDef<Produk>[] = [
     header: "Harga",
     cell: ({ row }) => (
       <div className="text-right font-medium">
-        Rp {row.original.harga.toLocaleString('id-ID')}
+        Rp {(row.original.harga || 0).toLocaleString('id-ID')}
       </div>
     ),
   },
