@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { getProdukByKategori } from "@/components/lib/services/produk.service";
+import { getAllProduk } from "@/components/lib/services/produk.service";
 
 // Define the type for API response product
 type ProductVariant = {
@@ -25,8 +25,8 @@ type APIProduct = {
   variants: ProductVariant[];
 };
 
-type CategoryProductPageProps = {
-  params: { name: string };
+type ProductsPageProps = {
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 // Fungsi format Rupiah
@@ -39,53 +39,45 @@ const formatRupiah = (price: number) => {
 };
 
 // BAGIAN 1: KOMPONEN HALAMAN UTAMA
-export default function CategoryProductPage({ params }: CategoryProductPageProps) {
+export default function ProductsPage({ searchParams }: ProductsPageProps) {
   const [products, setProducts] = useState<APIProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // --- Ambil nama kategori dari URL ---
-  const categoryName = decodeURIComponent(params.name);
+  // Get category from search params
+  const category = typeof searchParams.category === 'string' ? searchParams.category : '';
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         setError(null);
-        // In a real implementation, you'd need to get the category ID by name
-        // For this example, we'll simulate this by using a fixed ID mapping
-        // You might need to expand this to have a function to get category ID by name
-        const categoryMap: Record<string, string> = {
-          "basketball": "basketball_id", // Replace with actual category ID
-          "soccer": "soccer_id", 
-          "badminton": "badminton_id",
-          "running": "running_id",
-          "swimming": "swimming_id",
-          "fitness": "fitness_id",
-          "cycling": "cycling_id",
-          "outdoor": "outdoor_id",
-          "lifestyle": "lifestyle_id",
-        };
         
-        // For this example, I'll just use the category name as ID since it's for demo
-        const kategoriId = categoryMap[categoryName.toLowerCase()] || categoryName;
+        // Fetch all products and filter by category if provided
+        const allProducts = await getAllProduk();
         
-        const data = await getProdukByKategori(kategoriId);
-        setProducts(data);
+        if (category) {
+          const filteredProducts = allProducts.filter(
+            product => product.category?.toLowerCase() === category.toLowerCase()
+          );
+          setProducts(filteredProducts);
+        } else {
+          setProducts(allProducts);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Gagal memuat produk kategori");
+        setError(err instanceof Error ? err.message : "Gagal memuat produk");
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [categoryName]);
+  }, [category]);
 
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p>Memuat produk kategori...</p>
+        <p>Memuat produk...</p>
       </div>
     );
   }
@@ -104,7 +96,7 @@ export default function CategoryProductPage({ params }: CategoryProductPageProps
   if (products.length === 0) {
     return (
       <div className="flex h-screen items-center justify-center text-center text-red-600">
-        <h1>Tidak ada produk dalam kategori {params.name}.</h1>
+        <h1>Tidak ada produk yang ditemukan.</h1>
       </div>
     );
   }
@@ -114,7 +106,7 @@ export default function CategoryProductPage({ params }: CategoryProductPageProps
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
         <h1 className="mb-8 text-3xl font-bold text-gray-900">
-          Produk dalam Kategori: {params.name}
+          {category ? `Produk dalam Kategori: ${category}` : 'Semua Produk'}
         </h1>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => {

@@ -5,7 +5,7 @@ import products from "@/app/data/products";
 import Image from "next/image";
 
 type CheckoutPageProps = {
-  params: { name: string };
+  params: { slug: string };
 };
 
 const formatRupiah = (price: number) =>
@@ -23,12 +23,12 @@ const paymentMethods = [
 ];
 
 export default function CheckoutPage({ params }: CheckoutPageProps) {
-  // ambil nama dari URL, decode biar spasi/huruf khusus aman
-  const productName = decodeURIComponent(params.name).toLowerCase();
+  // ambil slug dari URL, decode biar spasi/huruf khusus aman
+  const productSlug = decodeURIComponent(params.slug).toLowerCase();
 
-  // cari produk berdasarkan nama
+  // cari produk berdasarkan slug
   const product = products.find(
-    (p) => p.name.toLowerCase() === productName
+    (p) => p.slug.toLowerCase() === productSlug
   );
 
   const [selectedPayment, setSelectedPayment] = useState(paymentMethods[0].name);
@@ -44,7 +44,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   if (!product) {
     return (
       <div className="flex h-screen items-center justify-center text-center text-red-600">
-        <h1>Produk dengan nama {params.name} tidak ditemukan.</h1>
+        <h1>Produk dengan slug {params.slug} tidak ditemukan.</h1>
       </div>
     );
   }
