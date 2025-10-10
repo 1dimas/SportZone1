@@ -9,13 +9,10 @@ const getToken = () => localStorage.getItem("token");
 // GET ALL PRODUK
 // =====================
 export async function getAllProduk() {
-  const token = getToken();
-  if (!token) throw new Error("Belum login");
-
+  // No authentication required to view products
   const response = await fetch(`${API_URL}/produk`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
@@ -33,13 +30,10 @@ export async function getAllProduk() {
 // GET PRODUK BY ID
 // =====================
 export async function getProdukById(id: string) {
-  const token = getToken();
-  if (!token) throw new Error("Belum login");
-
+  // No authentication required to view individual products
   const response = await fetch(`${API_URL}/produk/${id}`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
@@ -301,13 +295,10 @@ export async function getVarianById(varianId: string) {
 // GET PRODUK BY KATEGORI
 // =====================
 export async function getProdukByKategori(kategoriId: string) {
-  const token = getToken();
-  if (!token) throw new Error("Belum login");
-
+  // No authentication required to view products by category
   const response = await fetch(`${API_URL}/produk/kategori/${kategoriId}`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
@@ -325,13 +316,10 @@ export async function getProdukByKategori(kategoriId: string) {
 // GET PRODUK BY SUBKATEGORI
 // =====================
 export async function getProdukBySubkategori(subkategoriId: string) {
-  const token = getToken();
-  if (!token) throw new Error("Belum login");
-
+  // No authentication required to view products by subcategory
   const response = await fetch(`${API_URL}/produk/subkategori/${subkategoriId}`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
@@ -349,13 +337,10 @@ export async function getProdukBySubkategori(subkategoriId: string) {
 // GET PRODUK BY BRAND
 // =====================
 export async function getProdukByBrand(brandId: string) {
-  const token = getToken();
-  if (!token) throw new Error("Belum login");
-
+  // No authentication required to view products by brand
   const response = await fetch(`${API_URL}/produk/brand/${brandId}`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
