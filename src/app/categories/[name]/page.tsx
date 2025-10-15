@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import products from "@/app/data/products";
 import type { Product } from "@/app/data/products";
 import Link from "next/link";
@@ -16,7 +17,8 @@ const formatRupiah = (price: number) =>
   }).format(price);
 
 export default function CategoryPage({ params }: CategoryPageProps) {
-  const categoryName = decodeURIComponent(params.name).toLowerCase();
+  const { name } = React.use(params);
+  const categoryName = decodeURIComponent(name).toLowerCase();
   const filteredProducts = products.filter(
     (p: Product) => p.category.toLowerCase() === categoryName
   );
@@ -24,7 +26,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   if (filteredProducts.length === 0) {
     return (
       <div className="flex h-screen items-center justify-center text-center text-red-600">
-        <h1>Tidak ada produk untuk kategori {params.name}.</h1>
+        <h1>Tidak ada produk untuk kategori {name}.</h1>
       </div>
     );
   }
@@ -33,7 +35,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
         <h1 className="mb-8 text-3xl font-bold text-gray-900">
-          Kategori: {params.name}
+          Kategori: {name}
         </h1>
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map((product) => (

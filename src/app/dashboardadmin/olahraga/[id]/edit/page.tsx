@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/admin/app-sidebar"
 import { SiteHeader } from "@/components/admin/site-header"
@@ -14,6 +14,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 
 export default function EditKategoriOlahragaPage({ params }: { params: { id: string } }) {
+  const { id } = React.use(params)
   const router = useRouter()
   const [kategoriData, setKategoriData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -22,7 +23,7 @@ export default function EditKategoriOlahragaPage({ params }: { params: { id: str
   useEffect(() => {
     async function fetchKategori() {
       try {
-        const data = await getKategoriOlahragaById(params.id)
+        const data = await getKategoriOlahragaById(id)
         setKategoriData(data)
       } catch (err) {
         console.error("Failed to fetch kategori olahraga:", err)
@@ -34,7 +35,7 @@ export default function EditKategoriOlahragaPage({ params }: { params: { id: str
     }
 
     fetchKategori()
-  }, [params.id])
+  }, [id])
 
   const handleSuccess = () => {
     // Stay on the same page after successful update

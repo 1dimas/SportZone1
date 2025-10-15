@@ -1,13 +1,15 @@
-# TODO: Update Home Page to Use Real Product Data from Auth Service
+# TODO: Buat Detail Page Berfungsi dan Sesuai Data Produk
 
-## Tasks
-- [x] Create a public product service function for fetching products without authentication
-- [x] Update src/app/home/page.tsx to use real data instead of dummy data
-- [x] Add loading and error states to the home page
-- [ ] Test the home page to ensure it displays real products
+## Tugas Utama
+- [ ] Integrasikan komponen Detailpage yang ada ke dalam halaman produk
+- [ ] Update ProductActions.tsx agar sesuai dengan struktur data produk (variants)
+- [ ] Gunakan ProductImageGallery untuk galeri gambar produk
+- [ ] Pastikan halaman detail berfungsi dengan data lokal dan API
+- [ ] Test fungsionalitas tambah ke keranjang dan navigasi
 
-## Current Status
-- Home page now fetches real product data from the backend API using the existing getAllProduk service function
-- Added loading and error states to handle API responses
-- Replaced dummy data usage with real API data
-- Fixed TypeScript errors by adding proper types
+## Langkah-langkah
+1. [ ] Update src/app/product/[slug]/page.tsx untuk menggunakan komponen modular
+2. [ ] Modifikasi src/components/Detailpage/ProductActions.tsx untuk menangani variants
+3. [ ] Integrasikan ProductImageGallery ke dalam halaman
+4. [ ] Update helper functions untuk menangani gambar array
+5. [ ] Test halaman dengan produk yang berbeda

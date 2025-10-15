@@ -9,12 +9,9 @@ const getToken = () => localStorage.getItem("token");
 // GET ALL PRODUK
 // =====================
 export async function getAllProduk() {
-  // No authentication required to view products
   const response = await fetch(`${API_URL}/produk`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
 
   if (!response.ok) {
@@ -30,13 +27,23 @@ export async function getAllProduk() {
 // GET PRODUK BY ID
 // =====================
 export async function getProdukById(id: string) {
-  // No authentication required to view individual products
-  const response = await fetch(`${API_URL}/produk/${id}`, {
+  const safeDecode = (value: string) => {
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  };
+  const normalizedId = encodeURIComponent(safeDecode(id));
+
+  const response = await fetch(`${API_URL}/produk/${normalizedId}`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
+
+  if (response.status === 404) {
+    return null; // Produk tidak ditemukan
+  }
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -45,6 +52,8 @@ export async function getProdukById(id: string) {
 
   return response.json();
 }
+
+
 
 // =====================
 // CREATE PRODUK
@@ -68,15 +77,13 @@ export async function createProduk(data: {
   formData.append("subkategori_id", data.subkategori_id);
   formData.append("brand_id", data.brand_id);
   if (data.status) formData.append("status", data.status);
-  if (data.gambar && data.gambar.length > 0) {
-    data.gambar.forEach((file, index) => {
-      formData.append("gambar", file);
-    });
+  if (data.gambar?.length) {
+    data.gambar.forEach((file) => formData.append("gambar", file));
   }
 
   const response = await fetch(`${API_URL}/produk`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}` }, // Jangan set Content-Type untuk FormData
     body: formData,
   });
 
@@ -110,24 +117,20 @@ export async function updateProduk(
   if (data.subkategori_id) formData.append("subkategori_id", data.subkategori_id);
   if (data.brand_id) formData.append("brand_id", data.brand_id);
   if (data.status) formData.append("status", data.status);
-  if (data.gambar) {
-    if (Array.isArray(data.gambar) && data.gambar.length > 0) {
-      data.gambar.forEach((item) => {
-        if (item instanceof File) {
-          formData.append("gambar", item);
-        }
-      });
-    }
-  }
-  if (data.deleted_images && data.deleted_images.length > 0) {
-    data.deleted_images.forEach((imageUrl) => {
-      formData.append("deleted_images", imageUrl);
+
+  if (data.gambar?.length) {
+    data.gambar.forEach((item) => {
+      if (item instanceof File) formData.append("gambar", item);
     });
+  }
+
+  if (data.deleted_images?.length) {
+    data.deleted_images.forEach((url) => formData.append("deleted_images", url));
   }
 
   const response = await fetch(`${API_URL}/produk/${id}`, {
     method: "PATCH",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}` }, // jangan set Content-Type
     body: formData,
   });
 
@@ -148,9 +151,7 @@ export async function deleteProduk(id: string) {
 
   const response = await fetch(`${API_URL}/produk/${id}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!response.ok) {
@@ -215,17 +216,7 @@ export async function createVarian(data: {
 // =====================
 // UPDATE VARIAN
 // =====================
-export async function updateVarian(
-  varianId: string,
-  data: {
-    ukuran?: string;
-    warna?: string;
-    stok?: number;
-    harga?: number;
-    sku?: string;
-    produk_id?: string;
-  }
-) {
+export async function updateVarian(varianId: string, data: { ukuran?: string; warna?: string; stok?: number; harga?: number; sku?: string; produk_id?: string }) {
   const token = getToken();
   if (!token) throw new Error("Belum login");
 
@@ -255,9 +246,7 @@ export async function deleteVarian(varianId: string) {
 
   const response = await fetch(`${API_URL}/produk/varian/${varianId}`, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!response.ok) {
@@ -277,10 +266,7 @@ export async function getVarianById(varianId: string) {
 
   const response = await fetch(`${API_URL}/produk/varian/${varianId}`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
   });
 
   if (!response.ok) {
@@ -292,86 +278,34 @@ export async function getVarianById(varianId: string) {
 }
 
 // =====================
-// GET PRODUK BY KATEGORI
+// GET PRODUK BY KATEGORI / SUBKATEGORI / BRAND
 // =====================
 export async function getProdukByKategori(kategoriId: string) {
-  // No authentication required to view products by category
   const response = await fetch(`${API_URL}/produk/kategori/${kategoriId}`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gagal mengambil data produk by kategori: ${response.status} ${response.statusText} - ${errorText}`);
-  }
-
+  if (!response.ok) throw new Error(await response.text());
   const data = await response.json();
   return Array.isArray(data) ? data : [data];
 }
 
-// =====================
-// GET PRODUK BY SUBKATEGORI
-// =====================
 export async function getProdukBySubkategori(subkategoriId: string) {
-  // No authentication required to view products by subcategory
   const response = await fetch(`${API_URL}/produk/subkategori/${subkategoriId}`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gagal mengambil data produk by subkategori: ${response.status} ${response.statusText} - ${errorText}`);
-  }
-
+  if (!response.ok) throw new Error(await response.text());
   const data = await response.json();
   return Array.isArray(data) ? data : [data];
 }
 
-// =====================
-// GET PRODUK BY BRAND
-// =====================
 export async function getProdukByBrand(brandId: string) {
-  // No authentication required to view products by brand
   const response = await fetch(`${API_URL}/produk/brand/${brandId}`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gagal mengambil data produk by brand: ${response.status} ${response.statusText} - ${errorText}`);
-  }
-
+  if (!response.ok) throw new Error(await response.text());
   const data = await response.json();
   return Array.isArray(data) ? data : [data];
-}
-
-// =====================
-// DELETE GAMBAR PRODUK
-// =====================
-export async function deleteGambarProduk(id: string, gambarUrl: string) {
-  const token = getToken();
-  if (!token) throw new Error("Belum login");
-
-  const response = await fetch(`${API_URL}/produk/${id}/gambar/${encodeURIComponent(gambarUrl)}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gagal menghapus gambar produk: ${response.status} ${response.statusText} - ${errorText}`);
-  }
-
-  return response.json();
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/admin/app-sidebar"
 import { SiteHeader } from "@/components/admin/site-header"
@@ -13,6 +13,7 @@ import { getPetugasById } from "@/components/lib/services/petugas.service"
 import { toast } from "sonner"
 
 export default function EditPetugasPage({ params }: { params: { id: string } }) {
+  const { id } = React.use(params)
   const router = useRouter()
   const [petugasData, setPetugasData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -21,7 +22,7 @@ export default function EditPetugasPage({ params }: { params: { id: string } }) 
   useEffect(() => {
     async function fetchPetugas() {
       try {
-        const data = await getPetugasById(params.id)
+        const data = await getPetugasById(id)
         setPetugasData(data)
       } catch (err) {
         console.error("Failed to fetch petugas:", err)
@@ -33,7 +34,7 @@ export default function EditPetugasPage({ params }: { params: { id: string } }) 
     }
 
     fetchPetugas()
-  }, [params.id])
+  }, [id])
 
   if (loading) {
     return (

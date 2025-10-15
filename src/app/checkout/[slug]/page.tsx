@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import products from "@/app/data/products";
 import Image from "next/image";
 
@@ -23,8 +23,9 @@ const paymentMethods = [
 ];
 
 export default function CheckoutPage({ params }: CheckoutPageProps) {
+  const { slug } = React.use(params);
   // ambil slug dari URL, decode biar spasi/huruf khusus aman
-  const productSlug = decodeURIComponent(params.slug).toLowerCase();
+  const productSlug = decodeURIComponent(slug).toLowerCase();
 
   // cari produk berdasarkan slug
   const product = products.find(
@@ -44,7 +45,7 @@ export default function CheckoutPage({ params }: CheckoutPageProps) {
   if (!product) {
     return (
       <div className="flex h-screen items-center justify-center text-center text-red-600">
-        <h1>Produk dengan slug {params.slug} tidak ditemukan.</h1>
+        <h1>Produk dengan slug {slug} tidak ditemukan.</h1>
       </div>
     );
   }

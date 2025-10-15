@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/admin/app-sidebar"
 import { SiteHeader } from "@/components/admin/site-header"
@@ -13,6 +13,7 @@ import { getSubkategoriPeralatanById } from "@/components/lib/services/subkatego
 import { toast } from "sonner"
 
 export default function EditSubkategoriPeralatanPage({ params }: { params: { id: string } }) {
+  const { id } = React.use(params)
   const router = useRouter()
   const [subkategoriData, setSubkategoriData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -21,7 +22,7 @@ export default function EditSubkategoriPeralatanPage({ params }: { params: { id:
   useEffect(() => {
     async function fetchSubkategori() {
       try {
-        const data = await getSubkategoriPeralatanById(params.id)
+        const data = await getSubkategoriPeralatanById(id)
         setSubkategoriData(data)
       } catch (err: any) {
         console.error("Failed to fetch subkategori peralatan:", err)
@@ -33,7 +34,7 @@ export default function EditSubkategoriPeralatanPage({ params }: { params: { id:
     }
 
     fetchSubkategori()
-  }, [params.id])
+  }, [id])
 
   if (loading) {
     return (
