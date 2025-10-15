@@ -10,12 +10,13 @@ const getToken = () => localStorage.getItem("token");
 // =====================
 export async function getAllBrands() {
   const token = getToken();
-  if (!token) throw new Error("Belum login");
 
   const response = await fetch(`${API_URL}/brand`, {
     method: "GET",
-    headers: {
+    headers: token ? {
       Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    } : {
       "Content-Type": "application/json",
     },
   });
