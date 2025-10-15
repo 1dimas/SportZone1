@@ -120,6 +120,48 @@ export async function getSubkategoriPeralatanByKategoriOlahraga(kategoriOlahraga
 }
 
 // =====================
+// GET SUBKATEGORI PERALATAN BY BRAND ID
+// =====================
+export async function getSubkategoriPeralatanByBrand(brandId: string) {
+  const token = getToken();
+
+  const response = await fetch(`${API_URL}/subkategori-peralatan/brand/${brandId}`, {
+    method: "GET",
+    headers: token ? {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    } : {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gagal mengambil data subkategori peralatan: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  // Transform the data to match the frontend schema
+  return Array.isArray(data)
+    ? data.map(item => ({
+        ...item,
+        nama: item.nama,
+        kategori_olahraga_id: item.kategori_olahraga_id,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        kategoriOlahraga: item.kategoriOlahraga
+      }))
+    : {
+        ...data,
+        nama: data.nama,
+        kategori_olahraga_id: data.kategori_olahraga_id,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        kategoriOlahraga: data.kategoriOlahraga
+      };
+}
+
+// =====================
 // CREATE SUBKATEGORI PERALATAN
 // =====================
 export async function createSubkategoriPeralatan(data: {

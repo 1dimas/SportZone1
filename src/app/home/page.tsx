@@ -23,6 +23,9 @@ type APIProduct = {
   slug?: string;
   category?: string;
   subcategory?: string;
+  brand?: {
+    nama: string;
+  };
   isNew?: boolean;
   description?: string;
   variants: ProductVariant[];
@@ -32,6 +35,7 @@ const Page = () => {
   const [products, setProducts] = React.useState<APIProduct[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [selectedBrand, setSelectedBrand] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const fetchProducts = async () => {
@@ -57,18 +61,32 @@ const Page = () => {
 
       <main className="container mx-auto px-4 py-16">
         {/* Popular Brands */}
-        <PopularBrands />
+        <PopularBrands onBrandSelect={setSelectedBrand} />
 
         {/* Rekomendasi Grid */}
         <section>
-          <h2 className="text-3xl font-bold mb-8">Rekomendasi Untuk Anda</h2>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold">
+              {selectedBrand ? `Produk dari ${selectedBrand}` : "Rekomendasi Untuk Anda"}
+            </h2>
+            {selectedBrand && (
+              <button
+                onClick={() => setSelectedBrand(null)}
+                className="text-gray-500 hover:text-gray-700 text-lg"
+              >
+                ✕ Reset
+              </button>
+            )}
+          </div>
           {loading && <p>Memuat data produk...</p>}
           {error && <p className="text-red-600">{error}</p>}
           {!loading && !error && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {products
+                .filter(product => !selectedBrand || product.brand?.nama === selectedBrand)
+                .map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
             </div>
           )}
         </section>
