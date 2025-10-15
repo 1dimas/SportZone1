@@ -153,3 +153,56 @@ export async function resetPassword(email: string, otp: string, newPassword: str
 
   return response.json();
 }
+
+// =====================
+// GET PROFILE BY USER ID
+// =====================
+export async function getProfileByUserId(userId: string) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Belum login");
+
+  try {
+    // Coba endpoint langsung dulu
+    const response = await fetch(`${API_URL}/users/${userId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        id: data.id,
+        username: data.username,
+        email: data.email,
+      };
+    }
+
+    // Jika endpoint tidak ada (404), coba ambil profile sendiri
+    if (response.status === 404) {
+      const profile = await getProfile();
+      if (profile.id === userId) {
+        return {
+          id: profile.id,
+          username: profile.username,
+          email: profile.email,
+        };
+      }
+    }
+
+    // Jika bukan 404, throw error asli
+    if (response.status !== 404) {
+      const errorText = await response.text();
+      throw new Error(`Gagal mengambil profile: ${response.status} ${errorText}`);
+    }
+
+    throw new Error("User tidak ditemukan");
+  } catch (error: any) {
+    if (error.message === "User tidak ditemukan") {
+      throw error;
+    }
+    throw new Error(`Gagal mengambil profile: ${error.message}`);
+  }
+}
