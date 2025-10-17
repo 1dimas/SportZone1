@@ -153,13 +153,6 @@ export default function ProdukDetailPage() {
             <Edit className="w-4 h-4 mr-2" />
             Edit Produk
           </Button>
-          <Button
-            onClick={() => router.push(`/dashboardpetugas/produk/${produk.id}/varian`)}
-            variant="outline"
-          >
-            <Package className="w-4 h-4 mr-2" />
-            Kelola Varian
-          </Button>
         </div>
       </div>
 
@@ -328,20 +321,11 @@ export default function ProdukDetailPage() {
                           <p className="text-sm text-gray-600">SKU: {item.sku || 'Tidak ada'}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="font-medium">{item.stok} unit</p>
-                          {item.harga && (
-                            <p className="text-sm text-green-600">{formatCurrency(item.harga)}</p>
-                          )}
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => router.push(`/dashboardpetugas/produk/${produk.id}/varian/${item.id}/edit`)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                      <div className="text-right">
+                        <p className="font-medium">{item.stok} unit</p>
+                        {item.harga && (
+                          <p className="text-sm text-green-600">{formatCurrency(item.harga)}</p>
+                        )}
                       </div>
                     </div>
                   ))}

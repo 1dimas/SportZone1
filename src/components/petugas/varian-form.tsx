@@ -25,8 +25,8 @@ import {
 const varianSchema = z.object({
   ukuran: z.string().optional(),
   warna: z.string().optional(),
-  stok: z.number().min(0, "Stok harus positif"),
-  harga: z.number().optional(),
+  stok: z.number().min(0, "Stok minimal 0"),
+  harga: z.number().optional().nullable(),
   sku: z.string().optional(),
 })
 
@@ -63,16 +63,29 @@ export function VarianForm({ produkId, varian, onSuccess }: VarianFormProps) {
   const onSubmit = async (data: VarianFormData) => {
     setLoading(true)
     try {
+      // Clean up empty strings to undefined for optional fields
+      const cleanData = {
+        ukuran: data.ukuran && data.ukuran.trim() !== "" ? data.ukuran.trim() : undefined,
+        warna: data.warna && data.warna.trim() !== "" ? data.warna.trim() : undefined,
+        stok: data.stok,
+        harga: data.harga,
+        sku: data.sku && data.sku.trim() !== "" ? data.sku.trim() : undefined,
+      }
+
+      console.log("Submitting varian data:", cleanData)
+
       if (varian) {
-        await updateVarian(varian.id, data)
+        await updateVarian(varian.id, cleanData)
         toast.success("Varian berhasil diperbarui")
       } else {
-        await createVarian({ ...data, produk_id: produkId })
+        await createVarian({ ...cleanData, produk_id: produkId })
         toast.success("Varian berhasil dibuat")
       }
       onSuccess()
     } catch (error) {
-      toast.error("Terjadi kesalahan")
+      console.error("Error submitting varian:", error)
+      const errorMessage = error instanceof Error ? error.message : "Terjadi kesalahan"
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -80,7 +93,10 @@ export function VarianForm({ produkId, varian, onSuccess }: VarianFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+        console.log("Validation errors:", errors)
+        toast.error("Mohon periksa kembali isian form")
+      })} className="space-y-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="space-y-6">
             <FormField
@@ -123,8 +139,11 @@ export function VarianForm({ produkId, varian, onSuccess }: VarianFormProps) {
                     <Input
                       type="number"
                       placeholder="Masukkan stok"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        field.onChange(value === "" ? 0 : Number(value))
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -142,8 +161,11 @@ export function VarianForm({ produkId, varian, onSuccess }: VarianFormProps) {
                     <Input
                       type="number"
                       placeholder="Masukkan harga"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        field.onChange(value === "" ? undefined : Number(value))
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

@@ -14,16 +14,17 @@ export default function VarianCreatePage() {
 
   const handleSuccess = () => {
     toast.success("Varian berhasil dibuat")
-    router.push(`/dashboardpetugas/produk/${params.id}/varian`)
+    // Use window.location to force a full page reload and refresh the variant data
+    window.location.href = `/dashboardpetugas/produk/${params.id}`
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={() => router.push(`/dashboardpetugas/produk/${params.id}/varian`)}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => router.push(`/dashboardpetugas/produk/${params.id}`)}
           className="h-8 w-8"
         >
           <IconArrowLeft className="h-4 w-4" />
