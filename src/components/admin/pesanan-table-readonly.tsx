@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -12,24 +12,23 @@ import {
   SortingState,
   useReactTable,
   VisibilityState,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 import {
-  IconChevronDown,
   IconChevronLeft,
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -37,54 +36,66 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Pesanan } from "@/components/lib/services/pesanan.service"
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Pesanan } from "@/components/lib/services/pesanan.service";
+import {
+  Pembayaran as PembayaranType,
+  getPembayaranByPesananId,
+  updatePembayaranStatus,
+} from "@/components/lib/services/pembayaran.service";
+import { toast } from "sonner";
+
+// ==============================
+// Utility Functions
+// ==============================
 
 // Status badge colors
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-    case 'diproses':
-      return 'bg-blue-100 text-blue-800 border-blue-200'
-    case 'dikirim':
-      return 'bg-purple-100 text-purple-800 border-purple-200'
-    case 'selesai':
-      return 'bg-green-100 text-green-800 border-green-200'
-    case 'dibatalkan':
-      return 'bg-red-100 text-red-800 border-red-200'
+    case "pending":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    case "diproses":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "dikirim":
+      return "bg-purple-100 text-purple-800 border-purple-200";
+    case "selesai":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "dibatalkan":
+      return "bg-red-100 text-red-800 border-red-200";
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200'
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
-}
+};
 
 // Format currency
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-  }).format(amount)
-}
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+  }).format(amount);
+};
 
 // Format date
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
+  return new Date(dateString).toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
-// Define columns for the table (read-only version)
-export const columns: ColumnDef<Pesanan>[] = [
+// ==============================
+// Table Columns Definition
+// ==============================
+export const columns: ColumnDef<
+  Pesanan & { pembayaran?: PembayaranType | null }
+>[] = [
   {
     accessorKey: "id",
     header: "ID Pesanan",
     cell: ({ row }) => (
-      <div className="font-mono text-sm">
-        {row.original.id.slice(0, 8)}...
-      </div>
+      <div className="font-mono text-sm">{row.original.id.slice(0, 8)}...</div>
     ),
   },
   {
@@ -92,8 +103,12 @@ export const columns: ColumnDef<Pesanan>[] = [
     header: "Pelanggan",
     cell: ({ row }) => (
       <div>
-        <div className="font-medium">{row.original.user?.username || 'N/A'}</div>
-        <div className="text-sm text-muted-foreground">{row.original.user?.email || ''}</div>
+        <div className="font-medium">
+          {row.original.user?.username || "N/A"}
+        </div>
+        <div className="text-sm text-muted-foreground">
+          {row.original.user?.email || ""}
+        </div>
       </div>
     ),
   },
@@ -101,9 +116,7 @@ export const columns: ColumnDef<Pesanan>[] = [
     accessorKey: "tanggal_pesanan",
     header: "Tanggal",
     cell: ({ row }) => (
-      <div className="text-sm">
-        {formatDate(row.original.tanggal_pesanan)}
-      </div>
+      <div className="text-sm">{formatDate(row.original.tanggal_pesanan)}</div>
     ),
   },
   {
@@ -120,7 +133,8 @@ export const columns: ColumnDef<Pesanan>[] = [
     header: "Status",
     cell: ({ row }) => (
       <Badge className={getStatusColor(row.original.status)}>
-        {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
+        {row.original.status.charAt(0).toUpperCase() +
+          row.original.status.slice(1)}
       </Badge>
     ),
   },
@@ -133,33 +147,150 @@ export const columns: ColumnDef<Pesanan>[] = [
       </div>
     ),
   },
-]
+  {
+    id: "metode_pembayaran",
+    header: "Metode Pembayaran",
+    cell: ({ row }) => {
+      const metode = row.original.pembayaran?.metode || null;
+      const label = metode ? metode.toUpperCase() : "-";
+      return <div className="text-sm">{label}</div>;
+    },
+  },
+  {
+    id: "status_pembayaran",
+    header: "Status Pembayaran",
+    cell: ({ row }) => {
+      const status = row.original.pembayaran?.status;
+      if (!status) return <div className="text-sm">-</div>;
 
+      const color =
+        status === "sudah bayar"
+          ? "bg-green-100 text-green-800 border-green-200"
+          : status === "belum bayar"
+          ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+          : status === "gagal"
+          ? "bg-red-100 text-red-800 border-red-200"
+          : "bg-gray-100 text-gray-800 border-gray-200";
+
+      return <Badge className={color}>{status}</Badge>;
+    },
+  },
+  {
+    id: "aksi_pembayaran",
+    header: "Aksi Pembayaran",
+    cell: ({ row, table }) => {
+      const pembayaran = row.original.pembayaran;
+      if (
+        !pembayaran ||
+        pembayaran.metode !== "cod" ||
+        pembayaran.status === "sudah bayar" ||
+        pembayaran.status === "gagal"
+      )
+        return <div className="text-sm">-</div>;
+
+      return (
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              try {
+                await updatePembayaranStatus(pembayaran.id, "sudah bayar");
+                toast.success("Status pembayaran COD diubah ke 'sudah bayar'");
+                await new Promise((r) => setTimeout(r, 200));
+                await (table.options.meta as any)?.refetch?.();
+              } catch (e: any) {
+                toast.error(e?.message || "Gagal mengubah status pembayaran");
+              }
+            }}
+          >
+            Tandai Lunas
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={async () => {
+              try {
+                await updatePembayaranStatus(pembayaran.id, "gagal");
+                toast.success("Status pembayaran COD diubah ke 'gagal'");
+                await new Promise((r) => setTimeout(r, 200));
+                await (table.options.meta as any)?.refetch?.();
+              } catch (e: any) {
+                toast.error(e?.message || "Gagal mengubah status pembayaran");
+              }
+            }}
+          >
+            Tandai Gagal
+          </Button>
+        </div>
+      );
+    },
+  },
+];
+
+// ==============================
+// Component: PesananTableReadonly
+// ==============================
 export function PesananTableReadonly() {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  })
-  const [data, setData] = React.useState<Pesanan[]>([])
-  const [loading, setLoading] = React.useState(true)
+  });
+  const [data, setData] = React.useState<
+    (Pesanan & { pembayaran?: PembayaranType | null })[]
+  >([]);
+  const [loading, setLoading] = React.useState(true);
+
+  const refetch = React.useCallback(async () => {
+    try {
+      const { getAllPesanan } = await import(
+        "@/components/lib/services/pesanan.service"
+      );
+      const pesananData = await getAllPesanan();
+
+      // Urutkan agar pesanan terbaru di atas
+      const sortedPesanan = [...pesananData].sort(
+        (a, b) =>
+          new Date(b.tanggal_pesanan).getTime() -
+          new Date(a.tanggal_pesanan).getTime()
+      );
+
+      const withPembayaran = await Promise.all(
+        sortedPesanan.map(async (p) => {
+          try {
+            const pembayaran = await getPembayaranByPesananId(p.id);
+            return { ...p, pembayaran };
+          } catch {
+            return { ...p, pembayaran: null };
+          }
+        })
+      );
+
+      setData(withPembayaran);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   React.useEffect(() => {
+    let active = true;
     const fetchData = async () => {
-      try {
-        const { getAllPesanan } = await import("@/components/lib/services/pesanan.service")
-        const pesananData = await getAllPesanan()
-        setData(pesananData)
-      } catch (error) {
-        console.error("Error fetching orders:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
+      await refetch();
+    };
+    if (active) fetchData();
+    return () => {
+      active = false;
+    };
+  }, [refetch]);
+
 
   const table = useReactTable({
     data,
@@ -178,46 +309,48 @@ export function PesananTableReadonly() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-  })
+    meta: { refetch },
+  });
 
   if (loading) {
-    return <div className="text-center py-8">Memuat data pesanan...</div>
+    return <div className="text-center py-8">Memuat data pesanan...</div>;
   }
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Search and Info */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Cari berdasarkan nama pelanggan..."
-            value={(table.getColumn("customer")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("customer")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-        </div>
+        <Input
+          placeholder="Cari berdasarkan nama pelanggan..."
+          value={
+            (table.getColumn("customer")?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) =>
+            table.getColumn("customer")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
         <div className="text-sm text-muted-foreground">
           Menampilkan {table.getFilteredRowModel().rows.length} pesanan
         </div>
       </div>
+
+      {/* Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -225,19 +358,25 @@ export function PesananTableReadonly() {
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
-                  key={row.id}
+                  key={row.original.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   Tidak ada pesanan ditemukan.
                 </TableCell>
               </TableRow>
@@ -245,32 +384,38 @@ export function PesananTableReadonly() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
       <div className="flex items-center justify-between px-2">
         <div className="text-muted-foreground flex-1 text-sm">
           {table.getFilteredSelectedRowModel().rows.length} dari{" "}
           {table.getFilteredRowModel().rows.length} baris dipilih.
         </div>
+
         <div className="flex items-center gap-8">
+          {/* Rows per page */}
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">Baris per halaman</span>
             <Select
-              value={`${table.getState().pagination.pageSize}`}
-              onValueChange={(value) => {
-                table.setPageSize(Number(value))
-              }}
+              value={String(table.getState().pagination.pageSize)}
+              onValueChange={(value) => table.setPageSize(Number(value))}
             >
               <SelectTrigger className="w-20">
-                <SelectValue placeholder={table.getState().pagination.pageSize} />
+                <SelectValue
+                  placeholder={String(table.getState().pagination.pageSize)}
+                />
               </SelectTrigger>
-              <SelectContent side="top">
+              <SelectContent>
                 {[10, 20, 30, 40, 50].map((pageSize) => (
-                  <SelectItem key={pageSize} value={`${pageSize}`}>
+                  <SelectItem key={pageSize} value={String(pageSize)}>
                     {pageSize}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
+
+          {/* Page Navigation */}
           <div className="flex items-center justify-center text-sm font-medium">
             Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
             {table.getPageCount()}
@@ -282,42 +427,35 @@ export function PesananTableReadonly() {
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
-              <span className="sr-only">Ke halaman pertama</span>
               <IconChevronsLeft />
             </Button>
             <Button
               variant="outline"
               className="size-8"
-              size="icon"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              <span className="sr-only">Ke halaman sebelumnya</span>
               <IconChevronLeft />
             </Button>
             <Button
               variant="outline"
               className="size-8"
-              size="icon"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
-              <span className="sr-only">Ke halaman berikutnya</span>
               <IconChevronRight />
             </Button>
             <Button
               variant="outline"
               className="hidden size-8 lg:flex"
-              size="icon"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
             >
-              <span className="sr-only">Ke halaman terakhir</span>
               <IconChevronsRight />
             </Button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
