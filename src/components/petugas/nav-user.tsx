@@ -107,10 +107,10 @@ export function NavUser({
                 <IconSettings className="mr-2 h-4 w-4" />
                 Pengaturan
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <IconNotification className="mr-2 h-4 w-4" />
                 Notifikasi
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>

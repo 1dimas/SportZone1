@@ -67,25 +67,25 @@ type Produk = z.infer<typeof produkSchema>
 const columns: ColumnDef<Produk>[] = [
   {
     accessorKey: "gambar",
-    header: "Foto",
+    header: () => <div className="text-center">Foto</div>,
     cell: ({ row }) => (
-      <div className="flex items-center justify-center">
+      <div className="flex justify-center">
         {row.original.gambar && row.original.gambar.length > 0 ? (
-          <div className="relative h-16 w-16 overflow-hidden rounded-md">
+          <div className="relative h-14 w-14 overflow-hidden rounded-md border bg-muted/30">
             <img
               src={row.original.gambar[0]}
               alt={row.original.nama}
               className="h-full w-full object-cover"
             />
             {row.original.gambar.length > 1 && (
-              <div className="absolute bottom-0 right-0 rounded-full bg-primary px-1 text-xs text-primary-foreground">
+              <div className="absolute bottom-0 right-0 rounded-full bg-primary px-1 text-[10px] text-primary-foreground">
                 +{row.original.gambar.length - 1}
               </div>
             )}
           </div>
         ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-md bg-muted">
-            <span className="text-xs text-muted-foreground">No Image</span>
+          <div className="flex h-14 w-14 items-center justify-center rounded-md bg-muted">
+            <span className="text-[10px] text-muted-foreground">No Image</span>
           </div>
         )}
       </div>
@@ -93,24 +93,24 @@ const columns: ColumnDef<Produk>[] = [
   },
   {
     accessorKey: "nama",
-    header: "Nama Produk",
+    header: () => <div className="text-left">Nama Produk</div>,
     cell: ({ row }) => (
-      <div className="font-medium max-w-[200px] truncate">{row.original.nama}</div>
+      <div className="font-medium truncate max-w-[200px]">{row.original.nama}</div>
     ),
   },
   {
     accessorKey: "harga",
-    header: "Harga",
+    header: () => <div className="text-center">Harga</div>,
     cell: ({ row }) => {
       const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('id-ID', {
-          style: 'currency',
-          currency: 'IDR',
-          minimumFractionDigits: 0
+        return new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
         }).format(amount)
       }
       return (
-        <div className="text-right font-medium">
+        <div className="text-center font-medium text-gray-800">
           {formatCurrency(row.original.harga || 0)}
         </div>
       )
@@ -118,84 +118,99 @@ const columns: ColumnDef<Produk>[] = [
   },
   {
     accessorKey: "subkategori.kategoriOlahraga.nama",
-    header: "Olahraga",
+    header: () => <div className="text-center">Olahraga</div>,
     cell: ({ row }) => (
-      <div className="text-muted-foreground">{row.original.subkategori?.kategoriOlahraga?.nama || "-"}</div>
+      <div className="text-center text-muted-foreground">
+        {row.original.subkategori?.kategoriOlahraga?.nama || "-"}
+      </div>
     ),
   },
   {
     accessorKey: "subkategori.nama",
-    header: "Alat",
+    header: () => <div className="text-center">Alat</div>,
     cell: ({ row }) => (
-      <div className="text-muted-foreground">{row.original.subkategori?.nama || "-"}</div>
+      <div className="text-center text-muted-foreground">
+        {row.original.subkategori?.nama || "-"}
+      </div>
     ),
   },
   {
     accessorKey: "brand.nama",
-    header: "Brand",
+    header: () => <div className="text-center">Brand</div>,
     cell: ({ row }) => (
-      <div className="text-muted-foreground">{row.original.brand?.nama || "-"}</div>
+      <div className="text-center text-muted-foreground">
+        {row.original.brand?.nama || "-"}
+      </div>
     ),
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: () => <div className="text-center">Status</div>,
     cell: ({ row }) => (
-      <Badge
-        variant={row.original.status === "aktif" ? "default" : "secondary"}
-      >
-        {row.original.status === "aktif" ? "Aktif" : row.original.status === "nonaktif" ? "Nonaktif" : "Stok Habis"}
-      </Badge>
+      <div className="flex justify-center">
+        <Badge
+          variant={
+            row.original.status === "aktif"
+              ? "default"
+              : row.original.status === "stok habis"
+              ? "secondary"
+              : "outline"
+          }
+        >
+          {row.original.status === "aktif"
+            ? "Aktif"
+            : row.original.status === "nonaktif"
+            ? "Nonaktif"
+            : "Stok Habis"}
+        </Badge>
+      </div>
     ),
   },
   {
     id: "actions",
+    header: () => <div className="text-center">Aksi</div>,
     cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="h-8 w-8 p-0"
-          >
-            <span className="sr-only">Open menu</span>
-            <IconDotsVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => {
-              window.location.href = `/dashboardpetugas/produk/${row.original.id}`
-            }}
-          >
-            <IconEye className="mr-2 h-4 w-4" />
-            Lihat Detail
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              window.location.href = `/dashboardpetugas/produk/${row.original.id}/edit`
-            }}
-          >
-            <IconEdit className="mr-2 h-4 w-4" />
-            Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={async () => {
-              if (confirm("Apakah Anda yakin ingin menghapus produk ini?")) {
-                try {
-                  await deleteProduk(row.original.id)
-                  toast.success("Produk berhasil dihapus")
-                  triggerProductRefresh()
-                } catch (error) {
-                  toast.error("Gagal menghapus produk")
-                }
+      <div className="flex justify-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <IconDotsVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() =>
+                (window.location.href = `/dashboardpetugas/produk/${row.original.id}`)
               }
-            }}
-          >
-            <IconTrash className="mr-2 h-4 w-4" />\n            Hapus
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            >
+              <IconEye className="mr-2 h-4 w-4" /> Lihat Detail
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                (window.location.href = `/dashboardpetugas/produk/${row.original.id}/edit`)
+              }
+            >
+              <IconEdit className="mr-2 h-4 w-4" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={async () => {
+                if (confirm("Apakah Anda yakin ingin menghapus produk ini?")) {
+                  try {
+                    await deleteProduk(row.original.id)
+                    toast.success("Produk berhasil dihapus")
+                    triggerProductRefresh()
+                  } catch (error) {
+                    toast.error("Gagal menghapus produk")
+                  }
+                }
+              }}
+            >
+              <IconTrash className="mr-2 h-4 w-4" /> Hapus
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     ),
   },
 ]
@@ -244,36 +259,42 @@ export function ProdukTable({ data }: ProdukTableProps) {
           Menampilkan {table.getFilteredRowModel().rows.length} produk
         </div>
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader className="bg-muted">
+
+      {/* Table container */}
+      <div className="rounded-md border overflow-x-auto shadow-sm">
+        <Table className="table-fixed w-full">
+          <TableHeader className="bg-muted/40">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} className="font-semibold">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead
+                    key={header.id}
+                    className="py-3 text-sm font-semibold text-center"
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
+
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-muted/50"
+                  className="even:bg-muted/20 hover:bg-muted/40 transition"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className="text-sm text-center py-3"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -284,10 +305,7 @@ export function ProdukTable({ data }: ProdukTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
+                <TableCell colSpan={columns.length} className="h-24 text-center">
                   Tidak ada data produk.
                 </TableCell>
               </TableRow>
@@ -295,6 +313,8 @@ export function ProdukTable({ data }: ProdukTableProps) {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination */}
       <div className="flex items-center justify-between py-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} dari{" "}

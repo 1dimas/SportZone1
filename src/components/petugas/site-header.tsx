@@ -14,11 +14,6 @@ export function SiteHeader() {
         />
         <h1 className="text-lg font-semibold">Dashboard Petugas</h1>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2">
-            <IconBell className="h-4 w-4" />
-            <span className="hidden md:inline">Notifikasi</span>
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">3</span>
-          </Button>
         </div>
       </div>
     </header>
