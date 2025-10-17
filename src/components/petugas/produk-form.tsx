@@ -70,8 +70,20 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([])
   const [previewUrls, setPreviewUrls] = React.useState<string[]>([])
   const [deletedImages, setDeletedImages] = React.useState<string[]>([]) // Track deleted existing images
+  const [hargaDisplay, setHargaDisplay] = React.useState<string>("")
 
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  // Format number to rupiah display
+  const formatRupiah = (value: number): string => {
+    return value.toLocaleString('id-ID')
+  }
+
+  // Parse rupiah string to number
+  const parseRupiah = (value: string): number => {
+    const cleaned = value.replace(/\D/g, '') // Remove all non-digits
+    return cleaned === '' ? 0 : parseInt(cleaned, 10)
+  }
 
   const form = useForm<ProdukFormData>({
     resolver: zodResolver(produkSchema),
@@ -104,6 +116,13 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
     }
     fetchData()
   }, [])
+
+  // Initialize harga display
+  React.useEffect(() => {
+    if (produk?.harga) {
+      setHargaDisplay(formatRupiah(produk.harga))
+    }
+  }, [produk])
 
   // Reset form when produk changes (for edit)
   React.useEffect(() => {
@@ -277,10 +296,20 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                   <FormLabel>Harga (Rp)</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
+                      type="text"
                       placeholder="Masukkan harga"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      value={hargaDisplay}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setHargaDisplay(value)
+                        const numericValue = parseRupiah(value)
+                        field.onChange(numericValue)
+                      }}
+                      onBlur={() => {
+                        // Format on blur
+                        const numericValue = form.getValues("harga")
+                        setHargaDisplay(formatRupiah(numericValue))
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

@@ -14,6 +14,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
@@ -34,6 +35,7 @@ type VarianFormData = z.infer<typeof varianSchema>
 
 interface VarianFormProps {
   produkId: string
+  hargaProduk?: number
   varian?: {
     id: string
     produk_id: string
@@ -46,7 +48,7 @@ interface VarianFormProps {
   onSuccess: () => void
 }
 
-export function VarianForm({ produkId, varian, onSuccess }: VarianFormProps) {
+export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianFormProps) {
   const [loading, setLoading] = React.useState(false)
 
   const form = useForm<VarianFormData>({
@@ -68,7 +70,10 @@ export function VarianForm({ produkId, varian, onSuccess }: VarianFormProps) {
         ukuran: data.ukuran && data.ukuran.trim() !== "" ? data.ukuran.trim() : undefined,
         warna: data.warna && data.warna.trim() !== "" ? data.warna.trim() : undefined,
         stok: data.stok,
-        harga: data.harga,
+        // If harga is 0 or undefined, use hargaProduk (if available)
+        harga: (data.harga === 0 || data.harga === null || data.harga === undefined) && hargaProduk
+          ? hargaProduk
+          : data.harga,
         sku: data.sku && data.sku.trim() !== "" ? data.sku.trim() : undefined,
       }
 
@@ -168,6 +173,11 @@ export function VarianForm({ produkId, varian, onSuccess }: VarianFormProps) {
                       }}
                     />
                   </FormControl>
+                  {hargaProduk && (
+                    <FormDescription>
+                      Kosongkan atau isi 0 untuk menggunakan harga produk (Rp {hargaProduk.toLocaleString('id-ID')})
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}

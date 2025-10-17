@@ -7,10 +7,24 @@ import { IconArrowLeft } from "@tabler/icons-react"
 
 import { Button } from "@/components/ui/button"
 import { VarianForm } from "@/components/petugas/varian-form"
+import { getProdukById } from "@/components/lib/services/produk.service"
 
 export default function VarianCreatePage() {
   const params = useParams()
   const router = useRouter()
+  const [hargaProduk, setHargaProduk] = React.useState<number>(0)
+
+  React.useEffect(() => {
+    const fetchProduk = async () => {
+      try {
+        const produk = await getProdukById(params.id as string)
+        setHargaProduk(produk?.harga || 0)
+      } catch (error) {
+        console.error("Error fetching product:", error)
+      }
+    }
+    fetchProduk()
+  }, [params.id])
 
   const handleSuccess = () => {
     toast.success("Varian berhasil dibuat")
@@ -32,7 +46,7 @@ export default function VarianCreatePage() {
         <h1 className="text-2xl font-bold md:text-3xl">Tambah Varian Baru</h1>
       </div>
       <div className="rounded-lg border bg-card p-6">
-        <VarianForm produkId={params.id as string} onSuccess={handleSuccess} />
+        <VarianForm produkId={params.id as string} hargaProduk={hargaProduk} onSuccess={handleSuccess} />
       </div>
     </div>
   )

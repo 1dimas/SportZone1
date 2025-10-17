@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useParams, useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { ArrowLeft, Edit, Package, Image as ImageIcon, Plus, Eye, EyeOff } from "lucide-react"
+import { ArrowLeft, Edit, Package, Image as ImageIcon, Plus, Trash } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { getProdukById, getVarianByProduk } from "@/components/lib/services/produk.service"
+import { deleteVarian } from "@/components/lib/services/varian.service"
 
 interface ProdukDetail {
   id: string
@@ -91,6 +92,22 @@ export default function ProdukDetailPage() {
         return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
       default:
         return 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+    }
+  }
+
+  const handleDeleteVarian = async (varianId: string) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus varian ini?")) {
+      return
+    }
+
+    try {
+      await deleteVarian(varianId)
+      // Remove from local state
+      setVarian(prev => prev.filter(v => v.id !== varianId))
+      toast.success("Varian berhasil dihapus")
+    } catch (error) {
+      console.error("Error deleting variant:", error)
+      toast.error("Gagal menghapus varian")
     }
   }
 
@@ -321,11 +338,21 @@ export default function ProdukDetailPage() {
                           <p className="text-sm text-gray-600">SKU: {item.sku || 'Tidak ada'}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium">{item.stok} unit</p>
-                        {item.harga && (
-                          <p className="text-sm text-green-600">{formatCurrency(item.harga)}</p>
-                        )}
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="font-medium">{item.stok} unit</p>
+                          {item.harga && (
+                            <p className="text-sm text-green-600">{formatCurrency(item.harga)}</p>
+                          )}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteVarian(item.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
