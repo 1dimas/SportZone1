@@ -69,6 +69,7 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
   const [loading, setLoading] = React.useState(false)
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([])
   const [previewUrls, setPreviewUrls] = React.useState<string[]>([])
+  const [deletedImages, setDeletedImages] = React.useState<string[]>([]) // Track deleted existing images
 
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -117,6 +118,7 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
         status: (produk.status as "aktif" | "nonaktif" | "stok habis") || "aktif",
         gambar: [],
       })
+      setDeletedImages([]) // Reset deleted images when editing a different product
     }
   }, [produk, form])
 
@@ -153,12 +155,11 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
       // Delete from backend immediately
       try {
         await deleteGambarProduk(produk.id, imageUrl)
-        // Remove from produk gambar array
-        if (produk.gambar) {
-          produk.gambar = produk.gambar.filter(g => g !== imageUrl)
-        }
+        // Add to deleted images list to hide from UI
+        setDeletedImages(prev => [...prev, imageUrl])
         toast.success("Gambar berhasil dihapus")
       } catch (error) {
+        console.error("Error deleting image:", error)
         toast.error("Gagal menghapus gambar")
         return
       }
@@ -227,8 +228,9 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
     }
   }
 
-  // Count total images (existing + new)
-  const totalImages = (produk?.gambar?.length || 0) + selectedFiles.length
+  // Count total images (existing + new), excluding deleted ones
+  const existingImages = produk?.gambar?.filter(img => !deletedImages.includes(img)) || []
+  const totalImages = existingImages.length + selectedFiles.length
 
   return (
     <Form {...form}>
@@ -430,11 +432,11 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
             {totalImages > 0 && (
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">
-                  Total: {totalImages} gambar ({selectedFiles.length} baru, {produk?.gambar?.length || 0} existing)
+                  Total: {totalImages} gambar ({selectedFiles.length} baru, {existingImages.length} existing)
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                  {/* Existing images */}
-                  {produk?.gambar?.map((imageUrl, index) => (
+                  {/* Existing images (filtered to exclude deleted ones) */}
+                  {existingImages.map((imageUrl, index) => (
                     <div key={`existing-${index}`} className="relative">
                       <div className="aspect-square overflow-hidden rounded-md border">
                         <img

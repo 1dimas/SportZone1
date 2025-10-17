@@ -170,14 +170,6 @@ const columns: ColumnDef<Produk>[] = [
             Edit
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => {
-              window.location.href = `/dashboardpetugas/produk/${row.original.id}/varian`
-            }}
-          >
-            <IconEye className="mr-2 h-4 w-4" />
-            Lihat Varian
-          </DropdownMenuItem>
-          <DropdownMenuItem
             variant="destructive"
             onClick={async () => {
               if (confirm("Apakah Anda yakin ingin menghapus produk ini?")) {

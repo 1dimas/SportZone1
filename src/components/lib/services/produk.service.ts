@@ -2,7 +2,9 @@
 
 import { API_URL } from "./auth.service";
 
-// Get token from localStorage
+// =====================
+// HELPER GET TOKEN
+// =====================
 const getToken = () => localStorage.getItem("token");
 
 // =====================
@@ -41,10 +43,7 @@ export async function getProdukById(id: string) {
     headers: { "Content-Type": "application/json" },
   });
 
-  if (response.status === 404) {
-    return null; // Produk tidak ditemukan
-  }
-
+  if (response.status === 404) return null;
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Gagal mengambil data produk: ${response.status} ${response.statusText} - ${errorText}`);
@@ -52,8 +51,6 @@ export async function getProdukById(id: string) {
 
   return response.json();
 }
-
-
 
 // =====================
 // CREATE PRODUK
@@ -83,7 +80,7 @@ export async function createProduk(data: {
 
   const response = await fetch(`${API_URL}/produk`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` }, // Jangan set Content-Type untuk FormData
+    headers: { Authorization: `Bearer ${token}` },
     body: formData,
   });
 
@@ -130,7 +127,7 @@ export async function updateProduk(
 
   const response = await fetch(`${API_URL}/produk/${id}`, {
     method: "PATCH",
-    headers: { Authorization: `Bearer ${token}` }, // jangan set Content-Type
+    headers: { Authorization: `Bearer ${token}` },
     body: formData,
   });
 
@@ -163,7 +160,48 @@ export async function deleteProduk(id: string) {
 }
 
 // =====================
-// GET VARIAN BY PRODUK
+// DELETE GAMBAR PRODUK
+// =====================
+export async function deleteGambarProduk(produkId: string, gambarUrl: string) {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  // Extract filename from URL
+  // Example: "http://localhost:3000/uploads/products/image.jpg" -> "image.jpg"
+  // Or: "uploads/products/image.jpg" -> "image.jpg"
+  let gambarId = gambarUrl;
+  try {
+    // Try to extract the filename from the URL
+    const urlParts = gambarUrl.split('/');
+    gambarId = urlParts[urlParts.length - 1];
+
+    // If the URL contains query parameters, remove them
+    if (gambarId.includes('?')) {
+      gambarId = gambarId.split('?')[0];
+    }
+  } catch (error) {
+    // If extraction fails, use the original gambarUrl
+    console.warn('Failed to extract filename from URL:', error);
+  }
+
+  // Encode the gambarId to handle special characters
+  const encodedGambarId = encodeURIComponent(gambarId);
+
+  const response = await fetch(`${API_URL}/produk/${produkId}/gambar/${encodedGambarId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gagal menghapus gambar produk: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  return true;
+}
+
+// =====================
+// VARIAN PRODUK
 // =====================
 export async function getVarianByProduk(produkId: string) {
   const token = getToken();
@@ -171,10 +209,7 @@ export async function getVarianByProduk(produkId: string) {
 
   const response = await fetch(`${API_URL}/produk/${produkId}/varian`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
   });
 
   if (!response.ok) {
@@ -186,9 +221,6 @@ export async function getVarianByProduk(produkId: string) {
   return Array.isArray(data) ? data : [data];
 }
 
-// =====================
-// CREATE VARIAN
-// =====================
 export async function createVarian(data: {
   produk_id: string;
   ukuran?: string;
@@ -202,10 +234,7 @@ export async function createVarian(data: {
 
   const response = await fetch(`${API_URL}/produk/${data.produk_id}/varian`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 
@@ -213,19 +242,16 @@ export async function createVarian(data: {
   return response.json();
 }
 
-// =====================
-// UPDATE VARIAN
-// =====================
-export async function updateVarian(varianId: string, data: { ukuran?: string; warna?: string; stok?: number; harga?: number; sku?: string; produk_id?: string }) {
+export async function updateVarian(
+  varianId: string,
+  data: { ukuran?: string; warna?: string; stok?: number; harga?: number; sku?: string; produk_id?: string }
+) {
   const token = getToken();
   if (!token) throw new Error("Belum login");
 
   const response = await fetch(`${API_URL}/produk/varian/${varianId}`, {
     method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
 
@@ -237,9 +263,6 @@ export async function updateVarian(varianId: string, data: { ukuran?: string; wa
   return response.json();
 }
 
-// =====================
-// DELETE VARIAN
-// =====================
 export async function deleteVarian(varianId: string) {
   const token = getToken();
   if (!token) throw new Error("Belum login");
@@ -257,9 +280,6 @@ export async function deleteVarian(varianId: string) {
   return true;
 }
 
-// =====================
-// GET VARIAN BY ID
-// =====================
 export async function getVarianById(varianId: string) {
   const token = getToken();
   if (!token) throw new Error("Belum login");
@@ -278,7 +298,7 @@ export async function getVarianById(varianId: string) {
 }
 
 // =====================
-// GET PRODUK BY KATEGORI / SUBKATEGORI / BRAND
+// PRODUK FILTER BY KATEGORI / SUBKATEGORI / BRAND
 // =====================
 export async function getProdukByKategori(kategoriId: string) {
   const response = await fetch(`${API_URL}/produk/kategori/${kategoriId}`, {
