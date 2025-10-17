@@ -101,11 +101,20 @@ const columns: ColumnDef<Produk>[] = [
   {
     accessorKey: "harga",
     header: "Harga",
-    cell: ({ row }) => (
-      <div className="text-right font-medium">
-        Rp {(row.original.harga || 0).toLocaleString('id-ID')}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(amount)
+      }
+      return (
+        <div className="text-right font-medium">
+          {formatCurrency(row.original.harga || 0)}
+        </div>
+      )
+    },
   },
   {
     accessorKey: "subkategori.kategoriOlahraga.nama",

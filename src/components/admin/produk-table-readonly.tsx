@@ -89,11 +89,20 @@ const columns: ColumnDef<Produk>[] = [
   {
     accessorKey: "harga",
     header: "Harga",
-    cell: ({ row }) => (
-      <div className="text-right font-medium">
-        Rp {row.original.harga.toLocaleString('id-ID')}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          minimumFractionDigits: 0
+        }).format(amount)
+      }
+      return (
+        <div className="text-right font-medium">
+          {formatCurrency(row.original.harga)}
+        </div>
+      )
+    },
   },
   {
     accessorKey: "subkategori.kategoriOlahraga.nama",
@@ -138,6 +147,14 @@ function VarianList({ produkId }: { produkId: string }) {
   const [varian, setVarian] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(true)
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(amount)
+  }
+
   React.useEffect(() => {
     const fetchVarian = async () => {
       try {
@@ -167,7 +184,7 @@ function VarianList({ produkId }: { produkId: string }) {
           {v.ukuran && `Ukuran: ${v.ukuran}`}
           {v.warna && `, Warna: ${v.warna}`}
           {`, Stok: ${v.stok}`}
-          {v.harga && `, Harga: Rp ${v.harga.toLocaleString('id-ID')}`}
+          {v.harga && `, Harga: ${formatCurrency(v.harga)}`}
         </li>
       ))}
     </ul>
