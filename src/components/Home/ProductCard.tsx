@@ -34,7 +34,7 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
   const name = product.nama || product.name || "";
   const price = product.harga !== undefined ? product.harga : product.price || 0;
   const imageUrl = (product.gambar && product.gambar.length > 0) ? product.gambar[0] : product.imageUrl || "/products/kao.jpeg";
-  
+
   // Check if the image URL is from an external domain
   const isExternal = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
 
@@ -61,7 +61,7 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
           Rp{price ? price.toLocaleString("id-ID") : "0"}
         </p>
         <Link
-          href={`/product/${product.slug || product.id}`}
+          href={`/product/${product.id}`}
           className="block text-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 shadow hover:shadow-md"
         >
           Lihat Detail

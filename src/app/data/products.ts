@@ -1,6 +1,7 @@
 // Definisikan tipe untuk Varian
 export type ProductVariant = {
-  size: string | number;
+  size?: string | number;
+  color?: string;
   stock: number;
 };
 
@@ -293,6 +294,38 @@ const products: Product[] = [
       { size: "M", stock: 30 },
       { size: "L", stock: 15 },
       { size: "XL", stock: 5 },
+    ],
+  },
+  {
+    id: 28,
+    name: "Colorful Basketball",
+    slug: "colorful-basketball",
+    price: 350000,
+    category: "Basketball",
+    subcategory: "Peralatan",
+    imageUrl: "/products/kao.jpeg",
+    description: "Bola basket dengan berbagai pilihan warna.",
+    variants: [
+      { color: "Merah", stock: 15 },
+      { color: "Biru", stock: 10 },
+      { color: "Hijau", stock: 8 },
+    ],
+  },
+  {
+    id: 29,
+    name: "Multi-Size Color Tee",
+    slug: "multi-size-color-tee",
+    price: 250000,
+    category: "Lifestyle",
+    subcategory: "Pakaian",
+    imageUrl: "/products/kao.jpeg",
+    description: "Kaos dengan berbagai ukuran dan warna.",
+    variants: [
+      { size: "M", color: "Merah", stock: 10 },
+      { size: "M", color: "Biru", stock: 5 },
+      { size: "L", color: "Merah", stock: 8 },
+      { size: "L", color: "Biru", stock: 12 },
+      { size: "XL", color: "Hijau", stock: 6 },
     ],
   },
 ];
