@@ -104,6 +104,16 @@ export const ProductActions: React.FC<ProductActionsProps> = ({ product, onAddTo
     }
   };
 
+  // Check if a size has available variants
+  const isSizeAvailable = (size: string | number) => {
+    return variants.some(v => (v.ukuran || v.size) === size && v.stok > 0);
+  };
+
+  // Check if a color has available variants
+  const isColorAvailable = (color: string) => {
+    return variants.some(v => (v.warna || v.color) === color && v.stok > 0);
+  };
+
   if (loadingVariants) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -118,34 +128,60 @@ export const ProductActions: React.FC<ProductActionsProps> = ({ product, onAddTo
       {/* Pilihan Ukuran */}
       {hasSizes && (
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Ukuran:</label>
-          <select
-            value={selectedSize || ''}
-            onChange={e => setSelectedSize(e.target.value)}
-            className="w-full px-3 py-2 text-sm border rounded-md focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-          >
-            <option value="">Pilih ukuran</option>
-            {availableSizes.map((size, idx) => (
-              <option key={idx} value={size}>{size}</option>
-            ))}
-          </select>
+          <label className="block text-xs text-gray-500 mb-2">Ukuran:</label>
+          <div className="flex flex-wrap gap-2">
+            {availableSizes.map((size, idx) => {
+              const available = isSizeAvailable(size);
+              const isSelected = selectedSize === size;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => available && setSelectedSize(size)}
+                  disabled={!available}
+                  className={`px-4 py-2 border rounded-lg text-sm font-medium transition ${
+                    !available
+                      ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                      : isSelected
+                      ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                      : 'bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300'
+                  }`}
+                >
+                  {size}
+                  {!available && <span className="ml-1 text-xs">(Kosong)</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
       {/* Pilihan Warna */}
       {hasColors && (
         <div>
-          <label className="block text-xs text-gray-500 mb-1">Warna:</label>
-          <select
-            value={selectedColor || ''}
-            onChange={e => setSelectedColor(e.target.value)}
-            className="w-full px-3 py-2 text-sm border rounded-md focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-          >
-            <option value="">Pilih warna</option>
-            {availableColors.map((color, idx) => (
-              <option key={idx} value={color}>{color}</option>
-            ))}
-          </select>
+          <label className="block text-xs text-gray-500 mb-2">Warna:</label>
+          <div className="flex flex-wrap gap-2">
+            {availableColors.map((color, idx) => {
+              const available = isColorAvailable(color);
+              const isSelected = selectedColor === color;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => available && setSelectedColor(color)}
+                  disabled={!available}
+                  className={`px-4 py-2 border rounded-lg text-sm font-medium transition ${
+                    !available
+                      ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                      : isSelected
+                      ? 'bg-orange-500 text-white border-orange-500 shadow-md'
+                      : 'bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300'
+                  }`}
+                >
+                  {color}
+                  {!available && <span className="ml-1 text-xs">(Kosong)</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
