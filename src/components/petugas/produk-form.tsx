@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { toast } from "sonner"
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,76 +14,86 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { createProduk, updateProduk, deleteGambarProduk } from "@/components/lib/services/produk.service"
-import { getAllSubkategoriPeralatan, getSubkategoriPeralatanByKategoriOlahraga } from "@/components/lib/services/subkategori-peralatan.service"
-import { getAllBrands } from "@/components/lib/services/brand.service"
-import { getAllKategoriOlahraga } from "@/components/lib/services/olahraga.service"
-import { triggerProductRefresh } from "@/components/lib/utils/product-refresh"
+} from "@/components/ui/select";
+import {
+  createProduk,
+  updateProduk,
+  deleteGambarProduk,
+} from "@/components/lib/services/produk.service";
+import {
+  getAllSubkategoriPeralatan,
+  getSubkategoriPeralatanByKategoriOlahraga,
+} from "@/components/lib/services/subkategori-peralatan.service";
+import { getAllBrands } from "@/components/lib/services/brand.service";
+import { getAllKategoriOlahraga } from "@/components/lib/services/olahraga.service";
+import { triggerProductRefresh } from "@/components/lib/utils/product-refresh";
 
 const produkSchema = z.object({
   nama: z.string().min(1, "Nama produk wajib diisi"),
   deskripsi: z.string().min(1, "Deskripsi wajib diisi"),
   harga: z.number().min(0, "Harga harus positif"),
+  stok: z.number().min(0, "Stok minimal 0"),
   kategori_id: z.string().min(1, "Kategori wajib dipilih"),
   subkategori_id: z.string().min(1, "Subkategori wajib dipilih"),
   brand_id: z.string().min(1, "Brand wajib dipilih"),
   status: z.enum(["aktif", "nonaktif", "stok habis"]),
   gambar: z.array(z.instanceof(File)).optional(),
-})
+});
 
-type ProdukFormData = z.infer<typeof produkSchema>
+type ProdukFormData = z.infer<typeof produkSchema>;
 
 interface ProdukFormProps {
   produk?: {
-    id: string
-    nama: string
-    deskripsi: string
-    harga: number
-    subkategori_id: string
-    brand_id: string
-    status: string
-    gambar?: string[]
+    id: string;
+    nama: string;
+    deskripsi: string;
+    harga: number;
+    stok?: number;
+    subkategori_id: string;
+    brand_id: string;
+    status: string;
+    gambar?: string[];
     subkategori?: {
       kategoriOlahraga?: {
-        id: string
-      }
-    }
-  }
-  onSuccess: () => void
+        id: string;
+      };
+    };
+  };
+  onSuccess: () => void;
 }
 
 export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
-  const [kategoriOlahragas, setKategoriOlahragas] = React.useState([])
-  const [subkategoris, setSubkategoris] = React.useState([])
-  const [brands, setBrands] = React.useState([])
-  const [loading, setLoading] = React.useState(false)
-  const [selectedFiles, setSelectedFiles] = React.useState<File[]>([])
-  const [previewUrls, setPreviewUrls] = React.useState<string[]>([])
-  const [deletedImages, setDeletedImages] = React.useState<string[]>([]) // Track deleted existing images
-  const [hargaDisplay, setHargaDisplay] = React.useState<string>("")
+  const [kategoriOlahragas, setKategoriOlahragas] = React.useState([]);
+  const [subkategoris, setSubkategoris] = React.useState([]);
+  const [brands, setBrands] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = React.useState<string[]>([]);
+  const [deletedImages, setDeletedImages] = React.useState<string[]>([]); // Track deleted existing images
+  const [hargaDisplay, setHargaDisplay] = React.useState<string>("");
+  const [stokDisplay, setStokDisplay] = React.useState<string>("");
 
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Format number to rupiah display
   const formatRupiah = (value: number): string => {
-    return value.toLocaleString('id-ID')
-  }
+    return value.toLocaleString("id-ID");
+  };
 
   // Parse rupiah string to number
   const parseRupiah = (value: string): number => {
-    const cleaned = value.replace(/\D/g, '') // Remove all non-digits
-    return cleaned === '' ? 0 : parseInt(cleaned, 10)
-  }
+    const cleaned = value.replace(/\D/g, ""); // Remove all non-digits
+    return cleaned === "" ? 0 : parseInt(cleaned, 10);
+  };
 
   const form = useForm<ProdukFormData>({
     resolver: zodResolver(produkSchema),
@@ -91,13 +101,15 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
       nama: produk?.nama || "",
       deskripsi: produk?.deskripsi || "",
       harga: produk?.harga || 0,
+      stok: produk?.stok || 0,
       kategori_id: produk?.subkategori?.kategoriOlahraga?.id || "",
       subkategori_id: produk?.subkategori_id || "",
       brand_id: produk?.brand_id || "",
-      status: (produk?.status as "aktif" | "nonaktif" | "stok habis") || "aktif",
+      status:
+        (produk?.status as "aktif" | "nonaktif" | "stok habis") || "aktif",
       gambar: [],
     },
-  })
+  });
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -106,23 +118,26 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
           getAllKategoriOlahraga(),
           getAllSubkategoriPeralatan(),
           getAllBrands(),
-        ])
-        setKategoriOlahragas(kategoriData)
-        setSubkategoris(subkategoriData)
-        setBrands(brandData)
+        ]);
+        setKategoriOlahragas(kategoriData);
+        setSubkategoris(subkategoriData);
+        setBrands(brandData);
       } catch (error) {
-        toast.error("Gagal memuat data kategori, subkategori dan brand")
+        toast.error("Gagal memuat data kategori, subkategori dan brand");
       }
-    }
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, []);
 
-  // Initialize harga display
+  // Initialize harga and stok display
   React.useEffect(() => {
     if (produk?.harga) {
-      setHargaDisplay(formatRupiah(produk.harga))
+      setHargaDisplay(formatRupiah(produk.harga));
     }
-  }, [produk])
+    if (produk?.stok) {
+      setStokDisplay(produk.stok.toString());
+    }
+  }, [produk]);
 
   // Reset form when produk changes (for edit)
   React.useEffect(() => {
@@ -131,22 +146,24 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
         nama: produk.nama || "",
         deskripsi: produk.deskripsi || "",
         harga: produk.harga || 0,
+        stok: produk.stok || 0,
         kategori_id: produk.subkategori?.kategoriOlahraga?.id || "",
         subkategori_id: produk.subkategori_id || "",
         brand_id: produk.brand_id || "",
-        status: (produk.status as "aktif" | "nonaktif" | "stok habis") || "aktif",
+        status:
+          (produk.status as "aktif" | "nonaktif" | "stok habis") || "aktif",
         gambar: [],
-      })
-      setDeletedImages([]) // Reset deleted images when editing a different product
+      });
+      setDeletedImages([]); // Reset deleted images when editing a different product
     }
-  }, [produk, form])
+  }, [produk, form]);
 
   // Clean up preview URLs
   React.useEffect(() => {
     return () => {
-      previewUrls.forEach(url => URL.revokeObjectURL(url))
-    }
-  }, [previewUrls])
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [previewUrls]);
 
   // Initialize preview URLs for existing images when editing
   React.useEffect(() => {
@@ -154,66 +171,70 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
       // For existing images, we don't create object URLs, just use the image URLs directly
       // This is handled in the render section
     }
-  }, [produk])
+  }, [produk]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || [])
-    
-    // Add new files to existing selected files
-    const updatedFiles = [...selectedFiles, ...files]
-    setSelectedFiles(updatedFiles)
-    form.setValue("gambar", updatedFiles)
-    
-    // Create preview URLs for new files
-    const newPreviewUrls = files.map(file => URL.createObjectURL(file))
-    setPreviewUrls(prev => [...prev, ...newPreviewUrls])
-  }
+    const files = Array.from(event.target.files || []);
 
-  const removeFile = async (index: number, isExistingImage: boolean = false, imageUrl?: string) => {
+    // Add new files to existing selected files
+    const updatedFiles = [...selectedFiles, ...files];
+    setSelectedFiles(updatedFiles);
+    form.setValue("gambar", updatedFiles);
+
+    // Create preview URLs for new files
+    const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
+  };
+
+  const removeFile = async (
+    index: number,
+    isExistingImage: boolean = false,
+    imageUrl?: string
+  ) => {
     if (isExistingImage && imageUrl && produk) {
       // Delete from backend immediately
       try {
-        await deleteGambarProduk(produk.id, imageUrl)
+        await deleteGambarProduk(produk.id, imageUrl);
         // Add to deleted images list to hide from UI
-        setDeletedImages(prev => [...prev, imageUrl])
-        toast.success("Gambar berhasil dihapus")
+        setDeletedImages((prev) => [...prev, imageUrl]);
+        toast.success("Gambar berhasil dihapus");
       } catch (error) {
-        console.error("Error deleting image:", error)
-        toast.error("Gagal menghapus gambar")
-        return
+        console.error("Error deleting image:", error);
+        toast.error("Gagal menghapus gambar");
+        return;
       }
     } else {
       // Remove from selected files
-      const newFiles = [...selectedFiles]
-      newFiles.splice(index, 1)
-      setSelectedFiles(newFiles)
-      form.setValue("gambar", newFiles)
+      const newFiles = [...selectedFiles];
+      newFiles.splice(index, 1);
+      setSelectedFiles(newFiles);
+      form.setValue("gambar", newFiles);
 
       // Update preview URLs
-      const newPreviewUrls = [...previewUrls]
-      URL.revokeObjectURL(newPreviewUrls[index])
-      newPreviewUrls.splice(index, 1)
-      setPreviewUrls(newPreviewUrls)
+      const newPreviewUrls = [...previewUrls];
+      URL.revokeObjectURL(newPreviewUrls[index]);
+      newPreviewUrls.splice(index, 1);
+      setPreviewUrls(newPreviewUrls);
     }
-  }
+  };
 
   const clearAllFiles = () => {
     // Revoke all object URLs
-    previewUrls.forEach(url => URL.revokeObjectURL(url))
-    
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+
     // Clear files and previews
-    setSelectedFiles([])
-    setPreviewUrls([])
-    form.setValue("gambar", [])
-    
+    setSelectedFiles([]);
+    setPreviewUrls([]);
+    form.setValue("gambar", []);
+
     // Reset file input
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""
+      fileInputRef.current.value = "";
     }
-  }
+  };
 
   const onSubmit = async (data: ProdukFormData) => {
-    setLoading(true)
+    setLoading(true);
     try {
       if (produk) {
         // Update
@@ -221,35 +242,36 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
           nama: data.nama,
           deskripsi: data.deskripsi,
           harga: data.harga,
+          stok: data.stok,
           subkategori_id: data.subkategori_id,
           brand_id: data.brand_id,
           status: data.status,
           gambar: selectedFiles,
-
-        })
-        toast.success("Produk berhasil diperbarui")
-        triggerProductRefresh()
+        });
+        toast.success("Produk berhasil diperbarui");
+        triggerProductRefresh();
       } else {
         // Create
         await createProduk({
           ...data,
           gambar: selectedFiles,
-        })
-        toast.success("Produk berhasil dibuat")
-        triggerProductRefresh()
+        });
+        toast.success("Produk berhasil dibuat");
+        triggerProductRefresh();
       }
-      onSuccess()
+      onSuccess();
     } catch (error) {
-      console.error("Error submitting product:", error)
-      toast.error("Terjadi kesalahan saat menyimpan produk")
+      console.error("Error submitting product:", error);
+      toast.error("Terjadi kesalahan saat menyimpan produk");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   // Count total images (existing + new), excluding deleted ones
-  const existingImages = produk?.gambar?.filter(img => !deletedImages.includes(img)) || []
-  const totalImages = existingImages.length + selectedFiles.length
+  const existingImages =
+    produk?.gambar?.filter((img) => !deletedImages.includes(img)) || [];
+  const totalImages = existingImages.length + selectedFiles.length;
 
   return (
     <Form {...form}>
@@ -300,15 +322,15 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                       placeholder="Masukkan harga"
                       value={hargaDisplay}
                       onChange={(e) => {
-                        const value = e.target.value
-                        setHargaDisplay(value)
-                        const numericValue = parseRupiah(value)
-                        field.onChange(numericValue)
+                        const value = e.target.value;
+                        setHargaDisplay(value);
+                        const numericValue = parseRupiah(value);
+                        field.onChange(numericValue);
                       }}
                       onBlur={() => {
                         // Format on blur
-                        const numericValue = form.getValues("harga")
-                        setHargaDisplay(formatRupiah(numericValue))
+                        const numericValue = form.getValues("harga");
+                        setHargaDisplay(formatRupiah(numericValue));
                       }}
                     />
                   </FormControl>
@@ -316,8 +338,35 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                 </FormItem>
               )}
             />
-            
 
+            <FormField
+              control={form.control}
+              name="stok"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Stok</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Masukkan jumlah stok"
+                      value={stokDisplay}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setStokDisplay(value);
+                        const numericValue = parseRupiah(value);
+                        field.onChange(numericValue);
+                      }}
+                      onBlur={() => {
+                        // Format on blur
+                        const numericValue = form.getValues("stok");
+                        setStokDisplay(numericValue.toString());
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className="space-y-6">
@@ -327,11 +376,16 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kategori Olahraga</FormLabel>
-                  <Select onValueChange={(value) => {
-                    field.onChange(value)
-                    // Filter subkategori based on selected kategori
-                    getSubkategoriPeralatanByKategoriOlahraga(value).then(setSubkategoris)
-                  }} defaultValue={field.value}>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      // Filter subkategori based on selected kategori
+                      getSubkategoriPeralatanByKategoriOlahraga(value).then(
+                        setSubkategoris
+                      );
+                    }}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih kategori olahraga" />
@@ -355,7 +409,10 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Subkategori (Alat)</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih subkategori" />
@@ -380,7 +437,10 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Brand</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih brand" />
@@ -405,7 +465,10 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih status" />
@@ -426,7 +489,9 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
 
         <div className="space-y-4 rounded-lg border p-4">
           <div className="flex items-center justify-between">
-            <FormLabel className="text-base font-semibold">Gambar Produk</FormLabel>
+            <FormLabel className="text-base font-semibold">
+              Gambar Produk
+            </FormLabel>
             {selectedFiles.length > 0 && (
               <Button
                 type="button"
@@ -450,18 +515,20 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                 className="cursor-pointer"
               />
               <p className="text-sm text-muted-foreground">
-                Anda dapat memilih lebih dari satu gambar. Format yang didukung: JPG, PNG, WEBP.
+                Anda dapat memilih lebih dari satu gambar. Format yang didukung:
+                JPG, PNG, WEBP.
                 {totalImages > 0 && (
                   <span className="ml-1">Total gambar: {totalImages}</span>
                 )}
               </p>
             </div>
-            
+
             {/* Preview all images (existing + new) */}
             {totalImages > 0 && (
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">
-                  Total: {totalImages} gambar ({selectedFiles.length} baru, {existingImages.length} existing)
+                  Total: {totalImages} gambar ({selectedFiles.length} baru,{" "}
+                  {existingImages.length} existing)
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                   {/* Existing images (filtered to exclude deleted ones) */}
@@ -486,7 +553,7 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                       </div>
                     </div>
                   ))}
-                  
+
                   {/* New selected files */}
                   {selectedFiles.map((file, index) => (
                     <div key={`new-${index}`} className="relative">
@@ -517,10 +584,14 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
 
         <div className="flex justify-end">
           <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-            {loading ? "Menyimpan..." : produk ? "Perbarui Produk" : "Buat Produk"}
+            {loading
+              ? "Menyimpan..."
+              : produk
+              ? "Perbarui Produk"
+              : "Buat Produk"}
           </Button>
         </div>
       </form>
     </Form>
-  )
+  );
 }

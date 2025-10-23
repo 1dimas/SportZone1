@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -12,14 +12,14 @@ import {
   SortingState,
   useReactTable,
   VisibilityState,
-} from "@tanstack/react-table"
-import { z } from "zod"
-import { Eye } from "lucide-react"
-import { useRouter } from "next/navigation"
+} from "@tanstack/react-table";
+import { z } from "zod";
+import { Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -27,30 +27,40 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { getAllProduk, getVarianByProduk } from "@/components/lib/services/produk.service"
+} from "@/components/ui/table";
+import {
+  getAllProduk,
+  getVarianByProduk,
+} from "@/components/lib/services/produk.service";
 
 export const produkSchema = z.object({
   id: z.string(),
   nama: z.string(),
   deskripsi: z.string(),
   harga: z.number(),
+  stok: z.number().optional(),
   gambar: z.array(z.string()).optional(),
   status: z.enum(["aktif", "nonaktif", "stok habis"]),
-  subkategori: z.object({
-    nama: z.string(),
-    kategoriOlahraga: z.object({
+  subkategori: z
+    .object({
       nama: z.string(),
-    }).optional(),
-  }).optional(),
-  brand: z.object({
-    nama: z.string(),
-  }).optional(),
+      kategoriOlahraga: z
+        .object({
+          nama: z.string(),
+        })
+        .optional(),
+    })
+    .optional(),
+  brand: z
+    .object({
+      nama: z.string(),
+    })
+    .optional(),
   created_at: z.string(),
   updated_at: z.string(),
-})
+});
 
-type Produk = z.infer<typeof produkSchema>
+type Produk = z.infer<typeof produkSchema>;
 
 const columns: ColumnDef<Produk>[] = [
   {
@@ -83,7 +93,9 @@ const columns: ColumnDef<Produk>[] = [
     accessorKey: "nama",
     header: "Nama Produk",
     cell: ({ row }) => (
-      <div className="font-medium max-w-[200px] truncate">{row.original.nama}</div>
+      <div className="font-medium max-w-[200px] truncate">
+        {row.original.nama}
+      </div>
     ),
   },
   {
@@ -91,38 +103,51 @@ const columns: ColumnDef<Produk>[] = [
     header: "Harga",
     cell: ({ row }) => {
       const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('id-ID', {
-          style: 'currency',
-          currency: 'IDR',
-          minimumFractionDigits: 0
-        }).format(amount)
-      }
+        return new Intl.NumberFormat("id-ID", {
+          style: "currency",
+          currency: "IDR",
+          minimumFractionDigits: 0,
+        }).format(amount);
+      };
       return (
         <div className="text-right font-medium">
           {formatCurrency(row.original.harga)}
         </div>
-      )
+      );
     },
   },
   {
     accessorKey: "subkategori.kategoriOlahraga.nama",
     header: "Olahraga",
     cell: ({ row }) => (
-      <div className="text-muted-foreground">{row.original.subkategori?.kategoriOlahraga?.nama || "-"}</div>
+      <div className="text-muted-foreground">
+        {row.original.subkategori?.kategoriOlahraga?.nama || "-"}
+      </div>
     ),
   },
   {
     accessorKey: "subkategori.nama",
     header: "Alat",
     cell: ({ row }) => (
-      <div className="text-muted-foreground">{row.original.subkategori?.nama || "-"}</div>
+      <div className="text-muted-foreground">
+        {row.original.subkategori?.nama || "-"}
+      </div>
     ),
   },
   {
     accessorKey: "brand.nama",
     header: "Brand",
     cell: ({ row }) => (
-      <div className="text-muted-foreground">{row.original.brand?.nama || "-"}</div>
+      <div className="text-muted-foreground">
+        {row.original.brand?.nama || "-"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "stok",
+    header: "Stok",
+    cell: ({ row }) => (
+      <StockCell produkId={row.original.id} produkStok={row.original.stok} />
     ),
   },
   {
@@ -132,7 +157,11 @@ const columns: ColumnDef<Produk>[] = [
       <Badge
         variant={row.original.status === "aktif" ? "default" : "secondary"}
       >
-        {row.original.status === "aktif" ? "Aktif" : row.original.status === "nonaktif" ? "Nonaktif" : "Stok Habis"}
+        {row.original.status === "aktif"
+          ? "Aktif"
+          : row.original.status === "nonaktif"
+          ? "Nonaktif"
+          : "Stok Habis"}
       </Badge>
     ),
   },
@@ -141,40 +170,40 @@ const columns: ColumnDef<Produk>[] = [
     header: "Aksi",
     cell: ({ row }) => <ActionsCell produkId={row.original.id} />,
   },
-]
+];
 
 function VarianList({ produkId }: { produkId: string }) {
-  const [varian, setVarian] = React.useState<any[]>([])
-  const [loading, setLoading] = React.useState(true)
+  const [varian, setVarian] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount)
-  }
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
 
   React.useEffect(() => {
     const fetchVarian = async () => {
       try {
-        const data = await getVarianByProduk(produkId)
-        setVarian(data)
+        const data = await getVarianByProduk(produkId);
+        setVarian(data);
       } catch (error) {
-        console.error("Error fetching variants:", error)
+        console.error("Error fetching variants:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchVarian()
-  }, [produkId])
+    };
+    fetchVarian();
+  }, [produkId]);
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Memuat...</div>
+    return <div className="text-sm text-muted-foreground">Memuat...</div>;
   }
 
   if (varian.length === 0) {
-    return <div className="text-sm text-muted-foreground">-</div>
+    return <div className="text-sm text-muted-foreground">-</div>;
   }
 
   return (
@@ -188,11 +217,49 @@ function VarianList({ produkId }: { produkId: string }) {
         </li>
       ))}
     </ul>
-  )
+  );
+}
+
+function StockCell({
+  produkId,
+  produkStok,
+}: {
+  produkId: string;
+  produkStok?: number;
+}) {
+  const [varian, setVarian] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchVarian = async () => {
+      try {
+        const data = await getVarianByProduk(produkId);
+        setVarian(data);
+      } catch (error) {
+        console.error("Error fetching variants:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVarian();
+  }, [produkId]);
+
+  if (loading) {
+    return <div className="text-sm text-muted-foreground">Memuat...</div>;
+  }
+
+  if (varian.length > 0) {
+    // Jika ada varian, hitung total stok dari semua varian
+    const totalStok = varian.reduce((sum, v) => sum + (v.stok || 0), 0);
+    return <div className="text-right font-medium">{totalStok}</div>;
+  } else {
+    // Jika tidak ada varian, tampilkan stok dari produk induk
+    return <div className="text-right font-medium">{produkStok || 0}</div>;
+  }
 }
 
 function ActionsCell({ produkId }: { produkId: string }) {
-  const router = useRouter()
+  const router = useRouter();
   return (
     <Button
       variant="outline"
@@ -202,30 +269,33 @@ function ActionsCell({ produkId }: { produkId: string }) {
       <Eye className="w-4 h-4 mr-2" />
       Lihat Detail
     </Button>
-  )
+  );
 }
 
 export function ProdukTableReadonly() {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
-  const [data, setData] = React.useState<Produk[]>([])
-  const [loading, setLoading] = React.useState(true)
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
+  const [data, setData] = React.useState<Produk[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const produkData = await getAllProduk()
-        setData(produkData)
+        const produkData = await getAllProduk();
+        setData(produkData);
       } catch (error) {
-        console.error("Error fetching products:", error)
+        console.error("Error fetching products:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, []);
 
   const table = useReactTable({
     data,
@@ -244,10 +314,10 @@ export function ProdukTableReadonly() {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
 
   if (loading) {
-    return <div className="text-center py-8">Memuat data produk...</div>
+    return <div className="text-center py-8">Memuat data produk...</div>;
   }
 
   return (
@@ -280,7 +350,7 @@ export function ProdukTableReadonly() {
                             header.getContext()
                           )}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -343,5 +413,5 @@ export function ProdukTableReadonly() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   IconDotsVertical,
   IconEdit,
   IconTrash,
   IconEye,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -18,19 +18,19 @@ import {
   SortingState,
   useReactTable,
   VisibilityState,
-} from "@tanstack/react-table"
-import { toast } from "sonner"
-import { z } from "zod"
+} from "@tanstack/react-table";
+import { toast } from "sonner";
+import { z } from "zod";
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -38,31 +38,41 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { deleteProduk } from "@/components/lib/services/produk.service"
-import { triggerProductRefresh } from "@/components/lib/utils/product-refresh"
+} from "@/components/ui/table";
+import {
+  deleteProduk,
+  getVarianByProduk,
+} from "@/components/lib/services/produk.service";
+import { triggerProductRefresh } from "@/components/lib/utils/product-refresh";
 
 export const produkSchema = z.object({
   id: z.string(),
   nama: z.string(),
   deskripsi: z.string(),
   harga: z.number(),
+  stok: z.number().optional(),
   gambar: z.array(z.string()).optional(),
   status: z.enum(["aktif", "nonaktif", "stok habis"]),
-  subkategori: z.object({
-    nama: z.string(),
-    kategoriOlahraga: z.object({
+  subkategori: z
+    .object({
       nama: z.string(),
-    }).optional(),
-  }).optional(),
-  brand: z.object({
-    nama: z.string(),
-  }).optional(),
+      kategoriOlahraga: z
+        .object({
+          nama: z.string(),
+        })
+        .optional(),
+    })
+    .optional(),
+  brand: z
+    .object({
+      nama: z.string(),
+    })
+    .optional(),
   created_at: z.string(),
   updated_at: z.string(),
-})
+});
 
-type Produk = z.infer<typeof produkSchema>
+type Produk = z.infer<typeof produkSchema>;
 
 const columns: ColumnDef<Produk>[] = [
   {
@@ -95,7 +105,9 @@ const columns: ColumnDef<Produk>[] = [
     accessorKey: "nama",
     header: () => <div className="text-left">Nama Produk</div>,
     cell: ({ row }) => (
-      <div className="font-medium truncate max-w-[200px]">{row.original.nama}</div>
+      <div className="font-medium truncate max-w-[200px]">
+        {row.original.nama}
+      </div>
     ),
   },
   {
@@ -107,13 +119,13 @@ const columns: ColumnDef<Produk>[] = [
           style: "currency",
           currency: "IDR",
           minimumFractionDigits: 0,
-        }).format(amount)
-      }
+        }).format(amount);
+      };
       return (
         <div className="text-center font-medium text-gray-800">
           {formatCurrency(row.original.harga || 0)}
         </div>
-      )
+      );
     },
   },
   {
@@ -141,6 +153,13 @@ const columns: ColumnDef<Produk>[] = [
       <div className="text-center text-muted-foreground">
         {row.original.brand?.nama || "-"}
       </div>
+    ),
+  },
+  {
+    accessorKey: "stok",
+    header: () => <div className="text-center">Stok</div>,
+    cell: ({ row }) => (
+      <StockCell produkId={row.original.id} produkStok={row.original.stok} />
     ),
   },
   {
@@ -197,11 +216,11 @@ const columns: ColumnDef<Produk>[] = [
               onClick={async () => {
                 if (confirm("Apakah Anda yakin ingin menghapus produk ini?")) {
                   try {
-                    await deleteProduk(row.original.id)
-                    toast.success("Produk berhasil dihapus")
-                    triggerProductRefresh()
+                    await deleteProduk(row.original.id);
+                    toast.success("Produk berhasil dihapus");
+                    triggerProductRefresh();
                   } catch (error) {
-                    toast.error("Gagal menghapus produk")
+                    toast.error("Gagal menghapus produk");
                   }
                 }
               }}
@@ -213,17 +232,60 @@ const columns: ColumnDef<Produk>[] = [
       </div>
     ),
   },
-]
+];
+
+function StockCell({
+  produkId,
+  produkStok,
+}: {
+  produkId: string;
+  produkStok?: number;
+}): React.JSX.Element {
+  const [varian, setVarian] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchVarian = async () => {
+      try {
+        const data = await getVarianByProduk(produkId);
+        setVarian(data);
+      } catch (error) {
+        console.error("Error fetching variants:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVarian();
+  }, [produkId]);
+
+  if (loading) {
+    return (
+      <div className="text-center text-sm text-muted-foreground">Memuat...</div>
+    );
+  }
+
+  if (varian.length > 0) {
+    // Jika ada varian, hitung total stok dari semua varian
+    const totalStok = varian.reduce((sum, v) => sum + (v.stok || 0), 0);
+    return <div className="text-center font-medium">{totalStok}</div>;
+  } else {
+    // Jika tidak ada varian, tampilkan stok dari produk induk jika ada
+    return <div className="text-center font-medium">{produkStok || 0}</div>;
+  }
+}
 
 interface ProdukTableProps {
-  data: Produk[]
+  data: Produk[];
 }
 
 export function ProdukTable({ data }: ProdukTableProps) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
     data,
@@ -242,7 +304,7 @@ export function ProdukTable({ data }: ProdukTableProps) {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
 
   return (
     <div className="w-full">
@@ -305,7 +367,10 @@ export function ProdukTable({ data }: ProdukTableProps) {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   Tidak ada data produk.
                 </TableCell>
               </TableRow>
@@ -344,5 +409,5 @@ export function ProdukTable({ data }: ProdukTableProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,117 +1,133 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useParams, useRouter } from "next/navigation"
-import { toast } from "sonner"
-import { ArrowLeft, Edit, Package, Image as ImageIcon, Plus } from "lucide-react"
+import * as React from "react";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  ArrowLeft,
+  Edit,
+  Package,
+  Image as ImageIcon,
+  Plus,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { getProdukById, getVarianByProduk } from "@/components/lib/services/produk.service"
+import {
+  getProdukById,
+  getVarianByProduk,
+} from "@/components/lib/services/produk.service";
 
 interface ProdukDetail {
-  id: string
-  nama: string
-  deskripsi: string
-  harga: number
-  status: string
-  gambar?: string[]
+  id: string;
+  nama: string;
+  deskripsi: string;
+  harga: number;
+  stok: number;
+  status: string;
+  gambar?: string[];
   subkategori?: {
-    id: string
-    nama: string
+    id: string;
+    nama: string;
     kategoriOlahraga?: {
-      id: string
-      nama: string
-    }
-  }
+      id: string;
+      nama: string;
+    };
+  };
   brand?: {
-    id: string
-    nama: string
-    deskripsi?: string
-    logo?: string
-  }
-  varian?: any[]
-  created_at: string
-  updated_at: string
+    id: string;
+    nama: string;
+    deskripsi?: string;
+    logo?: string;
+  };
+  varian?: any[];
+  created_at: string;
+  updated_at: string;
 }
 
 interface VarianItem {
-  id: string
-  ukuran?: string
-  warna?: string
-  stok: number
-  harga?: number
-  sku?: string
+  id: string;
+  ukuran?: string;
+  warna?: string;
+  stok: number;
+  harga?: number;
+  sku?: string;
 }
 
 export default function AdminProdukDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const [produk, setProduk] = React.useState<ProdukDetail | null>(null)
-  const [varian, setVarian] = React.useState<VarianItem[]>([])
-  const [loading, setLoading] = React.useState(true)
-  const [selectedImage, setSelectedImage] = React.useState("")
+  const params = useParams();
+  const router = useRouter();
+  const [produk, setProduk] = React.useState<ProdukDetail | null>(null);
+  const [varian, setVarian] = React.useState<VarianItem[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [selectedImage, setSelectedImage] = React.useState("");
   const fetchVarian = async () => {
     try {
-      const varianData = await getVarianByProduk(params.id as string)
-      setVarian(varianData)
+      const varianData = await getVarianByProduk(params.id as string);
+      setVarian(varianData);
     } catch (error) {
-      console.error("Error fetching variants:", error)
-      toast.error("Gagal memuat varian")
+      console.error("Error fetching variants:", error);
+      toast.error("Gagal memuat varian");
     }
-  }
+  };
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const produkId = params.id as string
+        const produkId = params.id as string;
         const [produkData, varianData] = await Promise.all([
           getProdukById(produkId),
-          getVarianByProduk(produkId)
-        ])
-        setProduk(produkData)
-        setVarian(varianData)
+          getVarianByProduk(produkId),
+        ]);
+        setProduk(produkData);
+        setVarian(varianData);
         if (produkData.gambar && produkData.gambar.length > 0) {
-          setSelectedImage(produkData.gambar[0])
+          setSelectedImage(produkData.gambar[0]);
         }
       } catch (error) {
-        console.error("Error fetching product details:", error)
-        toast.error("Gagal memuat detail produk")
+        console.error("Error fetching product details:", error);
+        toast.error("Gagal memuat detail produk");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
     if (params.id) {
-      fetchData()
+      fetchData();
     }
-  }, [params.id])
+  }, [params.id]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount)
-  }
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'aktif':
-        return 'bg-green-100 text-green-800 hover:bg-green-200'
-      case 'nonaktif':
-        return 'bg-red-100 text-red-800 hover:bg-red-200'
-      case 'stok habis':
-        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
+      case "aktif":
+        return "bg-green-100 text-green-800 hover:bg-green-200";
+      case "nonaktif":
+        return "bg-red-100 text-red-800 hover:bg-red-200";
+      case "stok habis":
+        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
       default:
-        return 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -130,21 +146,23 @@ export default function AdminProdukDetailPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!produk) {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Produk tidak ditemukan</h1>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Produk tidak ditemukan
+          </h1>
           <Button onClick={() => router.back()} className="mt-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Kembali
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -152,11 +170,7 @@ export default function AdminProdukDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => router.back()}
-          >
+          <Button variant="outline" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div>
@@ -193,8 +207,8 @@ export default function AdminProdukDetailPage() {
                   onClick={() => setSelectedImage(image)}
                   className={`aspect-square rounded-lg overflow-hidden border-2 ${
                     selectedImage === image
-                      ? 'border-blue-500 ring-2 ring-blue-200'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? "border-blue-500 ring-2 ring-blue-200"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   <img
@@ -216,19 +230,28 @@ export default function AdminProdukDetailPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl">Informasi Produk</CardTitle>
                 <Badge className={getStatusColor(produk.status)}>
-                  {produk.status === 'aktif' ? 'Aktif' :
-                   produk.status === 'nonaktif' ? 'Nonaktif' : 'Stok Habis'}
+                  {produk.status === "aktif"
+                    ? "Aktif"
+                    : produk.status === "nonaktif"
+                    ? "Nonaktif"
+                    : "Stok Habis"}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">Harga</label>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(produk.harga)}</p>
+                <label className="text-sm font-medium text-gray-600">
+                  Harga
+                </label>
+                <p className="text-2xl font-bold text-green-600">
+                  {formatCurrency(produk.harga)}
+                </p>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-600">Deskripsi</label>
+                <label className="text-sm font-medium text-gray-600">
+                  Deskripsi
+                </label>
                 <p className="text-gray-900 mt-1">{produk.deskripsi}</p>
               </div>
 
@@ -236,21 +259,27 @@ export default function AdminProdukDetailPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Kategori Olahraga</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Kategori Olahraga
+                  </label>
                   <p className="text-gray-900 mt-1">
-                    {produk.subkategori?.kategoriOlahraga?.nama || 'Tidak ada'}
+                    {produk.subkategori?.kategoriOlahraga?.nama || "Tidak ada"}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Subkategori</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Subkategori
+                  </label>
                   <p className="text-gray-900 mt-1">
-                    {produk.subkategori?.nama || 'Tidak ada'}
+                    {produk.subkategori?.nama || "Tidak ada"}
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-600">Brand</label>
+                <label className="text-sm font-medium text-gray-600">
+                  Brand
+                </label>
                 <div className="flex items-center gap-3 mt-1">
                   {produk.brand?.logo && (
                     <img
@@ -259,7 +288,9 @@ export default function AdminProdukDetailPage() {
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   )}
-                  <span className="text-gray-900">{produk.brand?.nama || 'Tidak ada'}</span>
+                  <span className="text-gray-900">
+                    {produk.brand?.nama || "Tidak ada"}
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -273,16 +304,22 @@ export default function AdminProdukDetailPage() {
             <CardContent>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-bold text-blue-600">{produk.gambar?.length || 0}</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {produk.gambar?.length || 0}
+                  </p>
                   <p className="text-sm text-gray-600">Gambar</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-purple-600">{varian.length}</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {varian.length}
+                  </p>
                   <p className="text-sm text-gray-600">Varian</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-orange-600">
-                    {varian.reduce((sum, v) => sum + (v.stok || 0), 0)}
+                    {varian.length > 0
+                      ? varian.reduce((sum, v) => sum + (v.stok || 0), 0) || 0
+                      : produk.stok || 0}
                   </p>
                   <p className="text-sm text-gray-600">Total Stok</p>
                 </div>
@@ -311,21 +348,28 @@ export default function AdminProdukDetailPage() {
               {varian.length > 0 ? (
                 <div className="space-y-4">
                   {varian.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center gap-4">
                         <div>
                           <p className="font-medium">
                             {item.ukuran && item.warna
                               ? `${item.ukuran} - ${item.warna}`
-                              : item.ukuran || item.warna || 'Varian Default'}
+                              : item.ukuran || item.warna || "Varian Default"}
                           </p>
-                          <p className="text-sm text-gray-600">SKU: {item.sku || 'Tidak ada'}</p>
+                          <p className="text-sm text-gray-600">
+                            SKU: {item.sku || "Tidak ada"}
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="font-medium">{item.stok} unit</p>
                         {item.harga && (
-                          <p className="text-sm text-green-600">{formatCurrency(item.harga)}</p>
+                          <p className="text-sm text-green-600">
+                            {formatCurrency(item.harga)}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -334,7 +378,9 @@ export default function AdminProdukDetailPage() {
               ) : (
                 <div className="text-center py-8">
                   <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">Belum ada varian untuk produk ini</p>
+                  <p className="text-gray-600">
+                    Belum ada varian untuk produk ini
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -349,26 +395,30 @@ export default function AdminProdukDetailPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Dibuat</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Dibuat
+                  </label>
                   <p className="text-gray-900">
-                    {new Date(produk.created_at).toLocaleDateString('id-ID', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                    {new Date(produk.created_at).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-600">Terakhir Diupdate</label>
+                  <label className="text-sm font-medium text-gray-600">
+                    Terakhir Diupdate
+                  </label>
                   <p className="text-gray-900">
-                    {new Date(produk.updated_at).toLocaleDateString('id-ID', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                    {new Date(produk.updated_at).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </p>
                 </div>
@@ -387,7 +437,10 @@ export default function AdminProdukDetailPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Status:</span>
-                    <Badge variant="outline" className={getStatusColor(produk.status)}>
+                    <Badge
+                      variant="outline"
+                      className={getStatusColor(produk.status)}
+                    >
                       {produk.status}
                     </Badge>
                   </div>
@@ -406,21 +459,32 @@ export default function AdminProdukDetailPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 
-function VarianForm({ produkId, varian, onClose }: { produkId: string; varian?: VarianItem | null; onClose: () => void }) {
+function VarianForm({
+  produkId,
+  varian,
+  onClose,
+}: {
+  produkId: string;
+  varian?: VarianItem | null;
+  onClose: () => void;
+}) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{varian ? 'Edit Varian' : 'Tambah Varian'}</CardTitle>
+        <CardTitle>{varian ? "Edit Varian" : "Tambah Varian"}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Form untuk {varian ? 'edit' : 'tambah'} varian akan diimplementasikan di sini.</p>
+        <p>
+          Form untuk {varian ? "edit" : "tambah"} varian akan diimplementasikan
+          di sini.
+        </p>
         <Button onClick={onClose} className="mt-4">
           Tutup
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }
