@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { getPesananHistory, Pesanan } from "@/components/lib/services/pesanan.service";
 
 const formatCurrency = (amount: number) =>
@@ -10,10 +12,19 @@ const formatCurrency = (amount: number) =>
 const formatDate = (dateString: string) =>
   new Date(dateString).toLocaleDateString("id-ID", { year: "numeric", month: "short", day: "numeric" });
 
+const statusOrder: Record<string, number> = {
+  pending: 0,
+  diproses: 1,
+  dikirim: 2,
+  selesai: 3,
+  dibatalkan: 4,
+};
+
 export default function PesananHistoryPage() {
   const [orders, setOrders] = useState<Pesanan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<string>("semua");
 
   useEffect(() => {
     let mounted = true;
@@ -32,9 +43,26 @@ export default function PesananHistoryPage() {
     };
   }, []);
 
+  const filtered = useMemo(() => {
+    if (tab === "semua") return orders.slice().sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+    return orders.filter((o) => o.status === tab).sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+  }, [orders, tab]);
+
+  const statusTabs = [
+    { key: "semua", label: "Semua" },
+    { key: "pending", label: "Pending" },
+    { key: "diproses", label: "Diproses" },
+    { key: "dikirim", label: "Dikirim" },
+    { key: "selesai", label: "Selesai" },
+    { key: "dibatalkan", label: "Dibatalkan" },
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-semibold mb-6">Riwayat Pesanan</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-semibold">Riwayat Pesanan</h1>
+        <Link href="/products" className="text-sm text-orange-600 hover:text-orange-700">Belanja lagi</Link>
+      </div>
 
       {loading && <div className="text-gray-600">Memuat riwayat pesanan...</div>}
       {error && (
@@ -52,60 +80,71 @@ export default function PesananHistoryPage() {
         <div className="text-gray-700">Belum ada pesanan. Yuk belanja sekarang!</div>
       )}
 
-      {!loading && !error && orders.length > 0 && (
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <div key={order.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <div className="text-sm text-gray-500">ID Pesanan</div>
-                  <div className="font-mono text-sm">{order.id}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Tanggal</div>
-                  <div className="font-medium">{formatDate(order.tanggal_pesanan)}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Total</div>
-                  <div className="font-medium">{formatCurrency(order.total_harga)}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-500">Status</div>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm border">
-                    {order.status}
-                  </span>
-                </div>
-                <div>
-                  <Link href={`/pesanan/${order.id}`} className="text-orange-600 hover:text-orange-700 font-medium">
-                    Lihat Detail
-                  </Link>
-                </div>
-              </div>
-
-              {order.pesanan_items && order.pesanan_items.length > 0 && (
-                <div className="mt-4">
-                  <div className="text-sm text-gray-600 mb-2">Item</div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {order.pesanan_items.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between text-sm bg-gray-50 rounded p-2">
-                        <div className="truncate max-w-[60%]">
-                          {item.produk?.nama || "Produk"}
-                          {item.produk_varian && (
-                            <span className="text-gray-500 ml-1">
-                              ({item.produk_varian.warna_varian}/{item.produk_varian.ukuran})
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-gray-600">x{item.kuantitas}</div>
-                        <div className="font-medium">{formatCurrency(Number(item.harga_satuan))}</div>
+      {!loading && !error && (
+        <Tabs value={tab} onValueChange={setTab} className="mt-4">
+          <TabsList>
+            {statusTabs.map((s) => (
+              <TabsTrigger key={s.key} value={s.key}>{s.label}</TabsTrigger>
+            ))}
+          </TabsList>
+          <TabsContent value={tab} className="mt-4">
+            {filtered.length === 0 ? (
+              <div className="text-gray-700">Tidak ada pesanan pada kategori ini.</div>
+            ) : (
+              <div className="space-y-4">
+                {filtered.map((order) => (
+                  <div key={order.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <div className="text-sm text-gray-500">ID Pesanan</div>
+                        <div className="font-mono text-sm">{order.id}</div>
                       </div>
-                    ))}
+                      <div>
+                        <div className="text-sm text-gray-500">Tanggal</div>
+                        <div className="font-medium">{formatDate(order.tanggal_pesanan)}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Total</div>
+                        <div className="font-medium">{formatCurrency(order.total_harga)}</div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-500">Status</div>
+                        <Badge variant="outline" className="capitalize">{order.status}</Badge>
+                      </div>
+                      <div>
+                        <Link href={`/pesanan/${order.id}`} className="text-orange-600 hover:text-orange-700 font-medium">
+                          Lihat Detail
+                        </Link>
+                      </div>
+                    </div>
+
+                    {order.pesanan_items && order.pesanan_items.length > 0 && (
+                      <div className="mt-4">
+                        <div className="text-sm text-gray-600 mb-2">Item</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {order.pesanan_items.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between text-sm bg-gray-50 rounded p-2">
+                              <div className="truncate max-w-[60%]">
+                                {item.produk?.nama || "Produk"}
+                                {item.produk_varian && (
+                                  <span className="text-gray-500 ml-1">
+                                    ({item.produk_varian.warna_varian}/{item.produk_varian.ukuran})
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-gray-600">x{item.kuantitas}</div>
+                              <div className="font-medium">{formatCurrency(Number(item.harga_satuan))}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
