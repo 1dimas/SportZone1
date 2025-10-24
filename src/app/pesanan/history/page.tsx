@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { getPesananHistory, Pesanan } from "@/components/lib/services/pesanan.service";
 
 const formatCurrency = (amount: number) =>
@@ -60,8 +62,13 @@ export default function PesananHistoryPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">Riwayat Pesanan</h1>
-        <Link href="/products" className="text-sm text-orange-600 hover:text-orange-700">Belanja lagi</Link>
+        <div>
+          <h1 className="text-2xl font-semibold">Riwayat Pesanan</h1>
+          <p className="text-sm text-gray-600 mt-1">Lihat, lacak, dan kelola pesanan Anda.</p>
+        </div>
+        <Link href="/products">
+          <Button variant="outline">Belanja lagi</Button>
+        </Link>
       </div>
 
       {loading && <div className="text-gray-600">Memuat riwayat pesanan...</div>}
@@ -93,34 +100,25 @@ export default function PesananHistoryPage() {
             ) : (
               <div className="space-y-4">
                 {filtered.map((order) => (
-                  <div key={order.id} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <div className="text-sm text-gray-500">ID Pesanan</div>
-                        <div className="font-mono text-sm">{order.id}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Tanggal</div>
-                        <div className="font-medium">{formatDate(order.tanggal_pesanan)}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Total</div>
-                        <div className="font-medium">{formatCurrency(order.total_harga)}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Status</div>
-                        <Badge variant="outline" className="capitalize">{order.status}</Badge>
-                      </div>
-                      <div>
-                        <Link href={`/pesanan/${order.id}`} className="text-orange-600 hover:text-orange-700 font-medium">
-                          Lihat Detail
-                        </Link>
-                      </div>
-                    </div>
-
-                    {order.pesanan_items && order.pesanan_items.length > 0 && (
-                      <div className="mt-4">
-                        <div className="text-sm text-gray-600 mb-2">Item</div>
+                  <Card key={order.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="border-b">
+                      <CardTitle className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-mono text-sm text-gray-700">{order.id}</span>
+                        <div className="flex items-center gap-3">
+                          <div className="text-sm">
+                            <span className="text-gray-500 mr-2">Tanggal</span>
+                            <span className="font-medium">{formatDate(order.tanggal_pesanan)}</span>
+                          </div>
+                          <div className="text-sm">
+                            <span className="text-gray-500 mr-2">Total</span>
+                            <span className="font-medium">{formatCurrency(order.total_harga)}</span>
+                          </div>
+                          <Badge variant="outline" className="capitalize">{order.status}</Badge>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="py-4">
+                      {order.pesanan_items && order.pesanan_items.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           {order.pesanan_items.map((item) => (
                             <div key={item.id} className="flex items-center justify-between text-sm bg-gray-50 rounded p-2">
@@ -137,9 +135,16 @@ export default function PesananHistoryPage() {
                             </div>
                           ))}
                         </div>
+                      ) : (
+                        <div className="text-sm text-gray-600">Tidak ada item untuk pesanan ini.</div>
+                      )}
+                      <div className="mt-4 flex justify-end">
+                        <Link href={`/pesanan/${order.id}`}>
+                          <Button size="sm" variant="outline">Lihat Detail</Button>
+                        </Link>
                       </div>
-                    )}
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
