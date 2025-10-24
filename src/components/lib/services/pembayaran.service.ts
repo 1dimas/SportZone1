@@ -8,7 +8,13 @@ const getToken = () => localStorage.getItem("token");
 // =====================
 // Type Definitions
 // =====================
-export type MetodePembayaran = "cod" | "dana" | "qris";
+export type MetodePembayaran =
+  | "cod"
+  | "gopay"
+  | "ovo"
+  | "dana"
+  | "qris"
+  | "shopeepay";
 
 export type StatusPembayaran =
   | "belum bayar"
@@ -76,6 +82,92 @@ export async function getPembayaranByPesananId(
     const errorText = await response.text();
     throw new Error(
       `Gagal mengambil data pembayaran pesanan: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}
+
+// =====================
+// CREATE PEMBAYARAN (General)
+// =====================
+export async function createPembayaran(pesananId: string): Promise<Pembayaran> {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const response = await fetch(`${API_URL}/pembayaran`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pesananId }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Gagal membuat pembayaran: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}
+
+// =====================
+// CREATE COD PEMBAYARAN
+// =====================
+export async function createCodPayment(pesananId: string): Promise<Pembayaran> {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const response = await fetch(`${API_URL}/pembayaran/cod`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pesananId }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Gagal membuat pembayaran COD: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}
+
+// =====================
+// INITIATE MIDTRANS PAYMENT
+// =====================
+export interface MidtransPaymentResponse {
+  token: string;
+  redirect_url: string;
+}
+
+export async function createMidtransPayment(
+  pesananId: string,
+  metodePembayaran?: MetodePembayaran
+): Promise<MidtransPaymentResponse> {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const response = await fetch(`${API_URL}/pembayaran/initiate`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pesananId, metodePembayaran }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Gagal membuat pembayaran Midtrans: ${response.status} ${response.statusText} - ${errorText}`
     );
   }
 

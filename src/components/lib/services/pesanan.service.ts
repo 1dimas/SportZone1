@@ -41,7 +41,29 @@ export interface Pesanan {
   pesanan_items?: PesananItem[];
 }
 
-export type StatusPesanan = 'pending' | 'diproses' | 'dikirim' | 'selesai' | 'dibatalkan';
+export type StatusPesanan =
+  | "pending"
+  | "diproses"
+  | "dikirim"
+  | "selesai"
+  | "dibatalkan";
+
+// DTOs for creating orders
+export interface CreatePesananItemDto {
+  id_produk: string;
+  produk_varian_id?: string;
+  kuantitas: number;
+  harga_satuan: number;
+}
+
+export interface CreatePesananDto {
+  user_id: string;
+  tanggal_pesanan: string;
+  total_harga: number;
+  alamat_pengiriman: string;
+  metode_pembayaran: string;
+  items: CreatePesananItemDto[];
+}
 
 // =====================
 // GET ALL PESANAN
@@ -60,7 +82,9 @@ export async function getAllPesanan(): Promise<Pesanan[]> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Gagal mengambil data pesanan: ${response.status} ${response.statusText} - ${errorText}`);
+    throw new Error(
+      `Gagal mengambil data pesanan: ${response.status} ${response.statusText} - ${errorText}`
+    );
   }
 
   const data = await response.json();
@@ -85,7 +109,35 @@ export async function getPesananById(id: string): Promise<Pesanan> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Gagal mengambil detail pesanan: ${response.status} ${response.statusText} - ${errorText}`);
+    throw new Error(
+      `Gagal mengambil detail pesanan: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}
+
+// =====================
+// CREATE PESANAN
+// =====================
+export async function createPesanan(data: CreatePesananDto): Promise<Pesanan> {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const response = await fetch(`${API_URL}/pesanan`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Gagal membuat pesanan: ${response.status} ${response.statusText} - ${errorText}`
+    );
   }
 
   return response.json();
@@ -94,7 +146,10 @@ export async function getPesananById(id: string): Promise<Pesanan> {
 // =====================
 // UPDATE PESANAN STATUS
 // =====================
-export async function updatePesananStatus(id: string, status: StatusPesanan): Promise<Pesanan> {
+export async function updatePesananStatus(
+  id: string,
+  status: StatusPesanan
+): Promise<Pesanan> {
   const token = getToken();
   if (!token) throw new Error("Belum login");
 
@@ -109,7 +164,9 @@ export async function updatePesananStatus(id: string, status: StatusPesanan): Pr
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Gagal mengupdate status pesanan: ${response.status} ${response.statusText} - ${errorText}`);
+    throw new Error(
+      `Gagal mengupdate status pesanan: ${response.status} ${response.statusText} - ${errorText}`
+    );
   }
 
   return response.json();

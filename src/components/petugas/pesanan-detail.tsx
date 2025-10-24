@@ -1,72 +1,86 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Pesanan, getPesananById, updatePesananStatus } from "@/components/lib/services/pesanan.service"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Pesanan,
+  getPesananById,
+  updatePesananStatus,
+} from "@/components/lib/services/pesanan.service";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 interface PesananDetailProps {
-  id: string
+  id: string;
 }
 
 export function PesananDetail({ id }: PesananDetailProps) {
-  const [pesanan, setPesanan] = useState<Pesanan | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [updating, setUpdating] = useState(false)
-  const [selectedStatus, setSelectedStatus] = useState<string>("")
-  const router = useRouter()
+  const [pesanan, setPesanan] = useState<Pesanan | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const router = useRouter();
 
   const fetchPesanan = async () => {
     try {
-      setLoading(true)
-      const data = await getPesananById(id)
-      setPesanan(data)
-      setSelectedStatus(data.status)
+      setLoading(true);
+      const data = await getPesananById(id);
+      setPesanan(data);
+      setSelectedStatus(data.status);
     } catch (err) {
-      console.error("Failed to fetch pesanan detail:", err)
-      toast.error("Gagal memuat detail pesanan")
+      console.error("Failed to fetch pesanan detail:", err);
+      toast.error("Gagal memuat detail pesanan");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchPesanan()
-  }, [id])
+    fetchPesanan();
+  }, [id]);
 
   const handleStatusChange = (newStatus: string) => {
-    setSelectedStatus(newStatus)
-  }
+    setSelectedStatus(newStatus);
+  };
 
   const handleUpdateStatus = async () => {
-    if (!pesanan) return
+    if (!pesanan) return;
     try {
-      setUpdating(true)
-      await updatePesananStatus(pesanan.id, selectedStatus as any)
-      toast.success("Status pesanan berhasil diperbarui")
-      fetchPesanan()
+      setUpdating(true);
+
+      // Allow all status changes for petugas - backend will validate
+      await updatePesananStatus(pesanan.id, selectedStatus as any);
+      toast.success("Status pesanan berhasil diperbarui");
+      fetchPesanan();
     } catch (err) {
-      console.error("Failed to update status:", err)
-      toast.error("Gagal memperbarui status pesanan")
+      console.error("Failed to update status:", err);
+      toast.error("Gagal memperbarui status pesanan");
     } finally {
-      setUpdating(false)
+      setUpdating(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   if (!pesanan) {
-    return <div className="text-center text-red-600">Pesanan tidak ditemukan</div>
+    return (
+      <div className="text-center text-red-600">Pesanan tidak ditemukan</div>
+    );
   }
 
   return (
@@ -76,16 +90,19 @@ export function PesananDetail({ id }: PesananDetailProps) {
         <strong>ID Pesanan:</strong> {pesanan.id}
       </div>
       <div className="mb-4">
-        <strong>Pelanggan:</strong> {pesanan.user?.username} ({pesanan.user?.email})
+        <strong>Pelanggan:</strong> {pesanan.user?.username} (
+        {pesanan.user?.email})
       </div>
       <div className="mb-4">
-        <strong>Tanggal Pesanan:</strong> {new Date(pesanan.tanggal_pesanan).toLocaleString()}
+        <strong>Tanggal Pesanan:</strong>{" "}
+        {new Date(pesanan.tanggal_pesanan).toLocaleString()}
       </div>
       <div className="mb-4">
         <strong>Alamat Pengiriman:</strong> {pesanan.alamat_pengiriman}
       </div>
       <div className="mb-4">
-        <strong>Total Harga:</strong> Rp {pesanan.total_harga.toLocaleString("id-ID")}
+        <strong>Total Harga:</strong> Rp{" "}
+        {pesanan.total_harga.toLocaleString("id-ID")}
       </div>
       <Separator />
       <div className="my-4">
@@ -93,8 +110,11 @@ export function PesananDetail({ id }: PesananDetailProps) {
         <ul className="list-disc list-inside">
           {pesanan.pesanan_items?.map((item) => (
             <li key={item.id}>
-              {item.produk?.nama || "Produk"} - {item.kuantitas} x Rp {item.harga_satuan.toLocaleString("id-ID")}
-              {item.produk_varian ? ` (${item.produk_varian.warna_varian} - ${item.produk_varian.ukuran})` : ""}
+              {item.produk?.nama || "Produk"} - {item.kuantitas} x Rp{" "}
+              {item.harga_satuan.toLocaleString("id-ID")}
+              {item.produk_varian
+                ? ` (${item.produk_varian.warna_varian} - ${item.produk_varian.ukuran})`
+                : ""}
             </li>
           ))}
         </ul>
@@ -102,7 +122,11 @@ export function PesananDetail({ id }: PesananDetailProps) {
       <Separator />
       <div className="my-4">
         <Label>Status Pesanan</Label>
-        <Select value={selectedStatus} onValueChange={handleStatusChange} disabled={updating}>
+        <Select
+          value={selectedStatus}
+          onValueChange={handleStatusChange}
+          disabled={updating}
+        >
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -116,13 +140,20 @@ export function PesananDetail({ id }: PesananDetailProps) {
         </Select>
       </div>
       <div className="flex justify-end gap-4">
-        <Button variant="outline" onClick={() => router.back()} disabled={updating}>
+        <Button
+          variant="outline"
+          onClick={() => router.back()}
+          disabled={updating}
+        >
           Kembali
         </Button>
-        <Button onClick={handleUpdateStatus} disabled={updating || selectedStatus === pesanan.status}>
+        <Button
+          onClick={handleUpdateStatus}
+          disabled={updating || selectedStatus === pesanan.status}
+        >
           {updating ? "Menyimpan..." : "Simpan Perubahan"}
         </Button>
       </div>
     </div>
-  )
+  );
 }

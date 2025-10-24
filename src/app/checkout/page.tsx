@@ -3,24 +3,72 @@
 import { useCart } from "@/context/cart-context";
 import { formatRupiah } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiCheck, FiMapPin, FiUser, FiCreditCard } from "react-icons/fi";
+import {
+  createPesanan,
+  CreatePesananDto,
+  CreatePesananItemDto,
+} from "@/components/lib/services/pesanan.service";
+import {
+  createCodPayment,
+  createMidtransPayment,
+  MetodePembayaran,
+} from "@/components/lib/services/pembayaran.service";
+import { getProfile } from "@/components/lib/services/auth.service";
+
+// Type declaration for Midtrans Snap
+declare global {
+  interface Window {
+    snap: {
+      pay: (token: string, options: any) => void;
+    };
+  }
+}
 
 export default function CheckoutPage() {
   const { state, dispatch } = useCart();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
-  
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
     address: "",
-    city: "",
-    postalCode: "",
-    paymentMethod: "cod", // cod = Cash on Delivery
+    paymentMethod: "cod" as "cod" | "qris" | "dana",
   });
+
+  useEffect(() => {
+    async function init() {
+      try {
+        const stored = localStorage.getItem("token");
+        if (!stored) {
+          alert("Token tidak ditemukan. Login dulu.");
+          router.push("/login");
+          return;
+        }
+        setToken(stored);
+
+        // Get user profile
+        const userData = await getProfile();
+        setUser(userData?.user || userData || null);
+
+        // Pre-fill form with user data
+        if (userData) {
+          setFormData((prev) => ({
+            ...prev,
+            name: userData.username || "",
+            email: userData.email || "",
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to load user data:", error);
+        alert("Gagal memuat data pengguna");
+      }
+    }
+    init();
+  }, [router]);
 
   if (state.items.length === 0) {
     return (
@@ -28,10 +76,14 @@ export default function CheckoutPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-lg shadow-md p-8 text-center">
-              <h2 className="text-xl font-semibold text-gray-700 mb-2">Keranjang Anda Kosong</h2>
-              <p className="text-gray-500 mb-6">Tambahkan beberapa produk ke keranjang Anda sebelum checkout.</p>
+              <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                Keranjang Anda Kosong
+              </h2>
+              <p className="text-gray-500 mb-6">
+                Tambahkan beberapa produk ke keranjang Anda sebelum checkout.
+              </p>
               <button
-                onClick={() => router.push('/')}
+                onClick={() => router.push("/")}
                 className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-6 rounded-lg transition-colors"
               >
                 Belanja Sekarang
@@ -43,42 +95,174 @@ export default function CheckoutPage() {
     );
   }
 
-  const total = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = state.items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
   const tax = total * 0.1;
   const shipping = 0; // Free shipping
   const grandTotal = total + tax + shipping;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.phone || !formData.address || !formData.city || !formData.postalCode) {
-      alert('Mohon lengkapi semua informasi pengiriman');
+
+    if (!formData.address.trim()) {
+      alert("Mohon lengkapi alamat pengiriman");
       return;
     }
-    
+
+    if (!token) {
+      alert("Token tidak ditemukan. Login dulu.");
+      return;
+    }
+
     setIsProcessing(true);
-    
-    // Simulate order processing
-    setTimeout(() => {
-      // Clear cart after successful order
-      dispatch({ type: 'CLEAR_CART' });
+
+    try {
+      // Helper function to check if string is a valid UUID
+      const isValidUUID = (str: string | undefined): boolean => {
+        if (!str) return false;
+        const uuidRegex =
+          /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        return uuidRegex.test(str);
+      };
+
+      // Create order items from cart
+      const items: CreatePesananItemDto[] = state.items.map((item) => ({
+        id_produk: item.productId,
+        produk_varian_id:
+          isValidUUID(item.variantId) && !item.variantId?.startsWith("virtual-")
+            ? item.variantId
+            : undefined, // Only use variantId if it's a valid UUID and not virtual
+        kuantitas: item.quantity,
+        harga_satuan: item.price,
+      }));
+
+      // Create order
+      const orderData: CreatePesananDto = {
+        user_id: user.id,
+        tanggal_pesanan: new Date().toISOString().split("T")[0],
+        total_harga: grandTotal,
+        alamat_pengiriman: formData.address,
+        metode_pembayaran: formData.paymentMethod,
+        items,
+      };
+
+      const order = await createPesanan(orderData);
+      console.log("Order created:", order);
+
+      // Handle payment based on method
+      if (formData.paymentMethod === "cod") {
+        // Create COD payment
+        await createCodPayment(order.id);
+        alert(
+          "Pesanan COD berhasil dibuat! Terima kasih telah berbelanja di SportZone."
+        );
+        dispatch({ type: "CLEAR_CART" });
+        router.push("/pesanan");
+      } else {
+        // Midtrans payment for QRIS or DANA - this should create the payment record
+        const paymentResponse = await createMidtransPayment(
+          order.id,
+          formData.paymentMethod as MetodePembayaran
+        );
+        console.log("Midtrans payment response:", paymentResponse);
+
+        // Load Midtrans Snap script if not loaded
+        if (!window.snap) {
+          const script = document.createElement("script");
+          script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+          script.setAttribute(
+            "data-client-key",
+            process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || ""
+          );
+          document.head.appendChild(script);
+
+          await new Promise((resolve) => {
+            script.onload = resolve;
+          });
+        }
+
+        // Configure payment options based on selected method
+        const snapOptions: any = {
+          onSuccess: function (result: any) {
+            console.log("Payment success:", result);
+            alert(
+              "Pembayaran berhasil! Terima kasih telah berbelanja di SportZone."
+            );
+            dispatch({ type: "CLEAR_CART" });
+            router.push("/pesanan");
+          },
+          onPending: function (result: any) {
+            console.log("Payment pending:", result);
+            alert("Pembayaran sedang diproses. Silakan selesaikan pembayaran.");
+            router.push("/pesanan");
+          },
+          onError: function (result: any) {
+            console.log("Payment error:", result);
+            alert("Pembayaran gagal. Silakan coba lagi.");
+          },
+          onClose: function () {
+            console.log("Payment popup closed");
+            alert("Pembayaran dibatalkan.");
+          },
+        };
+
+        // Enable only specific payment method if DANA or QRIS is selected
+        if (formData.paymentMethod === "dana") {
+          snapOptions.enabledPayments = ["dana"];
+        } else if (formData.paymentMethod === "qris") {
+          snapOptions.enabledPayments = ["qris"];
+        }
+
+        // Open Midtrans payment popup
+        window.snap.pay(paymentResponse.token, snapOptions);
+      }
+    } catch (error: any) {
+      console.error("Checkout error:", error);
+      alert(error?.message || "Terjadi kesalahan saat memproses pesanan");
+    } finally {
       setIsProcessing(false);
-      alert('Pesanan Anda telah diterima! Terima kasih telah berbelanja di SportZone.');
-      router.push('/'); // Redirect to homepage
-    }, 2000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto">
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 hover:border-gray-300"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              Back to Product Details
+            </button>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Checkout Form */}
             <div className="lg:col-span-2">
@@ -86,105 +270,70 @@ export default function CheckoutPage() {
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                   <FiUser className="mr-2" /> Informasi Pengiriman
                 </h2>
-                
+
                 <form onSubmit={handleSubmit}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Nama Lengkap
                       </label>
                       <input
                         type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                        placeholder="Nama lengkap Anda"
+                        value={user?.username || ""}
+                        disabled
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
                       />
                     </div>
-                    
+
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Email
                       </label>
                       <input
                         type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                        placeholder="email@contoh.com"
+                        value={user?.email || ""}
+                        disabled
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
                       />
                     </div>
-                    
+
                     <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Telepon
                       </label>
                       <input
                         type="tel"
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                        placeholder="Nomor telepon Anda"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                        Kota
-                      </label>
-                      <input
-                        type="text"
-                        id="city"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                        placeholder="Kota Anda"
-                      />
-                    </div>
-                    
-                    <div className="md:col-span-2">
-                      <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                        Alamat Lengkap
-                      </label>
-                      <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                        placeholder="Alamat lengkap Anda"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
-                        Kode Pos
-                      </label>
-                      <input
-                        type="text"
-                        id="postalCode"
-                        name="postalCode"
-                        value={formData.postalCode}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                        placeholder="Kode pos"
+                        value={user?.phone || ""}
+                        disabled
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
                       />
                     </div>
                   </div>
-                  
+
+                  <div className="mb-6">
+                    <label
+                      htmlFor="address"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Alamat Lengkap *
+                    </label>
+                    <textarea
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      required
+                      rows={3}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                      placeholder="Masukkan alamat lengkap pengiriman"
+                    />
+                  </div>
+
                   <div className="mt-8">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                       <FiCreditCard className="mr-2" /> Metode Pembayaran
                     </h3>
-                    
+
                     <div className="space-y-3">
                       <label className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
                         <input
@@ -195,57 +344,79 @@ export default function CheckoutPage() {
                           onChange={handleInputChange}
                           className="h-4 w-4 text-orange-500 focus:ring-orange-500"
                         />
-                        <span className="ml-3 text-gray-700">Cash on Delivery (COD)</span>
+                        <span className="ml-3 text-gray-700">
+                          🚚 Cash on Delivery (COD)
+                        </span>
                       </label>
-                      
+
                       <label className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
                         <input
                           type="radio"
                           name="paymentMethod"
-                          value="transfer"
-                          checked={formData.paymentMethod === "transfer"}
+                          value="qris"
+                          checked={formData.paymentMethod === "qris"}
                           onChange={handleInputChange}
                           className="h-4 w-4 text-orange-500 focus:ring-orange-500"
                         />
-                        <span className="ml-3 text-gray-700">Transfer Bank</span>
+                        <span className="ml-3 text-gray-700">💳 QRIS</span>
+                      </label>
+
+                      <label className="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="dana"
+                          checked={formData.paymentMethod === "dana"}
+                          onChange={handleInputChange}
+                          className="h-4 w-4 text-orange-500 focus:ring-orange-500"
+                        />
+                        <span className="ml-3 text-gray-700">💳 DANA</span>
                       </label>
                     </div>
                   </div>
-                  
+
                   <div className="mt-8 flex items-center">
                     <button
                       type="submit"
                       disabled={isProcessing}
                       className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isProcessing ? 'Memproses...' : `Bayar ${formatRupiah(grandTotal)}`}
+                      {isProcessing
+                        ? "Memproses..."
+                        : `Bayar ${formatRupiah(grandTotal)}`}
                     </button>
                   </div>
                 </form>
               </div>
             </div>
-            
+
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                   <FiMapPin className="mr-2" /> Ringkasan Pesanan
                 </h2>
-                
+
                 <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                   {state.items.map((item) => (
                     <div key={item.id} className="flex items-center">
                       <div className="flex-shrink-0 w-16 h-16">
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
+                        <img
+                          src={item.image}
+                          alt={item.name}
                           className="w-full h-full object-contain rounded-md"
                         />
                       </div>
                       <div className="ml-4 flex-grow">
-                        <h3 className="text-sm font-medium text-gray-900">{item.name}</h3>
-                        <p className="text-xs text-gray-500">Ukuran: {item.size}</p>
-                        <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                        <h3 className="text-sm font-medium text-gray-900">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-gray-500">
+                          Ukuran: {item.size}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Qty: {item.quantity}
+                        </p>
                       </div>
                       <p className="text-sm font-semibold text-gray-900">
                         {formatRupiah(item.price * item.quantity)}
@@ -253,27 +424,31 @@ export default function CheckoutPage() {
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="border-t border-gray-200 pt-4 mt-4 space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">{formatRupiah(total)}</span>
                   </div>
-                  
+
                   <div className="flex justify-between">
                     <span className="text-gray-600">Pengiriman</span>
-                    <span className="font-medium">{formatRupiah(shipping)}</span>
+                    <span className="font-medium">
+                      {formatRupiah(shipping)}
+                    </span>
                   </div>
-                  
+
                   <div className="flex justify-between">
                     <span className="text-gray-600">Pajak</span>
                     <span className="font-medium">{formatRupiah(tax)}</span>
                   </div>
-                  
+
                   <div className="border-t border-gray-200 pt-3 mt-3">
                     <div className="flex justify-between">
                       <span className="text-lg font-semibold">Total</span>
-                      <span className="text-lg font-semibold">{formatRupiah(grandTotal)}</span>
+                      <span className="text-lg font-semibold">
+                        {formatRupiah(grandTotal)}
+                      </span>
                     </div>
                   </div>
                 </div>
