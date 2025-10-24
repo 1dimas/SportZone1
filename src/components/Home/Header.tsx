@@ -28,7 +28,7 @@ export default function Header() {
     } else {
       // Check if token is in URL (for Google login)
       const urlParams = new URLSearchParams(window.location.search);
-      const tokenFromUrl = urlParams.get("token");
+      const tokenFromUrl = urlParams.get("token") || urlParams.get("access_token") || urlParams.get("accessToken");
       if (tokenFromUrl) {
         localStorage.setItem("token", tokenFromUrl);
         setIsLoggedIn(true);
@@ -107,13 +107,21 @@ export default function Header() {
 
             {/* Tombol Login atau Logout */}
             {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg hover:shadow-md transition-all"
-              >
-                <FiUser size={18} />
-                <span className="font-medium">Logout</span>
-              </button>
+              <div className="hidden sm:flex items-center gap-2">
+                <Link
+                  href="/pesanan/history"
+                  className="items-center gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 rounded-lg hover:shadow-md transition-all"
+                >
+                  Riwayat
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2 rounded-lg hover:shadow-md transition-all"
+                >
+                  <FiUser size={18} />
+                  <span className="font-medium">Logout</span>
+                </button>
+              </div>
             ) : (
               <Link
                 href="/login"
@@ -153,6 +161,15 @@ export default function Header() {
                 {item.title}
               </Link>
             )
+          )}
+          {isLoggedIn && (
+            <Link
+              key="riwayat"
+              href="/pesanan/history"
+              className="font-medium text-gray-700 hover:text-orange-500 transition-colors"
+            >
+              Riwayat Pesanan
+            </Link>
           )}
         </nav>
       </div>
