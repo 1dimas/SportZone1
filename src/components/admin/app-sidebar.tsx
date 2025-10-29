@@ -139,12 +139,12 @@ const data = {
   ],
   documents: [
     {
-      name: "Reports",
+      name: "laporan produk",
       url: "#",
       icon: IconReport,
     },
     {
-      name: "Word Assistant",
+      name: "Laporan Penjualan",
       url: "#",
       icon: IconFileWord,
     },
@@ -172,7 +172,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
