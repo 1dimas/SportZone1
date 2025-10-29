@@ -86,11 +86,11 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
         id: `virtual-${product.id}`,
         ukuran: undefined,
         warna: undefined,
-        stok: product.stock || 999, // Stok dari produk utama (akan dicek di backend)
+        stok: product.stock || 0, // Stok dari produk utama (akan dicek di backend)
         harga: product.price,
         size: undefined,
         color: undefined,
-        stock: product.stock || 999,
+        stock: product.stock || 0,
       }
     : null;
 
