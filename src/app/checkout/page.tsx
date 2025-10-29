@@ -17,7 +17,6 @@ import {
 } from "@/components/lib/services/pembayaran.service";
 import { getProfile } from "@/components/lib/services/auth.service";
 
-// Type declaration for Midtrans Snap
 declare global {
   interface Window {
     snap: {
@@ -50,11 +49,9 @@ export default function CheckoutPage() {
         }
         setToken(stored);
 
-        // Get user profile
         const userData = await getProfile();
         setUser(userData?.user || userData || null);
 
-        // Pre-fill form with user data
         if (userData) {
           setFormData((prev) => ({
             ...prev,
@@ -142,7 +139,7 @@ export default function CheckoutPage() {
         produk_varian_id:
           isValidUUID(item.variantId) && !item.variantId?.startsWith("virtual-")
             ? item.variantId
-            : undefined, // Only use variantId if it's a valid UUID and not virtual
+            : undefined, 
         kuantitas: item.quantity,
         harga_satuan: item.price,
       }));
@@ -160,15 +157,13 @@ export default function CheckoutPage() {
       const order = await createPesanan(orderData);
       console.log("Order created:", order);
 
-      // Handle payment based on method
       if (formData.paymentMethod === "cod") {
-        // Create COD payment
         await createCodPayment(order.id);
-        alert(
-          "Pesanan COD berhasil dibuat! Terima kasih telah berbelanja di SportZone."
-        );
-        dispatch({ type: "CLEAR_CART" });
-        router.push("/pesanan");
+        // alert(
+        //   "Pesanan COD berhasil dibuat! Terima kasih telah berbelanja di SportZone."
+        // );
+        // dispatch({ type: "CLEAR_CART" });
+        router.push("/pesanan/history");
       } else {
         // Midtrans payment for QRIS or DANA - this should create the payment record
         const paymentResponse = await createMidtransPayment(
@@ -177,7 +172,6 @@ export default function CheckoutPage() {
         );
         console.log("Midtrans payment response:", paymentResponse);
 
-        // Load Midtrans Snap script if not loaded
         if (!window.snap) {
           const script = document.createElement("script");
           script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
@@ -192,7 +186,6 @@ export default function CheckoutPage() {
           });
         }
 
-        // Configure payment options based on selected method
         const snapOptions: any = {
           onSuccess: function (result: any) {
             console.log("Payment success:", result);
@@ -217,14 +210,12 @@ export default function CheckoutPage() {
           },
         };
 
-        // Enable only specific payment method if DANA or QRIS is selected
         if (formData.paymentMethod === "dana") {
           snapOptions.enabledPayments = ["dana"];
         } else if (formData.paymentMethod === "qris") {
           snapOptions.enabledPayments = ["qris"];
         }
 
-        // Open Midtrans payment popup
         window.snap.pay(paymentResponse.token, snapOptions);
       }
     } catch (error: any) {
