@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { FiSearch, FiFilter } from "react-icons/fi";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useCart } from "@/context/cart-context";
+import { addKeranjangItem } from "@/components/lib/services/keranjang.service";
+import { FiShoppingCart } from "react-icons/fi";
 
 // Define types
 type Product = {
@@ -20,6 +23,8 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const searchParams = useSearchParams();
+  const { dispatch } = useCart();
+  const router = useRouter();
 
   // Simulate loading products
   useEffect(() => {
@@ -111,6 +116,25 @@ export default function ProductsPage() {
     filterProducts(searchQuery);
   };
 
+  const addToCart = (product: Product) => {
+    // Basic add-to-cart from listing with default size and stock
+    dispatch({
+      type: "ADD_TO_CART",
+      payload: {
+        item: {
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          size: "Default",
+          quantity: 1,
+          stock: 99,
+        },
+      },
+    });
+    addKeranjangItem({ produk_id: product.id, kuantitas: 1 }).catch(() => {});
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -183,9 +207,21 @@ export default function ProductsPage() {
                         </p>
                       </div>
                       
-                      <button className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg transition-colors">
-                        Lihat Detail
-                      </button>
+                      <div className="mt-4 grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => router.push(`/product/${product.id}`)}
+                          className="w-full bg-white border border-orange-500 text-orange-600 hover:bg-orange-50 py-2 px-4 rounded-lg transition-colors"
+                        >
+                          Lihat Detail
+                        </button>
+                        <button
+                          onClick={() => addToCart(product)}
+                          className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                        >
+                          <FiShoppingCart />
+                          Tambah ke Keranjang
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

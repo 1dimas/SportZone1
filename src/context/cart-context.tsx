@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, ReactNode } from "react";
+import React, { createContext, useContext, useReducer, ReactNode, useEffect } from "react";
 
 // Define types
 type CartItem = {
@@ -97,7 +97,29 @@ type CartProviderProps = {
 };
 
 export const CartProvider = ({ children }: CartProviderProps) => {
-  const [state, dispatch] = useReducer(cartReducer, { items: [] });
+  const [state, dispatch] = useReducer(
+    cartReducer,
+    { items: [] },
+    (initial) => {
+      if (typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("cart");
+          return stored ? JSON.parse(stored) : initial;
+        } catch {
+          return initial;
+        }
+      }
+      return initial;
+    }
+  );
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("cart", JSON.stringify(state));
+    } catch {
+      // ignore storage errors
+    }
+  }, [state]);
 
   return (
     <CartContext.Provider value={{ state, dispatch }}>

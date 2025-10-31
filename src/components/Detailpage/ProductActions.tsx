@@ -6,6 +6,7 @@ import type { ProductVariant } from "@/app/data/products";
 import { FiShoppingCart, FiMinus, FiPlus } from "react-icons/fi";
 import { getVarianByProduk } from "@/components/lib/services/produk.service";
 import { useCart } from "@/context/cart-context";
+import { addKeranjangItem } from "@/components/lib/services/keranjang.service";
 
 type ProductData = {
   variants: ProductVariant[];
@@ -156,6 +157,18 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
         },
       },
     });
+    // Persist to backend (best-effort)
+    const varianIdToSend =
+      typeof selectedVariant.id === "string" && selectedVariant.id.startsWith("virtual-")
+        ? null
+        : (selectedVariant.id as string | undefined);
+    addKeranjangItem({
+      produk_id: product.id,
+      produk_varian_id: varianIdToSend ?? undefined,
+      kuantitas: quantity,
+    }).catch(() => {
+      // ignore server errors to avoid blocking UX
+    });
     alert(`Added ${quantity} ${selectedSize || selectedColor} to cart`);
   };
 
@@ -184,6 +197,16 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
         },
       },
     });
+    // Persist to backend (best-effort), then redirect
+    const varianIdToSend =
+      typeof selectedVariant.id === "string" && selectedVariant.id.startsWith("virtual-")
+        ? null
+        : (selectedVariant.id as string | undefined);
+    addKeranjangItem({
+      produk_id: product.id,
+      produk_varian_id: varianIdToSend ?? undefined,
+      kuantitas: quantity,
+    }).catch(() => {});
     if (onOrderNow) {
       onOrderNow(selectedVariant, quantity);
     }
