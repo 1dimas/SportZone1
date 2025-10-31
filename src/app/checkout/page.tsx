@@ -31,6 +31,8 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  // If navigated from cart with selection, hold selected ids
+  const [selectedOnly, setSelectedOnly] = useState<string[] | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -92,7 +94,23 @@ export default function CheckoutPage() {
     );
   }
 
-  const total = state.items.reduce(
+  // Parse selected item ids from query string once on mount
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const selected = params.get("selected");
+      if (selected) {
+        const ids = selected.split(",").filter(Boolean);
+        if (ids.length > 0) setSelectedOnly(ids);
+      }
+    } catch {}
+  }, []);
+
+  const itemsForCheckout = selectedOnly
+    ? state.items.filter((i) => selectedOnly.includes(i.id))
+    : state.items;
+
+  const total = itemsForCheckout.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
@@ -133,8 +151,8 @@ export default function CheckoutPage() {
         return uuidRegex.test(str);
       };
 
-      // Create order items from cart
-      const items: CreatePesananItemDto[] = state.items.map((item) => ({
+      // Create order items from cart (selected or all)
+      const items: CreatePesananItemDto[] = itemsForCheckout.map((item) => ({
         id_produk: item.productId,
         produk_varian_id:
           isValidUUID(item.variantId) && !item.variantId?.startsWith("virtual-")
@@ -389,7 +407,7 @@ export default function CheckoutPage() {
                 </h2>
 
                 <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                  {state.items.map((item) => (
+                  {itemsForCheckout.map((item) => (
                     <div key={item.id} className="flex items-center">
                       <div className="flex-shrink-0 w-16 h-16">
                         <img

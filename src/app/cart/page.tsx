@@ -4,10 +4,12 @@ import { useCart } from "@/context/cart-context";
 import { formatRupiah } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { FiMinus, FiPlus, FiShoppingCart, FiX } from "react-icons/fi";
+import { useMemo, useState } from "react";
 
 export default function CartPage() {
   const { state, dispatch } = useCart();
   const router = useRouter();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const updateQuantity = (id: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -24,12 +26,32 @@ export default function CartPage() {
   const total = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const handleCheckout = () => {
-    if (state.items.length === 0) {
-      alert('Keranjang Anda kosong!');
+  const allSelected = state.items.length > 0 && selectedIds.length === state.items.length;
+  const selectedSummary = useMemo(() => {
+    const selected = state.items.filter(i => selectedIds.includes(i.id));
+    const count = selected.reduce((s, i) => s + i.quantity, 0);
+    const amount = selected.reduce((s, i) => s + i.price * i.quantity, 0);
+    return { count, amount };
+  }, [selectedIds, state.items]);
+
+  const handleCheckoutSelected = () => {
+    if (selectedIds.length === 0) {
+      alert('Pilih minimal satu item untuk checkout.');
       return;
     }
-    router.push('/checkout');
+    const query = encodeURIComponent(selectedIds.join(','));
+    router.push(`/checkout?selected=${query}`);
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (allSelected) setSelectedIds([]);
+    else setSelectedIds(state.items.map((i) => i.id));
   };
 
   if (state.items.length === 0) {
@@ -65,8 +87,30 @@ export default function CartPage() {
             {/* Cart Items */}
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={toggleSelectAll}
+                    />
+                    Pilih Semua
+                  </label>
+                  {selectedIds.length > 0 && (
+                    <span className="text-sm text-gray-600">
+                      Dipilih: {selectedSummary.count} item • {formatRupiah(selectedSummary.amount)}
+                    </span>
+                  )}
+                </div>
                 {state.items.map((item) => (
                   <div key={item.id} className="flex items-center p-6 border-b border-gray-200 last:border-b-0">
+                    <div className="mr-4">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(item.id)}
+                        onChange={() => toggleSelect(item.id)}
+                      />
+                    </div>
                     <div className="flex-shrink-0 w-24 h-24">
                       <img 
                         src={item.image} 
@@ -128,17 +172,17 @@ export default function CartPage() {
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">{formatRupiah(total)}</span>
                   </div>
-                  
+                
                   <div className="flex justify-between">
                     <span className="text-gray-600">Pengiriman</span>
                     <span className="font-medium">Gratis</span>
                   </div>
-                  
+                
                   <div className="flex justify-between">
                     <span className="text-gray-600">Pajak</span>
                     <span className="font-medium">{formatRupiah(total * 0.1)}</span>
                   </div>
-                  
+                
                   <div className="border-t border-gray-200 pt-3 mt-3">
                     <div className="flex justify-between">
                       <span className="text-lg font-semibold">Total</span>
@@ -148,10 +192,13 @@ export default function CartPage() {
                 </div>
                 
                 <button
-                  onClick={handleCheckout}
-                  className="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  onClick={handleCheckoutSelected}
+                  disabled={selectedIds.length === 0}
+                  className="w-full mt-6 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
-                  Checkout ({totalItems} item{totalItems > 1 ? 's' : ''})
+                  {allSelected
+                    ? `Checkout Semua (${totalItems} item)`
+                    : `Checkout Terpilih (${selectedSummary.count} item)`}
                 </button>
                 
                 <button
