@@ -34,6 +34,8 @@ export default function CartPage() {
     return { count, amount };
   }, [selectedIds, state.items]);
 
+  const displayedSubtotal = selectedIds.length > 0 ? selectedSummary.amount : total;
+
   const handleCheckoutSelected = () => {
     if (selectedIds.length === 0) {
       alert('Pilih minimal satu item untuk checkout.');
@@ -170,23 +172,12 @@ export default function CartPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">{formatRupiah(total)}</span>
+                    <span className="font-medium">{formatRupiah(displayedSubtotal)}</span>
                   </div>
-                
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Pengiriman</span>
-                    <span className="font-medium">Gratis</span>
-                  </div>
-                
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Pajak</span>
-                    <span className="font-medium">{formatRupiah(total * 0.1)}</span>
-                  </div>
-                
                   <div className="border-t border-gray-200 pt-3 mt-3">
                     <div className="flex justify-between">
                       <span className="text-lg font-semibold">Total</span>
-                      <span className="text-lg font-semibold">{formatRupiah(total * 1.1)}</span>
+                      <span className="text-lg font-semibold">{formatRupiah(displayedSubtotal)}</span>
                     </div>
                   </div>
                 </div>

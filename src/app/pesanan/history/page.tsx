@@ -173,11 +173,11 @@ export default function PesananHistoryPage() {
                         <CardContent className="p-4">
                           {firstItem ? (
                             <div className="flex gap-4">
-                              <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0">
+                              <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
                                 <img
-                                  src={firstItem.produk?.gambar_url || "https://via.placeholder.com/150"}
+                                  src={(firstItem as any)?.produk?.gambar?.[0] || (firstItem as any)?.produk?.gambar_url || "/products/kao.jpeg"}
                                   alt={firstItem.produk?.nama}
-                                  className="w-full h-full object-cover rounded-lg"
+                                  className="w-full h-full object-cover"
                                 />
                               </div>
                               <div className="flex-grow min-w-0">

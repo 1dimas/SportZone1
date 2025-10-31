@@ -114,9 +114,9 @@ export default function CheckoutPage() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const tax = total * 0.1;
-  const shipping = 0; // Free shipping
-  const grandTotal = total + tax + shipping;
+  const tax = 0;
+  const shipping = 0;
+  const grandTotal = total;
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -439,19 +439,6 @@ export default function CheckoutPage() {
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">{formatRupiah(total)}</span>
                   </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Pengiriman</span>
-                    <span className="font-medium">
-                      {formatRupiah(shipping)}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Pajak</span>
-                    <span className="font-medium">{formatRupiah(tax)}</span>
-                  </div>
-
                   <div className="border-t border-gray-200 pt-3 mt-3">
                     <div className="flex justify-between">
                       <span className="text-lg font-semibold">Total</span>

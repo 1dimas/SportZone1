@@ -48,14 +48,14 @@ function StatusTimeline({ status }: { status: StatusKey }) {
               <span
                 className={
                   done
-                    ? "bg-green-600 text-white rounded-full p-1"
+                    ? "bg-orange-600 text-white rounded-full p-1"
                     : "bg-gray-200 text-gray-600 rounded-full p-1"
                 }
                 aria-label={item.label}
               >
                 <Icon className="size-4" />
               </span>
-              <span className={done ? "text-green-700 font-medium" : "text-gray-600"}>{item.label}</span>
+              <span className={done ? "text-orange-700 font-medium" : "text-gray-600"}>{item.label}</span>
               {idx < items.length - 1 && <Separator className="mx-2 w-10" />}
             </div>
           );
@@ -190,7 +190,12 @@ export default function PesananDetailPage() {
                         <TableCell className="font-medium">{item.produk?.nama || "Produk"}</TableCell>
                         <TableCell className="text-gray-600">
                           {item.produk_varian
-                            ? `${item.produk_varian.warna_varian}/${item.produk_varian.ukuran}`
+                            ? ([
+                                item.produk_varian.warna_varian,
+                                item.produk_varian.ukuran,
+                              ]
+                                .filter((v) => v && String(v).trim().length > 0)
+                                .join(" / ") || "-")
                             : "-"}
                         </TableCell>
                         <TableCell className="text-right">{formatCurrency(Number(item.harga_satuan))}</TableCell>
