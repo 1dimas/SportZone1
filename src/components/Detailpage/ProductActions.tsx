@@ -7,6 +7,7 @@ import { FiShoppingCart, FiMinus, FiPlus } from "react-icons/fi";
 import { getVarianByProduk } from "@/components/lib/services/produk.service";
 import { useCart } from "@/context/cart-context";
 import { addKeranjangItem } from "@/components/lib/services/keranjang.service";
+import { useRouter } from "next/navigation";
 
 type ProductData = {
   variants: ProductVariant[];
@@ -29,6 +30,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
   onOrderNow,
 }) => {
   const { dispatch } = useCart();
+  const router = useRouter();
   const [selectedSize, setSelectedSize] = useState<string | number | undefined>(
     undefined
   );
@@ -181,35 +183,26 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       alert(`Stok tidak mencukupi. Maksimal ${selectedVariant.stok} buah`);
       return;
     }
-    // Add to cart first, then redirect to checkout
-    dispatch({
-      type: "ADD_TO_CART",
-      payload: {
-        item: {
-          productId: product.id,
-          name: product.name,
-          price: selectedVariant.harga || product.price,
-          image: product.image,
-          size: selectedSize?.toString() || selectedColor || "Default",
-          variantId: selectedVariant.id,
-          quantity: quantity,
-          stock: selectedVariant.stok,
-        },
-      },
-    });
-    // Persist to backend (best-effort), then redirect
-    const varianIdToSend =
+    // Direct checkout: do NOT add to cart; store temp items and go to checkout
+    const variantIdStr =
       typeof selectedVariant.id === "string" && selectedVariant.id.startsWith("virtual-")
-        ? null
+        ? undefined
         : (selectedVariant.id as string | undefined);
-    addKeranjangItem({
-      produk_id: product.id,
-      produk_varian_id: varianIdToSend ?? undefined,
-      kuantitas: quantity,
-    }).catch(() => {});
-    if (onOrderNow) {
-      onOrderNow(selectedVariant, quantity);
-    }
+    const directItem = {
+      id: `direct-${product.id}-${selectedSize || selectedColor || "default"}`,
+      productId: product.id,
+      name: product.name,
+      price: selectedVariant.harga || product.price,
+      image: product.image,
+      size: selectedSize?.toString() || selectedColor || "Default",
+      variantId: variantIdStr,
+      quantity: quantity,
+      stock: selectedVariant.stok,
+    };
+    try {
+      localStorage.setItem("checkout_direct_items", JSON.stringify([directItem]));
+    } catch {}
+    router.push("/checkout?mode=direct");
   };
 
   // Check if a size has available variants

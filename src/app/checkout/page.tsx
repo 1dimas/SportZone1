@@ -108,7 +108,18 @@ export default function CheckoutPage() {
 
   const itemsForCheckout = selectedOnly
     ? state.items.filter((i) => selectedOnly.includes(i.id))
-    : state.items;
+    : (() => {
+        // If direct mode present, use items from localStorage and ignore cart
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get("mode");
+        if (mode === "direct") {
+          try {
+            const raw = localStorage.getItem("checkout_direct_items");
+            if (raw) return JSON.parse(raw);
+          } catch {}
+        }
+        return state.items;
+      })();
 
   const total = itemsForCheckout.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -210,7 +221,8 @@ export default function CheckoutPage() {
             alert(
               "Pembayaran berhasil! Terima kasih telah berbelanja di SportZone."
             );
-            dispatch({ type: "CLEAR_CART" });
+            const mode = new URLSearchParams(window.location.search).get("mode");
+            if (mode !== "direct") dispatch({ type: "CLEAR_CART" });
             router.push("/pesanan");
           },
           onPending: function (result: any) {
