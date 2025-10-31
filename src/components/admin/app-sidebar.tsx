@@ -52,12 +52,12 @@ const data = {
       icon: IconListDetails,
     },
     {
-      title: "Petugas",
+      title: "Officer",
       url: "/dashboardadmin/petugas",
       icon: IconUsers,
     },
     {
-      title: "Olahraga",
+      title: "Sports",
       url: "/dashboardadmin/olahraga",
       icon: IconFileWord,
     },
@@ -67,17 +67,17 @@ const data = {
       icon: IconFileWord,
     },
     {
-      title: "Produk",
+      title: "Products",
       url: "/dashboardadmin/produk",
       icon: IconListDetails,
     },
     {
-      title: "Pesanan",
+      title: "Orders",
       url: "/dashboardadmin/pesanan",
       icon: IconListDetails,
     },
     {
-      title: "Subkategori Peralatan",
+      title: "Equipment Subcategories",
       url: "/dashboardadmin/subkategori-peralatan",
       icon: IconChartBar,
     },
@@ -139,12 +139,12 @@ const data = {
   ],
   documents: [
     {
-      name: "laporan produk",
+      name: "Product Report",
       url: "#",
       icon: IconReport,
     },
     {
-      name: "Laporan Penjualan",
+      name: "Sales Report",
       url: "#",
       icon: IconFileWord,
     },

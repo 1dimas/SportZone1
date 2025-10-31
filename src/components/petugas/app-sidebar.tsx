@@ -28,7 +28,7 @@ import {
 
 const data = {
   user: {
-    name: "Petugas",
+    name: "Officer",
     email: "petugas@sportzone.com",
     avatar: "/avatars/shadcn.jpg",
   },
@@ -39,33 +39,33 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Produk",
+      title: "Products",
       url: "/dashboardpetugas/produk",
       icon: IconDatabase,
     },
     {
-      title: "Pesanan",
+      title: "Orders",
       url: "/dashboardpetugas/pesanan",
       icon: IconShoppingCart,
     },
   ],
   navClouds: [
     {
-      title: "Kategori Olahraga",
+      title: "Sports Category",
       icon: IconFolder,
       isActive: true,
       url: "#",
       items: [
         {
-          title: "Sepak Bola",
+          title: "Soccer",
           url: "#",
         },
         {
-          title: "Basket",
+          title: "Basketball",
           url: "#",
         },
         {
-          title: "Bulu Tangkis",
+          title: "Badminton",
           url: "#",
         },
       ],
@@ -93,12 +93,12 @@ const data = {
   navSecondary: [],
   documents: [
     {
-      name: "Laporan Produk",
+      name: "Product Report",
       url: "#",
       icon: IconDatabase,
     },
     {
-      name: "Laporan Penjualan",
+      name: "Sales Report",
       url: "#",
       icon: IconReport,
     },
