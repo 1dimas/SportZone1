@@ -1,6 +1,15 @@
 // services/auth.service.ts
 
-
+// Shared user profile shape used across pages
+export type UserProfile = {
+  id: string;
+  username: string;
+  email: string;
+  phone?: string | null;
+  role?: { id: string; name: string } | null;
+  // Optional stats if backend adds later
+  stats?: { orders: number; favorites: number; reviews: number };
+};
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -75,7 +84,7 @@ export async function logout() {
 // =====================
 // GET PROFILE
 // =====================
-export async function getProfile() {
+export async function getProfile(): Promise<UserProfile & { token?: string }> {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Belum login");
 
@@ -94,10 +103,15 @@ export async function getProfile() {
   const data = await response.json();
 
   // Flatten biar gampang diakses
-  return {
+  const result = {
     ...data.user,
     token: data.token || data.access_token || data.accessToken,
   };
+  // Persist userId for legacy links/uses
+  if (data?.user?.id) {
+    try { localStorage.setItem("userId", String(data.user.id)); } catch {}
+  }
+  return result;
 }
 
 
@@ -162,11 +176,28 @@ export async function resetPassword(email: string, otp: string, newPassword: str
 // =====================
 // GET PROFILE BY USER ID
 // =====================
-export async function getProfileByUserId(userId: string) {
+export async function getProfileByUserId(userId: string): Promise<UserProfile> {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("Belum login");
 
   try {
+    // Fast-path: if the requested id is the same as the current user's id, just return self profile
+    let self: (UserProfile & { token?: string }) | null = null;
+    try {
+      self = await getProfile();
+      if (self && String(self.id) === String(userId)) {
+        return {
+          id: self.id,
+          username: self.username,
+          email: self.email,
+          phone: self.phone ?? null,
+          role: self.role ?? null,
+        };
+      }
+    } catch {
+      // ignore self fetch error; continue to try users/:id
+    }
+
     // Coba endpoint langsung dulu
     const response = await fetch(`${API_URL}/users/${userId}`, {
       method: "GET",
@@ -182,19 +213,30 @@ export async function getProfileByUserId(userId: string) {
         id: data.id,
         username: data.username,
         email: data.email,
+        phone: data.phone ?? null,
+        role: data.role ?? null,
       };
     }
 
-    // Jika endpoint tidak ada (404), coba ambil profile sendiri
-    if (response.status === 404) {
-      const profile = await getProfile();
-      if (profile.id === userId) {
+    // Jika endpoint tidak ada (404) atau tidak authorized (401/403), coba ambil profile sendiri
+    if ([404, 401, 403].includes(response.status)) {
+      if (self) {
         return {
-          id: profile.id,
-          username: profile.username,
-          email: profile.email,
+          id: self.id,
+          username: self.username,
+          email: self.email,
+          phone: self.phone ?? null,
+          role: self.role ?? null,
         };
       }
+      const profile = await getProfile();
+      return {
+        id: profile.id,
+        username: profile.username,
+        email: profile.email,
+        phone: profile.phone ?? null,
+        role: profile.role ?? null,
+      };
     }
 
     // Jika bukan 404, throw error asli

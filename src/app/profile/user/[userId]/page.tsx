@@ -149,6 +149,13 @@ export default function ProfileByUserIdPage() {
                         <span className="text-lg text-slate-900">{state.user.email}</span>
                       </div>
                     </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-600">No. Telepon</label>
+                      <div className="p-3 bg-slate-50 rounded-lg border">
+                        <span className="text-lg text-slate-900">{state.user.phone || "-"}</span>
+                      </div>
+                    </div>
                     
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-slate-600">User ID</label>

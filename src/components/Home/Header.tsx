@@ -54,9 +54,11 @@ export default function Header() {
         setIsLoggedIn(true);
         try {
           const decodedToken = JSON.parse(atob(tokenFromUrl.split('.')[1]));
-          if (decodedToken.userId) {
-            localStorage.setItem("userId", decodedToken.userId);
-            setUserId(decodedToken.userId);
+          // Backend uses `sub` for user id; keep backward compatibility with `userId`
+          const uid = decodedToken.userId || decodedToken.sub;
+          if (uid) {
+            localStorage.setItem("userId", String(uid));
+            setUserId(String(uid));
           }
         } catch (error) {
           console.error("Failed to decode token:", error);
@@ -170,7 +172,7 @@ export default function Header() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href={`/profile/user/${userId}`} className="flex items-center">
+                        <Link href={`/profile`} className="flex items-center">
                           <FiUser className="mr-2 h-4 w-4" />
                           <span>Profil Saya</span>
                         </Link>
