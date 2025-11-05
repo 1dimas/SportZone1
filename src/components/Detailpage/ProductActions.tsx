@@ -135,6 +135,13 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
   ]);
 
   const handleAddToCart = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Silakan login terlebih dahulu untuk menambahkan ke keranjang.");
+      router.push("/login");
+      return;
+    }
+
     if (!selectedVariant) {
       alert("Silakan pilih varian terlebih dahulu.");
       return;
@@ -161,7 +168,8 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     });
     // Persist to backend (best-effort)
     const varianIdToSend =
-      typeof selectedVariant.id === "string" && selectedVariant.id.startsWith("virtual-")
+      typeof selectedVariant.id === "string" &&
+      selectedVariant.id.startsWith("virtual-")
         ? null
         : (selectedVariant.id as string | undefined);
     addKeranjangItem({
@@ -175,6 +183,12 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
   };
 
   const handleOrderNow = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Silakan login terlebih dahulu untuk melakukan pemesanan.");
+      router.push("/login");
+      return;
+    }
     if (!selectedVariant) {
       alert("Silakan pilih varian terlebih dahulu.");
       return;
@@ -185,7 +199,8 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     }
     // Direct checkout: do NOT add to cart; store temp items and go to checkout
     const variantIdStr =
-      typeof selectedVariant.id === "string" && selectedVariant.id.startsWith("virtual-")
+      typeof selectedVariant.id === "string" &&
+      selectedVariant.id.startsWith("virtual-")
         ? undefined
         : (selectedVariant.id as string | undefined);
     const directItem = {
@@ -200,7 +215,10 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       stock: selectedVariant.stok,
     };
     try {
-      localStorage.setItem("checkout_direct_items", JSON.stringify([directItem]));
+      localStorage.setItem(
+        "checkout_direct_items",
+        JSON.stringify([directItem])
+      );
     } catch {}
     router.push("/checkout?mode=direct");
   };
