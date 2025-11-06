@@ -6,15 +6,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getPesananHistory, Pesanan } from "@/components/lib/services/pesanan.service";
+import {
+  getPesananHistory,
+  Pesanan,
+} from "@/components/lib/services/pesanan.service";
 // Import ShoppingBag (dipakai di Card) dan FiArrowLeft (untuk tombol kembali)
 import { ShoppingBag, ArrowLeft } from "lucide-react";
 
 const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(amount);
+  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(
+    amount
+  );
 
 const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString("id-ID", { year: "numeric", month: "short", day: "numeric" });
+  new Date(dateString).toLocaleDateString("id-ID", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 
 const statusOrder: Record<string, number> = {
   pending: 0,
@@ -48,8 +57,13 @@ export default function PesananHistoryPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    if (tab === "semua") return orders.slice().sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-    return orders.filter((o) => o.status === tab).sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+    if (tab === "semua")
+      return orders
+        .slice()
+        .sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+    return orders
+      .filter((o) => o.status === tab)
+      .sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
   }, [orders, tab]);
 
   const statusTabs = [
@@ -64,16 +78,15 @@ export default function PesananHistoryPage() {
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        
         {/* =======================================================
           1. TOMBOL KEMBALI DITAMBAHKAN DI SINI
           ======================================================= */}
         <Button
           variant="ghost"
           className="mb-4 text-gray-700 hover:text-orange-500 px-0 hover:bg-transparent"
-          asChild 
+          asChild
         >
-          <Link href="/"> 
+          <Link href="/">
             {/* GANTI INI: <FiArrowLeft className="w-5 h-5 mr-2" /> */}
             <ArrowLeft className="w-5 h-5 mr-2" /> {/* JADI INI */}
             Kembali ke Home
@@ -81,51 +94,82 @@ export default function PesananHistoryPage() {
         </Button>
         {/* ======================================================= */}
 
-
         <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-          <div className="flex items-center gap-4"> 
-            
+          <div className="flex items-center gap-4">
             {/* 2. LOGO DIPASTIKAN TIDAK ADA */}
-            
+
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">Riwayat Pesanan</h1>
-              <p className="text-sm text-gray-600 mt-1">Lihat, lacak, dan kelola pesanan Anda.</p>
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                Riwayat Pesanan
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                Lihat, lacak, dan kelola pesanan Anda.
+              </p>
             </div>
           </div>
-          
+
           {/* =======================================================
             3. TOMBOL BELANJA LAGI DIHAPUS DARI SINI
             ======================================================= */}
-
         </div>
-        
+
         {/* ... Sisa kode (Loading, Error, Tabs, Cards) tetap sama ... */}
 
         {loading && (
           <div className="text-gray-600 flex items-center justify-center h-48">
-            <svg className="animate-spin h-8 w-8 text-orange-500 mr-3" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              className="animate-spin h-8 w-8 text-orange-500 mr-3"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
             Memuat riwayat pesanan...
           </div>
         )}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
             <strong className="font-bold">Terjadi Kesalahan! </strong>
             <span className="block sm:inline">{error}</span>
             {error.toLowerCase().includes("unauthorized") && (
               <span className="block mt-2 text-sm text-red-600">
-                Sesi berakhir. Silakan <Link href="/login" className="text-red-800 underline font-medium">login</Link> kembali.
+                Sesi berakhir. Silakan{" "}
+                <Link
+                  href="/login"
+                  className="text-red-800 underline font-medium"
+                >
+                  login
+                </Link>{" "}
+                kembali.
               </span>
             )}
           </div>
         )}
 
         {!loading && !error && orders.length === 0 && (
-          <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4" role="alert">
+          <div
+            className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4"
+            role="alert"
+          >
             <p className="font-bold">Belum ada pesanan</p>
-            <p>Sepertinya Anda belum melakukan pembelian apa pun. Yuk belanja sekarang!</p>
+            <p>
+              Sepertinya Anda belum melakukan pembelian apa pun. Yuk belanja
+              sekarang!
+            </p>
           </div>
         )}
 
@@ -147,12 +191,16 @@ export default function PesananHistoryPage() {
             </TabsList>
             <TabsContent value={tab} className="mt-6">
               {filtered.length === 0 ? (
-                <div className="text-gray-700 p-4 bg-white rounded-lg shadow-sm">Tidak ada pesanan pada kategori ini.</div>
+                <div className="text-gray-700 p-4 bg-white rounded-lg shadow-sm">
+                  Tidak ada pesanan pada kategori ini.
+                </div>
               ) : (
                 <div className="space-y-5">
                   {filtered.map((order) => {
                     const firstItem = order.pesanan_items?.[0];
-                    const otherItemsCount = order.pesanan_items.length - 1;
+                    const otherItemsCount = order.pesanan_items
+                      ? order.pesanan_items.length - 1
+                      : 0;
 
                     return (
                       <Card
@@ -161,13 +209,20 @@ export default function PesananHistoryPage() {
                       >
                         <CardHeader className="flex flex-row items-center justify-between p-4 border-b bg-gray-50/50">
                           <div className="flex items-center gap-3">
-                            <ShoppingBag className="w-4 h-4 text-gray-500" /> 
-                            <Badge variant="outline" className="capitalize font-semibold text-gray-800 bg-white border-gray-300">
-                                {order.status}
+                            <ShoppingBag className="w-4 h-4 text-gray-500" />
+                            <Badge
+                              variant="outline"
+                              className="capitalize font-semibold text-gray-800 bg-white border-gray-300"
+                            >
+                              {order.status}
                             </Badge>
-                            <span className="text-sm text-gray-600">{formatDate(order.tanggal_pesanan)}</span>
+                            <span className="text-sm text-gray-600">
+                              {formatDate(order.tanggal_pesanan)}
+                            </span>
                           </div>
-                          <span className="text-sm font-mono text-gray-500">#{order.id.substring(0, 8)}</span>
+                          <span className="text-sm font-mono text-gray-500">
+                            #{order.id.substring(0, 8)}
+                          </span>
                         </CardHeader>
 
                         <CardContent className="p-4">
@@ -175,20 +230,41 @@ export default function PesananHistoryPage() {
                             <div className="flex gap-4">
                               <div className="w-20 h-20 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
                                 <img
-                                  src={(firstItem as any)?.produk?.gambar?.[0] || (firstItem as any)?.produk?.gambar_url || "/products/kao.jpeg"}
+                                  src={
+                                    (firstItem as any)?.produk?.gambar?.[0] ||
+                                    (firstItem as any)?.produk?.gambar_url ||
+                                    "/products/kao.jpeg"
+                                  }
                                   alt={firstItem.produk?.nama}
                                   className="w-full h-full object-cover"
                                 />
                               </div>
                               <div className="flex-grow min-w-0">
-                                <p className="font-bold text-gray-800 truncate text-lg">{firstItem.produk?.nama || "Produk"}</p>
+                                <p className="font-bold text-gray-800 truncate text-lg">
+                                  {firstItem.produk?.nama || "Produk"}
+                                </p>
                                 <p className="text-sm text-gray-500 mt-1">
                                   {firstItem.kuantitas} barang
-                                  {firstItem.produk_varian && (
-                                    <span className="ml-1">
-                                      ({firstItem.produk_varian.warna_varian}/{firstItem.produk_varian.ukuran})
-                                    </span>
-                                  )}
+                                  {firstItem.produk_varian &&
+                                    (() => {
+                                      const varian = firstItem.produk_varian;
+                                      const color =
+                                        varian.warna;
+                                      const size = varian.ukuran;
+                                      let variantStr = "";
+                                      if (color && size) {
+                                        variantStr = `${color}/${size}`;
+                                      } else if (color) {
+                                        variantStr = color;
+                                      } else if (size) {
+                                        variantStr = size;
+                                      }
+                                      return variantStr ? (
+                                        <span className="ml-1">
+                                          ({variantStr})
+                                        </span>
+                                      ) : null;
+                                    })()}
                                 </p>
                                 {otherItemsCount > 0 && (
                                   <p className="text-sm text-orange-600 font-medium mt-2">
@@ -198,27 +274,39 @@ export default function PesananHistoryPage() {
                               </div>
                             </div>
                           ) : (
-                            <div className="text-sm text-gray-600">Tidak ada item untuk pesanan ini.</div>
+                            <div className="text-sm text-gray-600">
+                              Tidak ada item untuk pesanan ini.
+                            </div>
                           )}
-                          
+
                           <div className="flex items-end justify-between mt-4 pt-4 border-t border-gray-200">
                             <div>
-                              <span className="text-sm text-gray-500 block">Total Belanja</span>
-                              <p className="font-bold text-2xl text-orange-600">{formatCurrency(order.total_harga)}</p>
+                              <span className="text-sm text-gray-500 block">
+                                Total Belanja
+                              </span>
+                              <p className="font-bold text-2xl text-orange-600">
+                                {formatCurrency(order.total_harga)}
+                              </p>
                             </div>
                             <div className="flex gap-2">
-                                <Link href={`/pesanan/${order.id}`}>
+                              <Link href={`/pesanan/${order.id}`}>
                                 <Button
-                                    size="sm"
-                                    variant="default"
-                                    className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md"
+                                  size="sm"
+                                  variant="default"
+                                  className="bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md"
                                 >
-                                    Lihat Detail
+                                  Lihat Detail
                                 </Button>
-                                </Link>
-                                {order.status === 'selesai' && (
-                                    <Button size="sm" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100">Beri Ulasan</Button>
-                                )}
+                              </Link>
+                              {order.status === "selesai" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                                >
+                                  Beri Ulasan
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </CardContent>

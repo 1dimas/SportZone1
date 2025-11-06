@@ -24,7 +24,7 @@ export interface PesananItem {
   };
   produk_varian?: {
     id: string;
-    warna_varian: string;
+    warna: string;
     ukuran: string;
   };
 }

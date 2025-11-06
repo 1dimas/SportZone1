@@ -150,6 +150,14 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       alert(`Stok tidak mencukupi. Maksimal ${selectedVariant.stok} buah`);
       return;
     }
+    // Determine variant type
+    let variantType: "size" | "color" | "default" = "default";
+    if (hasSizes && selectedSize !== undefined) {
+      variantType = "size";
+    } else if (hasColors && selectedColor !== undefined) {
+      variantType = "color";
+    }
+
     // Add to cart using context
     dispatch({
       type: "ADD_TO_CART",
@@ -160,6 +168,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
           price: selectedVariant.harga || product.price,
           image: product.image,
           size: selectedSize?.toString() || selectedColor || "Default",
+          selectedSize: selectedSize?.toString(),
+          selectedColor: selectedColor,
+          variantType,
           variantId: selectedVariant.id,
           quantity: quantity,
           stock: selectedVariant.stok,

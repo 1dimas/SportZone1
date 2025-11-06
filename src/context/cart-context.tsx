@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, ReactNode, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 import { usePathname } from "next/navigation";
 
 // Define types
@@ -11,6 +18,9 @@ type CartItem = {
   price: number;
   image: string;
   size: string;
+  selectedSize?: string;
+  selectedColor?: string;
+  variantType: "size" | "color" | "both" | "default";
   variantId?: string;
   quantity: number;
   stock: number;
@@ -40,9 +50,16 @@ const CartContext = createContext<
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case "ADD_TO_CART":
-      const newItem = {
+      const itemData = {
         ...action.payload.item,
-        id: `${action.payload.item.productId}-${action.payload.item.size}`,
+        selectedSize: action.payload.item.selectedSize || "",
+        selectedColor: action.payload.item.selectedColor || "",
+      };
+      const newItem = {
+        ...itemData,
+        id: `${itemData.productId}-${itemData.selectedSize || "none"}-${
+          itemData.selectedColor || "none"
+        }`,
       };
       const existingItem = state.items.find((item) => item.id === newItem.id);
 
@@ -151,7 +168,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   useEffect(() => {
     try {
       const key = `cart:${uid}`;
-      const stored = typeof window !== "undefined" ? localStorage.getItem(key) : null;
+      const stored =
+        typeof window !== "undefined" ? localStorage.getItem(key) : null;
       const nextState: CartState = stored ? JSON.parse(stored) : { items: [] };
       dispatch({ type: "SET_CART", payload: nextState });
     } catch {
