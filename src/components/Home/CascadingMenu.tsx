@@ -34,7 +34,7 @@ export const CascadingMenu: React.FC<CascadingMenuProps> = ({ menuItem }) => {
         onMouseEnter={() => setIsOpen(true)}
         className="h-14 flex items-center"
       >
-        <Link href={menuItem.href} className="font-semibold text-gray-700 uppercase tracking-wider hover:text-blue-600 transition-colors">
+        <Link href={menuItem.href} className="font-semibold text-gray-700 uppercase tracking-wider hover:text-orange-600 transition-colors">
           {menuItem.title}
         </Link>
       </div>
@@ -46,7 +46,7 @@ export const CascadingMenu: React.FC<CascadingMenuProps> = ({ menuItem }) => {
         ${isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-4'}
       `}>
         <div className="container mx-auto">
-          <div className="w-screen max-w-4xl bg-white rounded-b-lg shadow-2xl flex border-t-2 border-blue-600">
+          <div className="w-screen max-w-4xl bg-white rounded-b-lg shadow-2xl flex border-t-2 border-orange-600">
             {/* Kolom Kiri: Daftar Kategori */}
             <div className="w-1/4 bg-slate-50 border-r border-slate-200 rounded-bl-lg">
               <ul className="p-4 space-y-1">
@@ -54,7 +54,7 @@ export const CascadingMenu: React.FC<CascadingMenuProps> = ({ menuItem }) => {
                   <li key={category.heading}>
                     <button 
                       onMouseEnter={() => setActiveCategory(category)}
-                      className={`w-full text-left flex justify-between items-center px-4 py-2 rounded-md transition-colors duration-150 ${activeCategory?.heading === category.heading ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-200'}`}
+                      className={`w-full text-left flex justify-between items-center px-4 py-2 rounded-md transition-colors duration-150 ${activeCategory?.heading === category.heading ? 'bg-blue-100 text-orange-600 font-semibold' : 'text-gray-600 hover:bg-gray-200'}`}
                     >
                       <span>{category.heading}</span>
                       <FiChevronRight size={16}/>
@@ -74,7 +74,7 @@ export const CascadingMenu: React.FC<CascadingMenuProps> = ({ menuItem }) => {
                   <ul className="grid grid-cols-2 gap-x-8 gap-y-2">
                     {activeCategory.links.map((link) => (
                       <li key={link.name}>
-                        <Link href={link.href} onClick={() => setIsOpen(false)} className="block py-1 text-slate-600 hover:text-blue-600 hover:translate-x-1 transition-all">
+                        <Link href={link.href} onClick={() => setIsOpen(false)} className="block py-1 text-slate-600 hover:text-orange-600 hover:translate-x-1 transition-all">
                           {link.name}
                         </Link>
                       </li>

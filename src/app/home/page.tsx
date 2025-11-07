@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import Footer from "@/components/Home/Footer";
@@ -9,23 +9,20 @@ import PopularBrands from "@/components/Home/PopularBrands";
 import ProductCarousel from "@/components/Home/ProductCarousel";
 import { getAllProduk } from "@/components/lib/services/produk.service";
 
-// Define the type for API response product
 type ProductVariant = {
   size: string | number;
   stock: number;
 };
 
 type APIProduct = {
-  id: string;           // API returns string ID
-  nama: string;         // API uses 'nama' instead of 'name'
-  harga: number;        // API uses 'harga' instead of 'price'
-  gambar: string[];     // API uses 'gambar' array instead of 'imageUrl'
+  id: string;
+  nama: string;
+  harga: number;
+  gambar: string[];
   slug?: string;
   category?: string;
   subcategory?: string;
-  brand?: {
-    nama: string;
-  };
+  brand?: { nama: string };
   isNew?: boolean;
   description?: string;
   variants: ProductVariant[];
@@ -50,54 +47,92 @@ const Page = () => {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  return (
-    <div className="bg-gray-50" id="homepage">
-      <Header />
-      <HeroSlider />
+  const filteredProducts = selectedBrand
+    ? products.filter((p) => p.brand?.nama === selectedBrand)
+    : [];
 
-      <main className="container mx-auto px-4 py-16">
+  return (
+    <div className="bg-white min-h-screen flex flex-col" id="homepage">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-50 bg-white shadow-sm">
+        <Header />
+      </div>
+
+      {/* Hero Section */}
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 mt-2">
+        <HeroSlider />
+      </div>
+
+      {/* Main Content */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-8">
         {/* Popular Brands */}
         <PopularBrands onBrandSelect={setSelectedBrand} />
 
-        {/* Rekomendasi Grid */}
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold">
-              {selectedBrand ? `Produk dari ${selectedBrand}` : "Rekomendasi Untuk Anda"}
-            </h2>
+        {/* Produk Grid */}
+        <section className="mt-8">
+          <div className="flex items-center justify-between mb-4">
             {selectedBrand && (
               <button
                 onClick={() => setSelectedBrand(null)}
-                className="text-gray-500 hover:text-gray-700 text-lg"
+                className="text-gray-500 hover:text-gray-700 text-sm sm:text-base"
               >
-                ✕ Reset
+                ✕ Hapus filter brand
               </button>
             )}
           </div>
-          {loading && <p>Memuat data produk...</p>}
-          {error && <p className="text-red-600">{error}</p>}
-          {!loading && !error && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {products
-                .filter(product => !selectedBrand || product.brand?.nama === selectedBrand)
-                .map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+
+          {/* Loading/Error */}
+          {loading && (
+            <p className="text-center text-gray-600 py-8 animate-pulse">
+              Memuat produk...
+            </p>
+          )}
+          {error && <p className="text-center text-red-500 py-8">{error}</p>}
+
+          {/* Produk Grid - hanya muncul setelah brand dipilih */}
+          {!loading && !error && selectedBrand && (
+            <div
+              className="
+                grid 
+                grid-cols-2 
+                sm:grid-cols-3 
+                md:grid-cols-4 
+                lg:grid-cols-5 
+                xl:grid-cols-6 
+                gap-x-3 gap-y-6 
+                sm:gap-x-4 sm:gap-y-8
+              "
+            >
+              {filteredProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
+          )}
+
+          {/* Jika brand dipilih tapi produk kosong */}
+          {!loading && !error && selectedBrand && filteredProducts.length === 0 && (
+            <p className="text-center text-gray-500 py-12">
+              Tidak ada produk untuk brand <b>{selectedBrand}</b>.
+            </p>
           )}
         </section>
 
-        {/* Carousel Produk */}
-        <section className="mt-16">
-          <h2 className="text-3xl font-bold mb-8">Produk Populer</h2>
+        {/* ===========================================================
+          PERUBAHAN DI SINI: mt-16 diubah menjadi mt-8
+          ===========================================================
+        */}
+        <section className="mt-8">
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">
+            Rekomendasi Produk
+          </h2>
           <ProductCarousel />
         </section>
       </main>
 
+      {/* Footer */}
       <Footer />
     </div>
   );

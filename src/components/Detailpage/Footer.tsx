@@ -1,54 +1,163 @@
 // components/Footer.tsx
-import Link from 'next/link';
+import Link from "next/link";
+import {
+  FiFacebook,
+  FiTwitter,
+  FiInstagram,
+  FiYoutube,
+  FiSend,
+} from "react-icons/fi";
 
-// 1. Tambahkan props
-type FooterProps = {
-  variant?: 'default' | 'simple';
-}
+const Footer = () => {
+  return (
+    <footer className="bg-gray-900 text-gray-300">
+      <div className="container mx-auto px-6 lg:px-8 py-12">
+        {/* Grid Utama */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-10">
+          {/* Kolom 1: Logo & Sosial Media */}
+          <div className="lg:col-span-2">
+            <Link
+              href="/"
+              className="text-3xl font-bold text-white hover:text-orange-400 transition-colors"
+            >
+              Sport
+            </Link>
+             <Link
+              href="/"
+              className="text-3xl font-bold text-orange-500 hover:text-orange-400 transition-colors"
+            >
+              Zone
+            </Link>
+            <p className="mt-4 text-gray-400 max-w-xs leading-relaxed">
+              Destinasi utama Anda untuk perlengkapan olahraga berkualitas dari
+              merek-merek terbaik dunia.
+            </p>
 
-const Footer = ({ variant = 'default' }: FooterProps) => {
-  if (variant === 'simple') {
-    // 2. Tampilan Footer yang simpel
-    return (
-      <footer className="bg-slate-100 border-t">
-        <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center text-sm text-slate-500">
-            <p>&copy; {new Date().getFullYear()} SportZone. All Rights Reserved.</p>
-            <div className="flex gap-4">
-              <Link href="/privacy-policy" className="hover:underline">Kebijakan Privasi</Link>
-              <Link href="/terms" className="hover:underline">Syarat & Ketentuan</Link>
+            <div className="flex gap-5 mt-6">
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="hover:text-white transition-colors"
+              >
+                <FiFacebook size={20} />
+              </a>
+              <a
+                href="#"
+                aria-label="Twitter"
+                className="hover:text-white transition-colors"
+              >
+                <FiTwitter size={20} />
+              </a>
+              <a
+                href="#"
+                aria-label="Instagram"
+                className="hover:text-white transition-colors"
+              >
+                <FiInstagram size={20} />
+              </a>
+              <a
+                href="#"
+                aria-label="YouTube"
+                className="hover:text-white transition-colors"
+              >
+                <FiYoutube size={20} />
+              </a>
             </div>
           </div>
-        </div>
-      </footer>
-    );
-  }
 
-  // 3. Tampilan Footer default (yang lebih lengkap)
-  return (
-    <footer className="bg-slate-800 text-slate-300">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:text-left">
-            {/* Kolom-kolom footer yang lebih detail bisa ditambahkan di sini */}
-            <div>
-                <h3 className="font-bold uppercase text-white mb-4">Produk</h3>
-                {/* ... link-link ... */}
-            </div>
-            <div>
-                <h3 className="font-bold uppercase text-white mb-4">Bantuan</h3>
-                {/* ... link-link ... */}
-            </div>
-            <div>
-                <h3 className="font-bold uppercase text-white mb-4">Tentang Kami</h3>
-                {/* ... link-link ... */}
-            </div>
-            <div>
-                <h3 className="font-bold uppercase text-white mb-4">Ikuti Kami</h3>
-                {/* ... ikon sosial media ... */}
-            </div>
+          {/* Kolom 2: Bantuan */}
+          <div>
+            <h3 className="text-lg font-semibold text-white uppercase tracking-wider">
+              Bantuan
+            </h3>
+            <ul className="flex flex-col gap-3 mt-4">
+              <li>
+                <Link
+                  href="/faq"
+                  className="hover:text-white transition-colors"
+                >
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="hover:text-white transition-colors"
+                >
+                  Hubungi Kami
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shipping"
+                  className="hover:text-white transition-colors"
+                >
+                  Info Pengiriman
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/returns"
+                  className="hover:text-white transition-colors"
+                >
+                  Kebijakan Pengembalian
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Kolom 3: Toko */}
+          <div>
+            <h3 className="text-lg font-semibold text-white uppercase tracking-wider">
+              Toko
+            </h3>
+            <ul className="flex flex-col gap-3 mt-4">
+              <li>
+                <Link
+                  href="/sports/football"
+                  className="hover:text-white transition-colors"
+                >
+                  Sepak Bola
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/sports/basketball"
+                  className="hover:text-white transition-colors"
+                >
+                  Basket
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/sports/running"
+                  className="hover:text-white transition-colors"
+                >
+                  Lari
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/promo"
+                  className="hover:text-white transition-colors"
+                >
+                  Promo
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+
         </div>
-        <div className="mt-12 border-t border-slate-700 pt-6 text-center text-sm text-slate-400">
-            <p>&copy; {new Date().getFullYear()} SportZone. All Rights Reserved.</p>
+
+        {/* Garis bawah */}
+        <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-gray-500 text-sm text-center sm:text-left">
+            &copy; {new Date().getFullYear()} SportZone. All Rights Reserved.
+          </p>
+          <div className="text-gray-500 text-sm mt-4 sm:mt-0">
+            Pembayaran Aman 💳
+          </div>
         </div>
       </div>
     </footer>

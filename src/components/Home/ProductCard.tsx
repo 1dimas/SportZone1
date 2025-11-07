@@ -1,29 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { FC } from "react";
 import Link from "next/link";
+import { FC } from "react";
+import { FiStar } from "react-icons/fi";
 
-// Define the type for API response product
 type ProductVariant = {
   size: string | number;
   stock: number;
 };
 
 type Product = {
-  id: string | number;  // API likely returns string ID
-  nama?: string;        // API uses 'nama' instead of 'name'
-  name?: string;        // Fallback for static data
-  harga?: number;       // API uses 'harga' instead of 'price'
-  price?: number;       // Fallback for static data
-  gambar?: string[];    // API uses 'gambar' array instead of 'imageUrl'
-  imageUrl?: string;    // Fallback for static data
+  id: string | number;
+  nama?: string;
+  name?: string;
+  harga?: number;
+  price?: number;
+  gambar?: string[];
+  imageUrl?: string;
   slug?: string;
-  category?: string;
-  subcategory?: string;
   isNew?: boolean;
   description?: string;
-  variants: ProductVariant[];
+  variants?: ProductVariant[];
+  rating?: number; // 0–5
 };
 
 type ProductCardProps = {
@@ -32,42 +31,77 @@ type ProductCardProps = {
 
 const ProductCard: FC<ProductCardProps> = ({ product }) => {
   const name = product.nama || product.name || "";
-  const price = product.harga !== undefined ? product.harga : product.price || 0;
-  const imageUrl = (product.gambar && product.gambar.length > 0) ? product.gambar[0] : product.imageUrl || "/products/kao.jpeg";
+  const price = product.harga ?? product.price ?? 0;
+  const imageUrl =
+    product.gambar?.[0] || product.imageUrl || "/products/kao.jpeg";
+  const isExternal =
+    imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
 
-  // Check if the image URL is from an external domain
-  const isExternal = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
+  const rating = product.rating ?? 4.6;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group w-64 sm:w-72">
+    <Link
+      href={`/product/${product.id}`}
+      className="
+        block 
+        w-full {/* DIUBAH: w-[...] dihapus, diganti w-full agar responsif */}
+        bg-white 
+        rounded-md 
+        border border-gray-200 
+        overflow-hidden 
+        hover:shadow-md 
+        hover:-translate-y-1 
+        transition-all 
+        duration-300
+        group
+      "
+    >
       {/* Gambar Produk */}
-      <div className="relative w-full h-60">
+      {/* DIUBAH: aspect-square digunakan agar rasio 1:1 (kotak) */}
+      <div className="relative w-full aspect-square bg-gray-50 flex items-center justify-center">
         <Image
           src={imageUrl}
           alt={name}
-          fill
-          sizes="100%"
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-          unoptimized={isExternal} // Disable optimization for external images
+          width={160}
+          height={160}
+          className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+          unoptimized={isExternal}
         />
+
+        {product.isNew && (
+          <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+            Baru
+          </span>
+        )}
       </div>
 
-      {/* Konten */}
-      <div className="p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-orange-500 transition-colors truncate">
+      {/* Info Produk */}
+      {/* DIUBAH: p-1.5 agar lebih ringkas */}
+      <div className="p-1.5">
+        <h3
+          className="
+            text-xs 
+            font-medium 
+            text-gray-800 
+            line-clamp-2 
+            h-[32px]
+          "
+        >
           {name}
         </h3>
-        <p className="text-md text-gray-700 font-semibold mb-4">
-          Rp{price ? price.toLocaleString("id-ID") : "0"}
+
+        <p className="mt-0.5 text-sm font-bold text-orange-500">
+          Rp{price.toLocaleString("id-ID")}
         </p>
-        <Link
-          href={`/product/${product.id}`}
-          className="block text-center bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 shadow hover:shadow-md"
-        >
-          Lihat Detail
-        </Link>
+
+        <div className="mt-0.5 flex items-center text-[11px] text-gray-600">
+          <FiStar className="text-yellow-400 mr-1 fill-yellow-400" size={12} />
+          <span>{rating}</span>
+          <span className="mx-1">•</span>
+          <span>Terjual 100+</span>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

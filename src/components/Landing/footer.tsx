@@ -48,29 +48,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Kolom 3: Newsletter */}
-          <div>
-            <h3 className="font-bold text-lg mb-6 relative inline-block">
-              Newsletter
-              <span className="absolute bottom-0 left-0 w-12 h-0.5 bg-orange-500"></span>
-            </h3>
-            <p className="text-gray-400 mb-6">
-              Dapatkan info promo & produk terbaru.
-            </p>
-            <form className="flex flex-col space-y-4">
-              <input 
-                type="email" 
-                placeholder="Email Anda" 
-                className="w-full px-4 py-3 text-white bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-              <button 
-                type="submit" 
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
+         
         </div>
 
         {/* Bottom Bar */}
