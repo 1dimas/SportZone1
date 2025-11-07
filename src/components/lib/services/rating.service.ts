@@ -1,0 +1,130 @@
+// services/rating.service.ts
+
+import { API_URL } from "./auth.service";
+
+const getToken = () => {
+  const raw = typeof localStorage !== "undefined" ? localStorage.getItem("token") : null;
+  if (!raw) return null;
+  return raw.replace(/^Bearer\s+/i, "").trim();
+};
+
+export type CreateRatingPayload = {
+  userId: string;
+  produkId: string;
+  rating: number; // 1-5
+};
+
+export async function createRating(payload: CreateRatingPayload) {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const res = await fetch(`${API_URL}/rating`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Gagal mengirim rating: ${res.status} ${res.statusText} - ${text}`);
+  }
+  return res.json();
+}
+
+export async function updateRating(id: string, rating: number) {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const res = await fetch(`${API_URL}/rating/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ rating }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Gagal update rating: ${res.status} ${res.statusText} - ${text}`);
+  }
+  return res.json();
+}
+
+export async function deleteRating(id: string) {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const res = await fetch(`${API_URL}/rating/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Gagal hapus rating: ${res.status} ${res.statusText} - ${text}`);
+  }
+  return res.json();
+}
+
+export async function getRatingsByProduct(produkId: string) {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const res = await fetch(`${API_URL}/rating/product/${produkId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Gagal ambil rating produk: ${res.status} ${res.statusText} - ${text}`);
+  }
+  return res.json();
+}
+
+export async function getRatingsByUser(userId: string) {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const res = await fetch(`${API_URL}/rating/user/${userId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Gagal ambil rating user: ${res.status} ${res.statusText} - ${text}`);
+  }
+  return res.json();
+}
+
+export async function getAverageRating(produkId: string): Promise<number> {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const res = await fetch(`${API_URL}/rating/product/${produkId}/average`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Gagal ambil rata-rata rating: ${res.status} ${res.statusText} - ${text}`);
+  }
+  const data = await res.json();
+  return typeof data?.averageRating === "number" ? data.averageRating : 0;
+}
+

@@ -11,7 +11,10 @@ import {
   Pesanan,
 } from "@/components/lib/services/pesanan.service";
 // Import ShoppingBag (dipakai di Card) dan FiArrowLeft (untuk tombol kembali)
-import { ShoppingBag, ArrowLeft } from "lucide-react";
+import { ShoppingBag, ArrowLeft, Star } from "lucide-react";
+import { createRating } from "@/components/lib/services/rating.service";
+import { getProfile } from "@/components/lib/services/auth.service";
+import { Textarea } from "@/components/ui/textarea";
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(
@@ -38,6 +41,20 @@ export default function PesananHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<string>("semua");
+  const [activeReviewOrderId, setActiveReviewOrderId] = useState<string | null>(null);
+  const [currentRating, setCurrentRating] = useState<number>(0);
+  const [currentReview, setCurrentReview] = useState<string>("");
+  const [pending, setPending] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await getProfile();
+        if (me?.id) setUserId(String(me.id));
+      } catch {}
+    })();
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -299,13 +316,88 @@ export default function PesananHistoryPage() {
                                 </Button>
                               </Link>
                               {order.status === "selesai" && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
-                                >
-                                  Beri Ulasan
-                                </Button>
+                                <div className="flex flex-col items-end gap-3 w-full">
+                                  {activeReviewOrderId === order.id ? (
+                                    <div className="w-full mt-2 border rounded-md p-3 bg-gray-50">
+                                      <div className="flex items-center gap-1 mb-2">
+                                        {[1, 2, 3, 4, 5].map((v) => (
+                                          <button
+                                            key={v}
+                                            aria-label={`pilih rating ${v}`}
+                                            disabled={pending}
+                                            onClick={() => setCurrentRating(v)}
+                                            className={`p-1 rounded ${pending ? "opacity-50" : "hover:bg-gray-100"}`}
+                                          >
+                                            <Star
+                                              className={
+                                                v <= currentRating
+                                                  ? "w-5 h-5 text-yellow-500 fill-yellow-400"
+                                                  : "w-5 h-5 text-gray-300"
+                                              }
+                                            />
+                                          </button>
+                                        ))}
+                                      </div>
+                                      <Textarea
+                                        placeholder="Tulis ulasan Anda (opsional)"
+                                        value={currentReview}
+                                        onChange={(e) => setCurrentReview(e.target.value)}
+                                        className="mb-3"
+                                      />
+                                      <div className="flex justify-end gap-2">
+                                        <Button
+                                          variant="outline"
+                                          disabled={pending}
+                                          onClick={() => {
+                                            setActiveReviewOrderId(null);
+                                            setCurrentRating(0);
+                                            setCurrentReview("");
+                                          }}
+                                        >
+                                          Batal
+                                        </Button>
+                                        <Button
+                                          disabled={pending}
+                                          className="bg-orange-600 hover:bg-orange-700 text-white"
+                                          onClick={async () => {
+                                            if (!userId) return alert("Silakan login kembali");
+                                            if (!currentRating) return alert("Pilih rating 1-5");
+                                            const produkId = order.pesanan_items?.[0]?.id_produk;
+                                            if (!produkId) return alert("Produk tidak ditemukan");
+                                            try {
+                                              setPending(true);
+                                              await createRating({ userId, produkId, rating: currentRating });
+                                              // TODO: kirim ulasan (currentReview) ketika endpoint tersedia
+                                              alert("Terima kasih atas ulasan dan rating Anda");
+                                              setActiveReviewOrderId(null);
+                                              setCurrentRating(0);
+                                              setCurrentReview("");
+                                            } catch (e: any) {
+                                              alert(e?.message || "Gagal mengirim ulasan/rating");
+                                            } finally {
+                                              setPending(false);
+                                            }
+                                          }}
+                                        >
+                                          Kirim Ulasan
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                                      onClick={() => {
+                                        setActiveReviewOrderId(order.id);
+                                        setCurrentRating(0);
+                                        setCurrentReview("");
+                                      }}
+                                    >
+                                      Beri Ulasan
+                                    </Button>
+                                  )}
+                                </div>
                               )}
                             </div>
                           </div>
