@@ -31,12 +31,8 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
 }) => {
   const { dispatch } = useCart();
   const router = useRouter();
-  const [selectedSize, setSelectedSize] = useState<string | number | undefined>(
-    undefined
-  );
-  const [selectedColor, setSelectedColor] = useState<string | undefined>(
-    undefined
-  );
+  const [selectedSize, setSelectedSize] = useState<string | number | undefined>(undefined);
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
   const [quantity, setQuantity] = useState(1);
   const [apiVariants, setApiVariants] = useState<any[]>([]);
   const [loadingVariants, setLoadingVariants] = useState(false);
@@ -50,30 +46,19 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
         setApiVariants(variants);
       } catch (error) {
         console.error("Failed to fetch variants:", error);
-        // Fallback to product.variants if API fails
         setApiVariants(product.variants);
       } finally {
         setLoadingVariants(false);
       }
     };
 
-    if (product.id) {
-      fetchVariants();
-    }
+    if (product.id) fetchVariants();
   }, [product.id, product.variants]);
 
-  // Use API variants if available, otherwise use product variants
   const variants = apiVariants.length > 0 ? apiVariants : product.variants;
 
-  // Cek apakah produk punya ukuran dan/atau warna
-  const hasSizes = variants.some(
-    (v) => v.ukuran !== undefined || v.size !== undefined
-  );
-  const hasColors = variants.some(
-    (v) => v.warna !== undefined || v.color !== undefined
-  );
-
-  // Jika produk tidak punya variant sama sekali, buat virtual variant dari produk utama
+  const hasSizes = variants.some((v) => v.ukuran !== undefined || v.size !== undefined);
+  const hasColors = variants.some((v) => v.warna !== undefined || v.color !== undefined);
   const hasVariants = variants.length > 0 && (hasSizes || hasColors);
 
   const availableSizes = hasSizes
@@ -83,13 +68,12 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     ? [...new Set(variants.map((v) => v.warna || v.color).filter(Boolean))]
     : [];
 
-  // Jika tidak ada variant, buat virtual variant dari produk utama
   const virtualVariant = !hasVariants
     ? {
         id: `virtual-${product.id}`,
         ukuran: undefined,
         warna: undefined,
-        stok: product.stock || 0, // Stok dari produk utama (akan dicek di backend)
+        stok: product.stock || 0,
         harga: product.price,
         size: undefined,
         color: undefined,
@@ -97,7 +81,6 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       }
     : null;
 
-  // Cari variant yang sesuai dengan selected size & color
   const selectedVariant = hasVariants
     ? variants.find(
         (v) =>
@@ -106,33 +89,15 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       )
     : virtualVariant;
 
-  // Set default variant saat load produk
   useEffect(() => {
     if (variants.length > 0 && !loadingVariants) {
       const firstVariant = variants[0];
-      if (
-        hasSizes &&
-        (firstVariant.ukuran || firstVariant.size) !== undefined &&
-        selectedSize === undefined
-      ) {
+      if (hasSizes && selectedSize === undefined)
         setSelectedSize(firstVariant.ukuran || firstVariant.size);
-      }
-      if (
-        hasColors &&
-        (firstVariant.warna || firstVariant.color) !== undefined &&
-        selectedColor === undefined
-      ) {
+      if (hasColors && selectedColor === undefined)
         setSelectedColor(firstVariant.warna || firstVariant.color);
-      }
     }
-  }, [
-    variants,
-    hasSizes,
-    hasColors,
-    selectedSize,
-    selectedColor,
-    loadingVariants,
-  ]);
+  }, [variants, hasSizes, hasColors, selectedSize, selectedColor, loadingVariants]);
 
   const handleAddToCart = () => {
     const token = localStorage.getItem("token");
@@ -146,19 +111,16 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       alert("Silakan pilih varian terlebih dahulu.");
       return;
     }
+
     if (quantity > selectedVariant.stok) {
       alert(`Stok tidak mencukupi. Maksimal ${selectedVariant.stok} buah`);
       return;
     }
-    // Determine variant type
-    let variantType: "size" | "color" | "default" = "default";
-    if (hasSizes && selectedSize !== undefined) {
-      variantType = "size";
-    } else if (hasColors && selectedColor !== undefined) {
-      variantType = "color";
-    }
 
-    // Add to cart using context
+    let variantType: "size" | "color" | "default" = "default";
+    if (hasSizes && selectedSize !== undefined) variantType = "size";
+    else if (hasColors && selectedColor !== undefined) variantType = "color";
+
     dispatch({
       type: "ADD_TO_CART",
       payload: {
@@ -172,24 +134,22 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
           selectedColor: selectedColor,
           variantType,
           variantId: selectedVariant.id,
-          quantity: quantity,
+          quantity,
           stock: selectedVariant.stok,
         },
       },
     });
-    // Persist to backend (best-effort)
+
     const varianIdToSend =
-      typeof selectedVariant.id === "string" &&
-      selectedVariant.id.startsWith("virtual-")
+      typeof selectedVariant.id === "string" && selectedVariant.id.startsWith("virtual-")
         ? null
         : (selectedVariant.id as string | undefined);
+
     addKeranjangItem({
       produk_id: product.id,
       produk_varian_id: varianIdToSend ?? undefined,
       kuantitas: quantity,
-    }).catch(() => {
-      // ignore server errors to avoid blocking UX
-    });
+    }).catch(() => {});
     alert(`Added ${quantity} ${selectedSize || selectedColor} to cart`);
   };
 
@@ -208,12 +168,12 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       alert(`Stok tidak mencukupi. Maksimal ${selectedVariant.stok} buah`);
       return;
     }
-    // Direct checkout: do NOT add to cart; store temp items and go to checkout
+
     const variantIdStr =
-      typeof selectedVariant.id === "string" &&
-      selectedVariant.id.startsWith("virtual-")
+      typeof selectedVariant.id === "string" && selectedVariant.id.startsWith("virtual-")
         ? undefined
         : (selectedVariant.id as string | undefined);
+
     const directItem = {
       id: `direct-${product.id}-${selectedSize || selectedColor || "default"}`,
       productId: product.id,
@@ -222,32 +182,25 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       image: product.image,
       size: selectedSize?.toString() || selectedColor || "Default",
       variantId: variantIdStr,
-      quantity: quantity,
+      quantity,
       stock: selectedVariant.stok,
     };
     try {
-      localStorage.setItem(
-        "checkout_direct_items",
-        JSON.stringify([directItem])
-      );
+      localStorage.setItem("checkout_direct_items", JSON.stringify([directItem]));
     } catch {}
     router.push("/checkout?mode=direct");
   };
 
-  // Check if a size has available variants
-  const isSizeAvailable = (size: string | number) => {
-    return variants.some((v) => (v.ukuran || v.size) === size && v.stok > 0);
-  };
+  const isSizeAvailable = (size: string | number) =>
+    variants.some((v) => (v.ukuran || v.size) === size && v.stok > 0);
 
-  // Check if a color has available variants
-  const isColorAvailable = (color: string) => {
-    return variants.some((v) => (v.warna || v.color) === color && v.stok > 0);
-  };
+  const isColorAvailable = (color: string) =>
+    variants.some((v) => (v.warna || v.color) === color && v.stok > 0);
 
   if (loadingVariants) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
         <span className="ml-2 text-sm text-gray-600">Memuat varian...</span>
       </div>
     );
@@ -317,11 +270,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
 
       {/* Informasi Variant yang Dipilih */}
       {selectedVariant && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-blue-900 mb-2">
-            Variant Dipilih:
-          </h4>
-          <div className="text-sm text-blue-800">
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-orange-900 mb-2">Variant Dipilih:</h4>
+          <div className="text-sm text-orange-800">
             {hasSizes && hasColors && (
               <p>
                 Ukuran: {selectedSize} | Warna: {selectedColor}
@@ -332,8 +283,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
             <p className="mt-1">Stok tersedia: {selectedVariant.stok}</p>
             {selectedVariant.harga && (
               <p className="mt-1">
-                Harga variant: Rp{" "}
-                {selectedVariant.harga.toLocaleString("id-ID")}
+                Harga variant: Rp {selectedVariant.harga.toLocaleString("id-ID")}
               </p>
             )}
           </div>
@@ -342,43 +292,39 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
 
       {/* Jumlah */}
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-          className="p-2 border rounded"
-        >
+        <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-2 border rounded">
           <FiMinus />
         </button>
         <span className="px-3">{quantity}</span>
-        <button
-          onClick={() => setQuantity((q) => q + 1)}
-          className="p-2 border rounded"
-        >
+        <button onClick={() => setQuantity((q) => q + 1)} className="p-2 border rounded">
           <FiPlus />
         </button>
       </div>
 
       {/* Tombol Aksi */}
       <div className="flex gap-3">
+        {/* Tambah ke Keranjang */}
         <button
           onClick={handleAddToCart}
           disabled={!selectedVariant || selectedVariant.stok === 0}
-          className={`flex-1 px-6 py-3 rounded-lg text-white font-semibold transition flex items-center justify-center gap-2 ${
+          className={`flex-1 px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 border-2 ${
             !selectedVariant || selectedVariant.stok === 0
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-indigo-600 hover:bg-indigo-700"
+              ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
+              : "border-orange-500 text-orange-500 bg-white hover:bg-orange-50 hover:shadow-md"
           }`}
         >
           <FiShoppingCart className="w-5 h-5" />
           Tambah ke Keranjang
         </button>
 
+        {/* Pesan Sekarang */}
         <button
           onClick={handleOrderNow}
           disabled={!selectedVariant || selectedVariant.stok === 0}
-          className={`flex-1 px-6 py-3 rounded-lg text-white font-semibold transition ${
+          className={`flex-1 px-6 py-3 rounded-lg font-semibold transition ${
             !selectedVariant || selectedVariant.stok === 0
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-green-600 hover:bg-green-700"
+              ? "bg-gray-300 text-gray-100 cursor-not-allowed"
+              : "bg-orange-500 hover:bg-orange-600 text-white shadow-sm hover:shadow-md"
           }`}
         >
           Pesan Sekarang
