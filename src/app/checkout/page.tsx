@@ -4,7 +4,7 @@ import { useCart } from "@/context/cart-context";
 import { formatRupiah } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { FiCheck, FiMapPin, FiUser, FiCreditCard } from "react-icons/fi";
+import { FiMapPin, FiUser, FiCreditCard } from "react-icons/fi";
 import {
   createPesanan,
   CreatePesananDto,
@@ -17,10 +17,24 @@ import {
 } from "@/components/lib/services/pembayaran.service";
 import { getProfile } from "@/components/lib/services/auth.service";
 
+type SnapPaymentResult = {
+  order_id: string;
+  status_code: string;
+  gross_amount: string;
+};
+
+type SnapOptions = {
+  onSuccess?: (result: SnapPaymentResult) => void;
+  onPending?: (result: SnapPaymentResult) => void;
+  onError?: (result: SnapPaymentResult) => void;
+  onClose?: () => void;
+  enabledPayments?: string[];
+};
+
 declare global {
   interface Window {
     snap: {
-      pay: (token: string, options: any) => void;
+      pay: (token: string, options: SnapOptions) => void;
     };
   }
 }
@@ -30,7 +44,12 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{
+    id: string;
+    username?: string;
+    email?: string;
+    phone?: string;
+  } | null>(null);
   // If navigated from cart with selection, hold selected ids
   const [selectedOnly, setSelectedOnly] = useState<string[] | null>(null);
 
@@ -69,17 +88,52 @@ export default function CheckoutPage() {
     init();
   }, [router]);
 
-  if (state.items.length === 0) {
+  // Parse selected item ids and direct mode check
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const selected = params.get("selected");
+      
+      if (selected) {
+        const ids = selected.split(",").filter(Boolean);
+        if (ids.length > 0) setSelectedOnly(ids);
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, []);
+
+  const itemsForCheckout = (() => {
+    // If direct mode, use items from localStorage
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("mode");
+    if (mode === "direct") {
+      try {
+        const raw = localStorage.getItem("checkout_direct_items");
+        if (raw) return JSON.parse(raw);
+      } catch {}
+    }
+    
+    // If selected items, filter cart
+    if (selectedOnly) {
+      return state.items.filter((i) => selectedOnly.includes(i.id));
+    }
+    
+    // Otherwise, use all cart items
+    return state.items;
+  })();
+
+  if (itemsForCheckout.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-lg shadow-md p-8 text-center">
               <h2 className="text-xl font-semibold text-gray-700 mb-2">
-                Keranjang Anda Kosong
+                Tidak Ada Produk untuk Checkout
               </h2>
               <p className="text-gray-500 mb-6">
-                Tambahkan beberapa produk ke keranjang Anda sebelum checkout.
+                Pilih produk terlebih dahulu untuk melanjutkan checkout.
               </p>
               <button
                 onClick={() => router.push("/")}
@@ -94,39 +148,12 @@ export default function CheckoutPage() {
     );
   }
 
-  // Parse selected item ids from query string once on mount
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const selected = params.get("selected");
-      if (selected) {
-        const ids = selected.split(",").filter(Boolean);
-        if (ids.length > 0) setSelectedOnly(ids);
-      }
-    } catch {}
-  }, []);
 
-  const itemsForCheckout = selectedOnly
-    ? state.items.filter((i) => selectedOnly.includes(i.id))
-    : (() => {
-        // If direct mode present, use items from localStorage and ignore cart
-        const params = new URLSearchParams(window.location.search);
-        const mode = params.get("mode");
-        if (mode === "direct") {
-          try {
-            const raw = localStorage.getItem("checkout_direct_items");
-            if (raw) return JSON.parse(raw);
-          } catch {}
-        }
-        return state.items;
-      })();
 
   const total = itemsForCheckout.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const tax = 0;
-  const shipping = 0;
   const grandTotal = total;
 
   const handleInputChange = (
@@ -188,10 +215,12 @@ export default function CheckoutPage() {
 
       if (formData.paymentMethod === "cod") {
         await createCodPayment(order.id);
-        // alert(
-        //   "Pesanan COD berhasil dibuat! Terima kasih telah berbelanja di SportZone."
-        // );
-        // dispatch({ type: "CLEAR_CART" });
+        const mode = new URLSearchParams(window.location.search).get("mode");
+        if (mode === "direct") {
+          localStorage.removeItem("checkout_direct_items");
+        } else {
+          dispatch({ type: "CLEAR_CART" });
+        }
         router.push("/pesanan/history");
       } else {
         // Midtrans payment for QRIS or DANA - this should create the payment record
@@ -215,22 +244,26 @@ export default function CheckoutPage() {
           });
         }
 
-        const snapOptions: any = {
-          onSuccess: function (result: any) {
+        const snapOptions: SnapOptions = {
+          onSuccess: function (result: SnapPaymentResult) {
             console.log("Payment success:", result);
             alert(
               "Pembayaran berhasil! Terima kasih telah berbelanja di SportZone."
             );
             const mode = new URLSearchParams(window.location.search).get("mode");
-            if (mode !== "direct") dispatch({ type: "CLEAR_CART" });
+            if (mode === "direct") {
+              localStorage.removeItem("checkout_direct_items");
+            } else {
+              dispatch({ type: "CLEAR_CART" });
+            }
             router.push("/pesanan");
           },
-          onPending: function (result: any) {
+          onPending: function (result: SnapPaymentResult) {
             console.log("Payment pending:", result);
             alert("Pembayaran sedang diproses. Silakan selesaikan pembayaran.");
             router.push("/pesanan");
           },
-          onError: function (result: any) {
+          onError: function (result: SnapPaymentResult) {
             console.log("Payment error:", result);
             alert("Pembayaran gagal. Silakan coba lagi.");
           },
@@ -248,9 +281,10 @@ export default function CheckoutPage() {
 
         window.snap.pay(paymentResponse.token, snapOptions);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Checkout error:", error);
-      alert(error?.message || "Terjadi kesalahan saat memproses pesanan");
+      const message = error instanceof Error ? error.message : "Terjadi kesalahan saat memproses pesanan";
+      alert(message);
     } finally {
       setIsProcessing(false);
     }
