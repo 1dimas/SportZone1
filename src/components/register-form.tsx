@@ -17,6 +17,7 @@ export function RegisterForm({
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -27,7 +28,7 @@ export function RegisterForm({
     setErrorMsg("");
 
     try {
-      const res = await register(name, email, password);
+      const res = await register(name, email, phone, password);
 
       if (res?.token) {
         localStorage.setItem("token", res.token);
@@ -63,9 +64,7 @@ export function RegisterForm({
             </div>
 
             {errorMsg && (
-              <div className=" text-sm text-center  p-3 ">
-                {errorMsg}
-              </div>
+              <div className=" text-sm text-center  p-3 ">{errorMsg}</div>
             )}
 
             <div className="grid gap-2">
@@ -91,6 +90,19 @@ export function RegisterForm({
                 placeholder="michael@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone" className="font-semibold text-[#FB8C00]">
+                Phone
+              </Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="Your Phone Number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 required
               />
             </div>
@@ -157,13 +169,13 @@ export function RegisterForm({
           </form>
 
           {/* Kolom Kanan: Gambar */}
-           <div className="relative hidden md:block bg-[#FB8C00] items-center justify-center rounded-r-3xl">
-             <img
-               src="/images/orange.jpg" // Pastikan gambar ini ada di folder /public
-               alt="Athlete"
-               className="h-full w-full object-contain rounded-r-3xl"
-             />
-           </div>
+          <div className="relative hidden md:block bg-[#FB8C00] items-center justify-center rounded-r-3xl">
+            <img
+              src="/images/orange.jpg" // Pastikan gambar ini ada di folder /public
+              alt="Athlete"
+              className="h-full w-full object-contain rounded-r-3xl"
+            />
+          </div>
         </CardContent>
       </Card>
     </div>

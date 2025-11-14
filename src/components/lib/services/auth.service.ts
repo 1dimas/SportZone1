@@ -19,12 +19,13 @@ export const API_URL =
 export async function register(
   username: string,
   email: string,
+  phone: string,
   password: string
 ) {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password }),
+    body: JSON.stringify({ username, email, phone, password }),
   });
 
   if (!response.ok) {
@@ -109,11 +110,12 @@ export async function getProfile(): Promise<UserProfile & { token?: string }> {
   };
   // Persist userId for legacy links/uses
   if (data?.user?.id) {
-    try { localStorage.setItem("userId", String(data.user.id)); } catch {}
+    try {
+      localStorage.setItem("userId", String(data.user.id));
+    } catch {}
   }
   return result;
 }
-
 
 // =====================
 // LOGIN GOOGLE
@@ -159,7 +161,11 @@ export async function verifyOtp(email: string, otp: string) {
 // =====================
 // RESET PASSWORD
 // =====================
-export async function resetPassword(email: string, otp: string, newPassword: string) {
+export async function resetPassword(
+  email: string,
+  otp: string,
+  newPassword: string
+) {
   const response = await fetch(`${API_URL}/auth/reset-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -168,6 +174,32 @@ export async function resetPassword(email: string, otp: string, newPassword: str
 
   if (!response.ok) {
     throw new Error("Gagal reset password");
+  }
+
+  return response.json();
+}
+
+// =====================
+// UPDATE CUSTOMER PROFILE
+// =====================
+export async function updateCustomerProfile(
+  id: string,
+  data: Partial<UserProfile>
+) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("Belum login");
+
+  const response = await fetch(`${API_URL}/users/profile/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Gagal update profile");
   }
 
   return response.json();
@@ -242,7 +274,9 @@ export async function getProfileByUserId(userId: string): Promise<UserProfile> {
     // Jika bukan 404, throw error asli
     if (response.status !== 404) {
       const errorText = await response.text();
-      throw new Error(`Gagal mengambil profile: ${response.status} ${errorText}`);
+      throw new Error(
+        `Gagal mengambil profile: ${response.status} ${errorText}`
+      );
     }
 
     throw new Error("User tidak ditemukan");
