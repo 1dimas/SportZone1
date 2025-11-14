@@ -368,8 +368,12 @@ export default function PesananHistoryPage() {
                                             if (!produkId) return alert("Produk tidak ditemukan");
                                             try {
                                               setPending(true);
-                                              await createRating({ userId, produkId, rating: currentRating });
-                                              // TODO: kirim ulasan (currentReview) ketika endpoint tersedia
+                                              await createRating({ 
+                                                userId, 
+                                                produkId, 
+                                                rating: currentRating,
+                                                review: currentReview.trim() || undefined
+                                              });
                                               alert("Terima kasih atas ulasan dan rating Anda");
                                               setActiveReviewOrderId(null);
                                               setCurrentRating(0);

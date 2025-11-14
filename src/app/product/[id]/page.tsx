@@ -6,11 +6,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { FiHeart, FiShare2 } from "react-icons/fi";
 import { ProductActions } from "@/components/Detailpage/ProductActions";
+import { RatingList } from "@/components/Detailpage/RatingList";
 import type { ProductVariant } from "@/app/data/products";
 import {
   getProdukById,
   getAllProduk,
 } from "@/components/lib/services/produk.service";
+import {
+  getRatingsByProduct,
+  getAverageRating,
+  type RatingData,
+} from "@/components/lib/services/rating.service";
 import Footer from "@/components/Home/Footer";
 import Header from "@/components/Home/Header"; // <-- Import ini sudah ada
 
@@ -47,6 +53,8 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState<UnionProduct | null>(null);
   const [related, setRelated] = useState<UnionProduct[]>([]);
+  const [ratings, setRatings] = useState<RatingData[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,6 +69,17 @@ export default function ProductDetailPage() {
         setProduct(produkData);
         const filtered = allProduk.filter((p) => p.id !== id);
         setRelated(filtered.slice(0, 8));
+
+        try {
+          const [ratingsData, avgRating] = await Promise.all([
+            getRatingsByProduct(id),
+            getAverageRating(id),
+          ]);
+          setRatings(ratingsData);
+          setAverageRating(avgRating);
+        } catch (ratingErr) {
+          console.error("Error loading ratings:", ratingErr);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Gagal memuat produk");
       } finally {
@@ -203,6 +222,11 @@ export default function ProductDetailPage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Rating & Ulasan Section */}
+        <div className="mb-16">
+          <RatingList ratings={ratings} averageRating={averageRating} />
         </div>
 
         {/* Produk Lainnya */}

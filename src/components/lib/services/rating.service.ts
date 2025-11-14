@@ -12,6 +12,25 @@ export type CreateRatingPayload = {
   userId: string;
   produkId: string;
   rating: number; // 1-5
+  review?: string;
+};
+
+export type UpdateRatingPayload = {
+  rating?: number;
+  review?: string;
+};
+
+export type RatingData = {
+  id: string;
+  rating: number;
+  review: string | null;
+  createdAt: string;
+  user: {
+    id: string;
+    nama: string;
+    username?: string;
+    email: string;
+  };
 };
 
 export async function createRating(payload: CreateRatingPayload) {
@@ -34,7 +53,7 @@ export async function createRating(payload: CreateRatingPayload) {
   return res.json();
 }
 
-export async function updateRating(id: string, rating: number) {
+export async function updateRating(id: string, payload: UpdateRatingPayload) {
   const token = getToken();
   if (!token) throw new Error("Belum login");
 
@@ -44,7 +63,7 @@ export async function updateRating(id: string, rating: number) {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ rating }),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
