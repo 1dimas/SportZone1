@@ -34,6 +34,7 @@ const statusOrder: Record<string, number> = {
   dikirim: 2,
   selesai: 3,
   dibatalkan: 4,
+  dikembalikan: 5,
 };
 
 export default function PesananHistoryPage() {
@@ -90,6 +91,7 @@ export default function PesananHistoryPage() {
     { key: "dikirim", label: "Dikirim" },
     { key: "selesai", label: "Selesai" },
     { key: "dibatalkan", label: "Dibatalkan" },
+    { key: "dikembalikan", label: "Dikembalikan" },
   ];
 
   return (

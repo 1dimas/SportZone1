@@ -6,6 +6,7 @@ import {
   Pesanan,
   getPesananById,
   updatePesananStatus,
+  StatusPesanan,
 } from "@/components/lib/services/pesanan.service";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ export function PesananDetail({ id }: PesananDetailProps) {
 
   useEffect(() => {
     fetchPesanan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleStatusChange = (newStatus: string) => {
@@ -57,13 +59,13 @@ export function PesananDetail({ id }: PesananDetailProps) {
     try {
       setUpdating(true);
 
-      // Allow all status changes for petugas - backend will validate
-      await updatePesananStatus(pesanan.id, selectedStatus as any);
+      await updatePesananStatus(pesanan.id, selectedStatus as StatusPesanan);
       toast.success("Status pesanan berhasil diperbarui");
       fetchPesanan();
     } catch (err) {
       console.error("Failed to update status:", err);
-      toast.error("Gagal memperbarui status pesanan");
+      const errorMessage = err instanceof Error ? err.message : "Gagal memperbarui status pesanan";
+      toast.error(errorMessage);
     } finally {
       setUpdating(false);
     }
@@ -136,8 +138,19 @@ export function PesananDetail({ id }: PesananDetailProps) {
             <SelectItem value="dikirim">Dikirim</SelectItem>
             <SelectItem value="selesai">Selesai</SelectItem>
             <SelectItem value="dibatalkan">Dibatalkan</SelectItem>
+            <SelectItem value="dikembalikan">Dikembalikan</SelectItem>
           </SelectContent>
         </Select>
+        {(pesanan.status === 'dikirim' || pesanan.status === 'selesai') && selectedStatus === 'dikembalikan' && (
+          <p className="text-sm text-orange-600 mt-2">
+            ⚠️ Mengubah status ke &quot;Dikembalikan&quot; akan mengembalikan stok produk.
+          </p>
+        )}
+        {pesanan.status !== 'dikirim' && pesanan.status !== 'selesai' && selectedStatus === 'dikembalikan' && (
+          <p className="text-sm text-red-600 mt-2">
+            ⚠️ Status &quot;Dikembalikan&quot; hanya dapat digunakan untuk pesanan dengan status &quot;Dikirim&quot; atau &quot;Selesai&quot;.
+          </p>
+        )}
       </div>
       <div className="flex justify-end gap-4">
         <Button

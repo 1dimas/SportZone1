@@ -1,0 +1,17 @@
+*** Begin Patch
+*** Update File: src/components/lib/services/pesanan.service.ts
+@@
+-export type StatusPesanan =
+-  | "pending"
+-  | "diproses"
+-  | "dikirim"
+-  | "selesai"
+-  | "dibatalkan";
++export type StatusPesanan =
++  | "pending"
++  | "diproses"
++  | "dikirim"
++  | "selesai"
++  | "dibatalkan"
++  | "dikembalikan";
+*** End Patch
