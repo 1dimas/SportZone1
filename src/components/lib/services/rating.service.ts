@@ -93,22 +93,23 @@ export async function deleteRating(id: string) {
 }
 
 export async function getRatingsByProduct(produkId: string) {
-  const token = getToken();
-  if (!token) throw new Error("Belum login");
-
   const res = await fetch(`${API_URL}/rating/product/${produkId}`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
+
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Gagal ambil rating produk: ${res.status} ${res.statusText} - ${text}`);
+    throw new Error(
+      `Gagal ambil rating produk: ${res.status} ${res.statusText} - ${text}`
+    );
   }
+
   return res.json();
 }
+
 
 export async function getRatingsByUser(userId: string) {
   const token = getToken();
@@ -129,23 +130,19 @@ export async function getRatingsByUser(userId: string) {
 }
 
 export async function getAverageRating(produkId: string): Promise<number> {
-  const token = getToken();
-  if (!token) throw new Error("Belum login");
-
   const res = await fetch(`${API_URL}/rating/product/${produkId}/average`, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Gagal ambil rata-rata rating: ${res.status} ${res.statusText} - ${text}`);
-  }
+
+  if (!res.ok) return 0;
+
   const data = await res.json();
   return typeof data?.averageRating === "number" ? data.averageRating : 0;
 }
+
 
 // Fungsi untuk mengambil rating rata-rata tanpa perlu login (untuk homepage)
 export async function getAverageRatingPublic(produkId: string): Promise<number> {

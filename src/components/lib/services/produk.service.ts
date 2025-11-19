@@ -224,15 +224,9 @@ export async function deleteGambarProduk(produkId: string, gambarUrl: string) {
 // VARIAN PRODUK
 // =====================
 export async function getVarianByProduk(produkId: string) {
-  const token = getToken();
-  if (!token) throw new Error("Belum login");
-
   const response = await fetch(`${API_URL}/produk/${produkId}/varian`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
 
   if (!response.ok) {
@@ -245,6 +239,7 @@ export async function getVarianByProduk(produkId: string) {
   const data = await response.json();
   return Array.isArray(data) ? data : [data];
 }
+
 
 export async function createVarian(data: {
   produk_id: string;
