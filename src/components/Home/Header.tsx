@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 // --- 1. IMPORT IMAGE ---
-import Image from "next/image"; 
+import Image from "next/image";
 import {
   FiSearch,
   FiShoppingCart,
@@ -64,7 +64,11 @@ export default function Header() {
         } catch (err) {
           console.error("Failed to decode token:", err);
         }
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
       }
     }
   }, []);
@@ -94,15 +98,14 @@ export default function Header() {
   };
 
   const handleSearch = (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!searchQuery.trim()) return;
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
 
-  router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+    router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
 
-  setIsSearchOpen(false);
-  setSearchQuery("");
-};
-
+    setIsSearchOpen(false);
+    setSearchQuery("");
+  };
 
   return (
     <>
@@ -119,7 +122,6 @@ export default function Header() {
           `}
         >
           <div className="flex items-center justify-between h-20 gap-4">
-            
             {/* --- 2. LOGO HEADER NORMAL DIUBAH --- */}
             <Link href="/" className="flex items-center gap-2 flex-shrink-0">
               {/* Ganti "logo-sz.png" jika nama file Anda berbeda */}
@@ -182,7 +184,9 @@ export default function Header() {
                         className="flex items-center gap-2 text-gray-700 hover:text-orange-500"
                       >
                         <FiUser size={18} />
-                        <span className="hidden md:block font-medium">Akun</span>
+                        <span className="hidden md:block font-medium">
+                          Akun
+                        </span>
                         <FiChevronDown size={16} className="hidden md:block" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -190,7 +194,10 @@ export default function Header() {
                       <DropdownMenuLabel>Halo!</DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/pesanan/history" className="flex items-center">
+                        <Link
+                          href="/pesanan/history"
+                          className="flex items-center"
+                        >
                           <FiList className="mr-2 h-4 w-4" />
                           <span>Riwayat Pesanan</span>
                         </Link>
@@ -235,7 +242,6 @@ export default function Header() {
         {isSearchOpen && (
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center h-20 gap-4">
-              
               {/* --- 3. LOGO HEADER SEARCH DIUBAH --- */}
               <Link href="/" className="flex items-center gap-2 flex-shrink-0">
                 <Image
@@ -287,28 +293,17 @@ export default function Header() {
         <div className="lg:hidden fixed inset-0 z-[100]">
           <div className="fixed inset-0 bg-black/40" onClick={closeMenu}></div>
           <div className="fixed top-0 left-0 w-3/4 max-w-sm h-full bg-white z-50 p-6 shadow-xl overflow-y-auto">
-            
             {/* --- 4. HEADER MENU MOBILE DIUBAH --- */}
             <div className="flex items-center justify-between mb-8">
-              <Link href="/" onClick={closeMenu} className="flex items-center gap-2 flex-shrink-0">
-                <Image
-                  src="/logo-sz.png"
-                  alt="SportZone Logo"
-                  width={40}
-                  height={40}
-                  className="h-10 w-10"
-                />
+              <Link
+                href="/"
+                onClick={closeMenu}
+                className="flex items-center gap-2 flex-shrink-0"
+              >
                 <span className="text-2xl font-bold text-gray-900">
                   Sport<span className="text-orange-500">Zone</span>
                 </span>
               </Link>
-              <button
-                onClick={closeMenu}
-                className="p-2 text-gray-600"
-                aria-label="Tutup Menu"
-              >
-                <FiX size={24} />
-              </button>
             </div>
             {/* --- --------------------------- --- */}
 
@@ -353,39 +348,49 @@ export default function Header() {
             </div>
 
             {/* Navigasi Kategori */}
+            {/* ======================================================= */}
+            {/* ================ NAVIGASI KATEGORI MOBILE =============== */}
+            {/* ======================================================= */}
             <nav className="flex flex-col gap-2 border-t pt-6">
-              {menuData.map((item) =>
-                item.title === "SPORTS" && item.columns.length > 0 ? (
-                  <div key={item.title} className="flex flex-col">
-                    <span className="py-3 px-3 rounded-lg font-medium text-gray-900 text-base">
-                      {item.title}
-                    </span>
-                    <div className="flex flex-col pl-5 pt-1 gap-1 border-l ml-3">
-                      {item.columns.map((column, colIndex) =>
-                        column.links.map((link) => (
-                          <Link
-                            key={`${colIndex}-${link.text}`}
-                            href={link.href}
-                            onClick={closeMenu}
-                            className="py-2 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:text-orange-500"
-                          >
-                            {link.text}
-                          </Link>
-                        ))
+              {menuData
+                .filter((item) => item.title === "SPORTS")
+                .map((item) => {
+                  // Pastikan item memiliki columns dan kolom pertama memiliki links
+                  const hasLinks = item.columns?.[0]?.links?.length > 0;
+
+                  return (
+                    <div key={item.title} className="flex flex-col">
+                      {/* TITLE SPORTS */}
+                      <span className="py-3 px-3 rounded-lg font-bold text-gray-900 text-lg">
+                        {item.title}
+                      </span>
+
+                      {/* SUB MENU (HANYA DITAMPILKAN JIKA ADA LINKS) */}
+                      {hasLinks && (
+                        <div className="flex flex-col pl-5 pt-1 gap-1 border-l ml-3">
+                          {/* Cek setiap kolom dan loop setiap link di dalamnya */}
+                          {item.columns.map((column, colIndex) => (
+                            // Tambahkan fragment atau div jika perlu, tapi fokus pada links
+                            <div key={colIndex}>
+                              {column.links?.map((link) => (
+                                <Link
+                                  key={link.text} // Key unik
+                                  href={link.href}
+                                  onClick={closeMenu}
+                                  // Pastikan kelas ini membuatnya terlihat dan interaktif
+                                  className="py-2 px-3 rounded-lg text-base text-gray-700 hover:bg-gray-100 hover:text-orange-500 transition-colors block"
+                                >
+                                  {link.text}
+                                </Link>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
                       )}
+                      {/* Jika SPORTS tidak punya links, tidak ada yang ditampilkan di sini */}
                     </div>
-                  </div>
-                ) : (
-                  <Link
-                    key={item.title}
-                    href={item.href}
-                    onClick={closeMenu}
-                    className="py-3 px-3 rounded-lg font-medium text-gray-700 hover:bg-gray-100 hover:text-orange-500"
-                  >
-                    {item.title}
-                  </Link>
-                )
-              )}
+                  );
+                })}
             </nav>
           </div>
         </div>

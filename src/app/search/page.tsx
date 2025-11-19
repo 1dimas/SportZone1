@@ -3,9 +3,25 @@ import Link from "next/link";
 import { getAllProduk } from "@/components/lib/services/produk.service";
 import Header from "@/components/Home/Header";
 
+// ⭐ Component Rating
+function StarRating({ rating }: { rating: number }) {
+  const stars = [];
+
+  for (let i = 1; i <= 5; i++) {
+    if (rating >= i) {
+      stars.push(<span key={i} className="text-yellow-400">★</span>);
+    } else if (rating >= i - 0.5) {
+      stars.push(<span key={i} className="text-yellow-400">☆</span>);
+    } else {
+      stars.push(<span key={i} className="text-gray-300">★</span>);
+    }
+  }
+
+  return <div className="flex text-xs mt-1">{stars}</div>;
+}
+
 export default async function SearchPage({ searchParams }: any) {
   const q = (searchParams.q || "").toLowerCase();
-  const sort = searchParams.sort || "relevance";
 
   // Ambil semua produk
   const allProducts = await getAllProduk();
@@ -14,17 +30,6 @@ export default async function SearchPage({ searchParams }: any) {
   let results = allProducts.filter((item: any) =>
     item.nama.toLowerCase().includes(q)
   );
-
-  // Sorting
-  if (sort === "low") {
-    results = results.sort((a: any, b: any) => a.harga - b.harga);
-  } else if (sort === "high") {
-    results = results.sort((a: any, b: any) => b.harga - a.harga);
-  } else if (sort === "new") {
-    results = results.sort(
-      (a: any, b: any) => new Date(b.createdAt) - new Date(a.createdAt)
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,37 +46,9 @@ export default async function SearchPage({ searchParams }: any) {
             <span className="text-orange-600">"{q}"</span>
           </h1>
           <p className="text-gray-600 mt-1 text-sm">
-            Menampilkan <span className="font-semibold">{results.length}</span> produk ditemukan
+            Menampilkan{" "}
+            <span className="font-semibold">{results.length}</span> produk ditemukan
           </p>
-        </div>
-
-        {/* ============================== */}
-        {/*       FILTER BAR MODERN        */}
-        {/* ============================== */}
-        <div className="bg-white border rounded-xl p-3 shadow-sm mb-8 flex flex-wrap gap-2 items-center">
-          <span className="text-gray-700 font-medium mr-2">Urutkan:</span>
-
-          {[
-            { key: "relevance", label: "Relevansi" },
-            { key: "low", label: "Termurah" },
-            { key: "high", label: "Termahal" },
-            { key: "new", label: "Terbaru" },
-          ].map((item) => (
-            <Link
-              key={item.key}
-              href={`/search?q=${q}${item.key === "relevance" ? "" : `&sort=${item.key}`}`}
-              className={`
-                px-4 py-1.5 rounded-lg text-sm border transition
-                ${
-                  sort === item.key
-                    ? "bg-orange-500 border-orange-500 text-white"
-                    : "bg-white hover:bg-gray-100 border-gray-300 text-gray-700"
-                }
-              `}
-            >
-              {item.label}
-            </Link>
-          ))}
         </div>
 
         {/* ============================== */}
@@ -80,29 +57,59 @@ export default async function SearchPage({ searchParams }: any) {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
           {results.map((product: any) => (
             <Link
-              key={product.id}
-              href={`/product/${product.id}`}
-              className="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all hover:-translate-y-1"
-            >
-              <div className="relative w-full h-40 bg-gray-100">
-                <Image
-                  src={product.gambar || "/images/no-image.png"}
-                  fill
-                  className="object-cover"
-                  alt={product.nama}
-                />
-              </div>
+  key={product.id}
+  href={`/product/${product.id}`}
+  className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition-all"
+>
+  {/* IMAGE */}
+  <div className="relative w-full h-48 bg-gray-100">
+    <Image
+      src={
+        Array.isArray(product.gambar)
+          ? product.gambar[0]
+          : "/images/no-image.png"
+      }
+      fill
+      className="object-cover"
+      alt={product.nama}
+    />
 
-              <div className="p-3">
-                <h3 className="font-medium text-sm h-10 leading-tight line-clamp-2">
-                  {product.nama}
-                </h3>
+    {product.diskon && (
+      <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+        {product.diskon}%
+      </div>
+    )}
+  </div>
 
-                <p className="text-orange-600 font-bold mt-2">
-                  Rp {product.harga.toLocaleString()}
-                </p>
-              </div>
-            </Link>
+  {/* CONTENT */}
+  <div className="p-2">
+
+    <h3 className="text-xs font-medium text-gray-800 line-clamp-2 h-8">
+      {product.nama}
+    </h3>
+
+    <p className="text-sm font-bold text-orange-600 mt-1">
+      Rp {product.harga.toLocaleString()}
+    </p>
+
+    {product.diskon && (
+      <p className="text-[10px] text-gray-400 line-through -mt-0.5">
+        Rp {(product.harga / (1 - product.diskon / 100)).toLocaleString()}
+      </p>
+    )}
+
+    <div className="flex items-center gap-1 text-[10px] text-gray-600 mt-1">
+      ⭐ {product.rating || 4.7}
+      <span>•</span>
+      <span>{product.terjual || "100+"} terjual</span>
+    </div>
+
+   
+  </div>
+</Link>
+
+
+
           ))}
         </div>
 

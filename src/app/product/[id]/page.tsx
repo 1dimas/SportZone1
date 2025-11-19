@@ -217,42 +217,61 @@ export default function ProductDetailPage() {
           <RatingList ratings={ratings} averageRating={averageRating} />
         </div>
 
+        
         {/* Produk Lainnya */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Produk Lainnya
-          </h2>
-          {related.length === 0 ? (
-            <p className="text-gray-600">Tidak ada produk lain.</p>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-              {related.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/product/${item.id}`}
-                  className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"
-                >
-                  <div className="relative w-full aspect-square">
-                    <Image
-                      src={item.gambar[0]}
-                      alt={item.nama}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-medium text-gray-800 line-clamp-2 mb-1">
-                      {item.nama}
-                    </h3>
-                    <p className="text-orange-600 font-semibold text-sm">
-                      {formatRupiah(item.harga)}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+<div>
+  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+    Produk Lainnya
+  </h2>
+
+  {related.length === 0 ? (
+    <p className="text-gray-600">Tidak ada produk lain.</p>
+  ) : (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+      {related.map((item) => (
+        <Link
+          key={item.id}
+          href={`/product/${item.id}`}
+          className="
+            bg-white border border-gray-200 rounded-xl overflow-hidden
+            shadow-sm hover:shadow-md transition duration-300
+            hover:-translate-y-1
+          "
+        >
+          {/* Gambar */}
+          <div className="relative w-full aspect-square bg-gray-50">
+            <Image
+              src={item.gambar[0]}
+              alt={item.nama}
+              fill
+              className="object-cover transition-transform duration-500 hover:scale-105"
+            />
+          </div>
+
+          {/* Detail Produk */}
+          <div className="p-3 space-y-1.5">
+            <h3 className="text-sm font-medium text-gray-800 line-clamp-2 min-h-[36px]">
+              {item.nama}
+            </h3>
+
+            <p className="text-orange-600 font-semibold text-sm">
+              {formatRupiah(item.harga)}
+            </p>
+
+            {/* ⭐ Rating + Terjual */}
+            <div className="flex items-center gap-1 text-[11px] text-gray-600">
+              <span className="text-yellow-400 text-xs">★</span>
+              <span>4.6</span>
+              <span className="text-gray-400">•</span>
+              <span>Terjual 50+</span>
             </div>
-          )}
-        </div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  )}
+</div>
+
       </main>
       {/* Footer */}
       <footer className="mt-20 border-t ...">

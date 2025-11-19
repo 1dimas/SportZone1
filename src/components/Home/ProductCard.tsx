@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";
 import { FiStar } from "react-icons/fi";
-import { formatRupiah } from "@/lib/utils";
 
 type ProductVariant = {
   size: string | number;
@@ -94,7 +93,7 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
         </h3>
 
         <p className="mt-0.5 text-sm font-bold text-orange-500">
-          {formatRupiah(price)}
+          Rp{price.toLocaleString("id-ID")}
         </p>
 
         <div className="mt-0.5 flex items-center text-[11px] text-gray-600">
