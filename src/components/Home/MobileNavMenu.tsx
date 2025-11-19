@@ -1,14 +1,58 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { menuData, MenuColumn } from '@/app/data/menuData';
+import { MenuColumn } from '@/app/data/menuData';
 import { FiChevronRight, FiChevronLeft } from 'react-icons/fi';
+import { getAllKategoriOlahraga } from '@/components/lib/services/olahraga.service';
+import { getSubkategoriPeralatanByKategoriOlahraga } from '@/components/lib/services/subkategori-peralatan.service';
+
+type KategoriOlahraga = {
+  id: string;
+  nama: string;
+};
+
+type SubkategoriPeralatan = {
+  id: string;
+  nama: string;
+  kategori_olahraga_id: string;
+};
 
 // Komponen ini menerima satu prop: sebuah fungsi untuk menutup panel utama
 export const MobileNavMenu = ({ onLinkClick }: { onLinkClick: () => void }) => {
-  // State untuk melacak kategori mana yang sedang aktif/terbuka
   const [activeCategory, setActiveCategory] = useState<MenuColumn | null>(null);
+  const [categories, setCategories] = useState<MenuColumn[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const kategoriData = await getAllKategoriOlahraga() as KategoriOlahraga[];
+        
+        const menuColumns: MenuColumn[] = await Promise.all(
+          kategoriData.map(async (kategori) => {
+            const subkategoriData = await getSubkategoriPeralatanByKategoriOlahraga(kategori.id) as SubkategoriPeralatan[];
+            
+            return {
+              heading: kategori.nama.toUpperCase(),
+              links: subkategoriData.map((sub) => ({
+                name: sub.nama,
+                href: `/sports/${kategori.nama.toLowerCase()}/${sub.nama.toLowerCase().replace(/\s+/g, '-')}`
+              }))
+            };
+          })
+        );
+
+        setCategories(menuColumns);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Fungsi untuk menangani saat kategori di-klik
   const handleCategoryClick = (category: MenuColumn) => {
@@ -30,30 +74,22 @@ export const MobileNavMenu = ({ onLinkClick }: { onLinkClick: () => void }) => {
           ${activeCategory ? '-translate-x-full' : 'translate-x-0'}
         `}
       >
-        <div className="p-4 flex flex-col">
-          {menuData.map((item) => (
-            // Jika item punya submenu, jadikan tombol. Jika tidak, jadikan link.
-            item.columns.length > 0 ? (
+        {isLoading ? (
+          <div className="p-4 text-center text-gray-500">Loading...</div>
+        ) : (
+          <div className="p-4 flex flex-col">
+            {categories.map((category) => (
               <button
-                key={item.title}
-                onClick={() => handleCategoryClick(item.columns[0])} // Asumsi kita masuk ke kolom pertama
+                key={category.heading}
+                onClick={() => handleCategoryClick(category)}
                 className="flex justify-between items-center w-full px-4 py-3 rounded-md text-gray-700 font-semibold hover:text-orange-600 hover:bg-slate-100 text-left"
               >
-                <span>{item.title}</span>
+                <span>{category.heading}</span>
                 <FiChevronRight />
               </button>
-            ) : (
-              <Link
-                key={item.title}
-                href={item.href}
-                onClick={onLinkClick}
-                className="block px-4 py-3 rounded-md text-gray-700 font-semibold hover:text-orange-600 hover:bg-slate-100"
-              >
-                {item.title}
-              </Link>
-            )
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Panel 2: Sub-Menu (Daftar Link di dalam kategori) */}

@@ -8,6 +8,7 @@ export type LinkItem = {
 
 export type MenuColumn = {
   heading: string;
+  kategoriHref?: string;
   links: LinkItem[];
 };
 

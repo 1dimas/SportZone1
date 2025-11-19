@@ -358,6 +358,9 @@ export async function getProdukByKategori(kategoriId: string) {
 }
 
 export async function getProdukBySubkategori(subkategoriId: string) {
+  console.log(`Fetching produk for subkategori ID: ${subkategoriId}`);
+  console.log(`API URL: ${API_URL}/produk/subkategori/${subkategoriId}`);
+  
   const response = await fetch(
     `${API_URL}/produk/subkategori/${subkategoriId}`,
     {
@@ -365,8 +368,18 @@ export async function getProdukBySubkategori(subkategoriId: string) {
       headers: { "Content-Type": "application/json" },
     }
   );
-  if (!response.ok) throw new Error(await response.text());
+  
+  console.log(`Response status: ${response.status}`);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Error response: ${errorText}`);
+    throw new Error(errorText);
+  }
+  
   const data = await response.json();
+  console.log(`Received produk data:`, data);
+  
   return Array.isArray(data) ? data : [data];
 }
 

@@ -83,14 +83,18 @@ export async function getSubkategoriPeralatanById(id: string) {
 // =====================
 export async function getSubkategoriPeralatanByKategoriOlahraga(kategoriOlahragaId: string) {
   const token = getToken();
-  if (!token) throw new Error("Belum login");
+  
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   const response = await fetch(`${API_URL}/subkategori-peralatan/kategori/${kategoriOlahragaId}`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {

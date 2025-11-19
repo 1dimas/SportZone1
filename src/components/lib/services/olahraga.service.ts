@@ -10,14 +10,18 @@ const getToken = () => localStorage.getItem("token");
 // =====================
 export async function getAllKategoriOlahraga() {
   const token = getToken();
-  if (!token) throw new Error("Belum login");
+  
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
 
   const response = await fetch(`${API_URL}/kategori-olahraga`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {

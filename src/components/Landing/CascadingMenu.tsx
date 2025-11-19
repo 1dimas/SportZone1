@@ -5,17 +5,63 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { MenuItem, MenuColumn } from '@/app/data/menuData';
 import { FiChevronRight } from 'react-icons/fi';
+import { getAllKategoriOlahraga } from '@/components/lib/services/olahraga.service';
+import { getSubkategoriPeralatanByKategoriOlahraga } from '@/components/lib/services/subkategori-peralatan.service';
 
 type CascadingMenuProps = {
   menuItem: MenuItem;
 };
 
+type KategoriOlahraga = {
+  id: string;
+  nama: string;
+};
+
+type SubkategoriPeralatan = {
+  id: string;
+  nama: string;
+  kategori_olahraga_id: string;
+};
+
 export const CascadingMenu: React.FC<CascadingMenuProps> = ({ menuItem }) => {
   const [isOpen, setIsOpen] = useState(false);
-  // State untuk melacak kategori yang di-hover, bukan diklik
-  const [activeCategory, setActiveCategory] = useState<MenuColumn | null>(menuItem.columns[0] || null);
+  const [categories, setCategories] = useState<MenuColumn[]>(menuItem.columns);
+  const [activeCategory, setActiveCategory] = useState<MenuColumn | null>(categories[0] || null);
+  const [isLoading, setIsLoading] = useState(true);
   
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const kategoriData = await getAllKategoriOlahraga() as KategoriOlahraga[];
+        
+        const menuColumns: MenuColumn[] = await Promise.all(
+          kategoriData.map(async (kategori) => {
+            const subkategoriData = await getSubkategoriPeralatanByKategoriOlahraga(kategori.id) as SubkategoriPeralatan[];
+            
+            return {
+              heading: kategori.nama.toUpperCase(),
+              kategoriHref: `/sports/${kategori.nama.toLowerCase()}`,
+              links: subkategoriData.map((sub) => ({
+                name: sub.nama,
+                href: `/sports/${kategori.nama.toLowerCase()}/${sub.nama.toLowerCase().replace(/\s+/g, '-')}`
+              }))
+            };
+          })
+        );
+
+        setCategories(menuColumns);
+        setActiveCategory(menuColumns[0] || null);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -49,19 +95,24 @@ export const CascadingMenu: React.FC<CascadingMenuProps> = ({ menuItem }) => {
           <div className="w-screen max-w-4xl bg-white rounded-b-lg shadow-2xl flex border-t-2 border-blue-600">
             {/* Kolom Kiri: Daftar Kategori */}
             <div className="w-1/4 bg-slate-50 border-r border-slate-200 rounded-bl-lg">
-              <ul className="p-4 space-y-1">
-                {menuItem.columns.map((category) => (
-                  <li key={category.heading}>
-                    <button 
-                      onMouseEnter={() => setActiveCategory(category)}
-                      className={`w-full text-left flex justify-between items-center px-4 py-2 rounded-md transition-colors duration-150 ${activeCategory?.heading === category.heading ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-200'}`}
-                    >
-                      <span>{category.heading}</span>
-                      <FiChevronRight size={16}/>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              {isLoading ? (
+                <div className="p-4 text-center text-gray-500">Loading...</div>
+              ) : (
+                <ul className="p-4 space-y-1">
+                  {categories.map((category) => (
+                    <li key={category.heading}>
+                      <Link
+                        href={category.kategoriHref || '#'}
+                        onMouseEnter={() => setActiveCategory(category)}
+                        className={`w-full text-left flex justify-between items-center px-4 py-2 rounded-md transition-colors duration-150 block ${activeCategory?.heading === category.heading ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-200'}`}
+                      >
+                        <span>{category.heading}</span>
+                        <FiChevronRight size={16}/>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Kolom Kanan: Daftar Item dari Kategori Aktif */}
