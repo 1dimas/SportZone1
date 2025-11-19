@@ -392,3 +392,34 @@ export async function getProdukByBrand(brandId: string) {
   const data = await response.json();
   return Array.isArray(data) ? data : [data];
 }
+
+
+
+// =====================
+// SEARCH PRODUK BY KEYWORD
+// =====================
+export async function searchProduk(query: string) {
+  // Menggunakan encodeURIComponent untuk memastikan query aman di URL
+  const encodedQuery = encodeURIComponent(query.trim());
+
+  // Asumsi: Endpoint API untuk pencarian adalah /produk/search?query=KEYWORD
+  const response = await fetch(
+    `${API_URL}/produk/search?query=${encodedQuery}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Gagal melakukan pencarian produk: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  const data = await response.json();
+  // Pastikan data yang dikembalikan adalah array
+  return Array.isArray(data) ? data : [];
+}
+

@@ -143,7 +143,6 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header /> {/* <-- HEADER DITAMBAHKAN DI SINI */}
-
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Tombol Kembali DIHAPUS DARI SINI */}
 
@@ -177,18 +176,6 @@ export default function ProductDetailPage() {
                 ))}
               </div>
             )}
-
-            {/* Tombol Favorite & Share */}
-            <div className="flex gap-3">
-              <button className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 hover:bg-orange-50 hover:border-orange-400 transition">
-                <FiHeart className="text-orange-500" />
-                <span>Favorit</span>
-              </button>
-              <button className="flex-1 flex items-center justify-center gap-2 border border-gray-300 rounded-lg py-2 hover:bg-orange-50 hover:border-orange-400 transition">
-                <FiShare2 className="text-orange-500" />
-                <span>Bagikan</span>
-              </button>
-            </div>
           </div>
 
           {/* Info Produk */}
@@ -266,11 +253,10 @@ export default function ProductDetailPage() {
           )}
         </div>
       </main>
-
       {/* Footer */}
-     <footer className="mt-20 border-t ...">
-    <Footer />
-  </footer>
-</div>
+      <footer className="mt-20 border-t ...">
+        <Footer />
+      </footer>
+    </div>
   );
 }

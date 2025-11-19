@@ -94,14 +94,15 @@ export default function Header() {
   };
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  e.preventDefault();
+  if (!searchQuery.trim()) return;
 
-    router.push(`/search?q=${searchQuery}`);
+  router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
 
-    setIsSearchOpen(false);
-    setSearchQuery("");
-  };
+  setIsSearchOpen(false);
+  setSearchQuery("");
+};
+
 
   return (
     <>
@@ -238,7 +239,7 @@ export default function Header() {
               {/* --- 3. LOGO HEADER SEARCH DIUBAH --- */}
               <Link href="/" className="flex items-center gap-2 flex-shrink-0">
                 <Image
-                  src="/logo-sz.png"
+                  src="/images/logo.png"
                   alt="SportZone Logo"
                   width={40}
                   height={40}

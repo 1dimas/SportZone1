@@ -44,7 +44,7 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
       href={`/product/${product.id}`}
       className="
         block 
-        w-full {/* DIUBAH: w-[...] dihapus, diganti w-full agar responsif */}
+        w-full 
         bg-white 
         rounded-md 
         border border-gray-200 
@@ -57,26 +57,28 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
       "
     >
       {/* Gambar Produk */}
-      {/* DIUBAH: aspect-square digunakan agar rasio 1:1 (kotak) */}
       <div className="relative w-full aspect-square bg-gray-50 flex items-center justify-center">
         <Image
           src={imageUrl}
           alt={name}
-          width={160}
-          height={160}
-          className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+          fill
+          className="
+            transition-transform 
+            duration-500 
+            group-hover:scale-105
+            object-contain 
+          " // DIREVISI: Menggunakan object-contain dan menghapus p-2
           unoptimized={isExternal}
         />
 
         {product.isNew && (
-          <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
+          <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full z-10">
             Baru
           </span>
         )}
       </div>
 
       {/* Info Produk */}
-      {/* DIUBAH: p-1.5 agar lebih ringkas */}
       <div className="p-1.5">
         <h3
           className="
