@@ -147,3 +147,47 @@ export async function getAverageRating(produkId: string): Promise<number> {
   return typeof data?.averageRating === "number" ? data.averageRating : 0;
 }
 
+// Fungsi untuk mengambil rating rata-rata tanpa perlu login (untuk homepage)
+export async function getAverageRatingPublic(produkId: string): Promise<number> {
+  try {
+    const res = await fetch(`${API_URL}/rating/product/${produkId}/average`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    
+    if (!res.ok) {
+      // Jika gagal, return 0 tanpa throw error
+      return 0;
+    }
+    
+    const data = await res.json();
+    return typeof data?.averageRating === "number" ? data.averageRating : 0;
+  } catch (error) {
+    // Jika error, return 0
+    return 0;
+  }
+}
+
+// Fungsi untuk mengambil rating count tanpa perlu login
+export async function getRatingCountPublic(produkId: string): Promise<number> {
+  try {
+    const res = await fetch(`${API_URL}/rating/product/${produkId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    
+    if (!res.ok) {
+      return 0;
+    }
+    
+    const data = await res.json();
+    return Array.isArray(data) ? data.length : 0;
+  } catch (error) {
+    return 0;
+  }
+}
+

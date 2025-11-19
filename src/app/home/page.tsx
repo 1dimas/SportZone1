@@ -8,6 +8,7 @@ import { HeroSlider } from "@/components/Home/Heroslider";
 import PopularBrands from "@/components/Home/PopularBrands";
 import ProductCarousel from "@/components/Home/ProductCarousel";
 import { getAllProduk } from "@/components/lib/services/produk.service";
+import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 
 type ProductVariant = {
   size: string | number;
@@ -26,6 +27,8 @@ type APIProduct = {
   isNew?: boolean;
   description?: string;
   variants: ProductVariant[];
+  averageRating?: number;
+  totalSold?: number;
 };
 
 const Page = () => {
@@ -40,7 +43,21 @@ const Page = () => {
         setLoading(true);
         setError(null);
         const data = await getAllProduk();
-        setProducts(data);
+        
+        // Fetch rating untuk setiap produk secara paralel
+        const productsWithRatings = await Promise.all(
+          data.map(async (product) => {
+            try {
+              const rating = await getAverageRatingPublic(product.id);
+              return { ...product, averageRating: rating };
+            } catch (error) {
+              console.error(`Error fetching rating for product ${product.id}:`, error);
+              return { ...product, averageRating: 0 };
+            }
+          })
+        );
+        
+        setProducts(productsWithRatings);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Gagal memuat data produk");
       } finally {

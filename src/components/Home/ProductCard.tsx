@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";
 import { FiStar } from "react-icons/fi";
+import { formatRupiah } from "@/lib/utils";
 
 type ProductVariant = {
   size: string | number;
@@ -23,6 +24,11 @@ type Product = {
   description?: string;
   variants?: ProductVariant[];
   rating?: number; // 0–5
+  averageRating?: number; // Rating rata-rata dari API
+  totalSold?: number; // Jumlah terjual
+  _count?: {
+    ratings?: number;
+  };
 };
 
 type ProductCardProps = {
@@ -37,7 +43,14 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
   const isExternal =
     imageUrl.startsWith("http://") || imageUrl.startsWith("https://");
 
-  const rating = product.rating ?? 4.6;
+  // Gunakan averageRating dari API jika ada, fallback ke rating atau 0
+  const rating = product.averageRating ?? product.rating ?? 0;
+  
+  // Gunakan totalSold dari API jika ada
+  const sold = product.totalSold ?? 0;
+  
+  // Jumlah review dari _count.ratings jika ada
+  const reviewCount = product._count?.ratings ?? 0;
 
   return (
     <Link
@@ -93,14 +106,18 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
         </h3>
 
         <p className="mt-0.5 text-sm font-bold text-orange-500">
-          Rp{price.toLocaleString("id-ID")}
+          {formatRupiah(price)}
         </p>
 
         <div className="mt-0.5 flex items-center text-[11px] text-gray-600">
           <FiStar className="text-yellow-400 mr-1 fill-yellow-400" size={12} />
-          <span>{rating}</span>
-          <span className="mx-1">•</span>
-          <span>Terjual 100+</span>
+          <span>{rating > 0 ? rating.toFixed(1) : "Belum ada rating"}</span>
+          {sold > 0 && (
+            <>
+              <span className="mx-1">•</span>
+              <span>Terjual {sold >= 1000 ? `${(sold / 1000).toFixed(1)}rb` : sold}+</span>
+            </>
+          )}
         </div>
       </div>
     </Link>

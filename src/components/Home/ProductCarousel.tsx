@@ -3,6 +3,7 @@
 import React from "react";
 import ProductCard from "./ProductCard";
 import { getAllProduk } from "@/components/lib/services/produk.service";
+import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 
 // Define the type for API response product
 type ProductVariant = {
@@ -21,6 +22,7 @@ type APIProduct = {
   isNew?: boolean;
   description?: string;
   variants: ProductVariant[];
+  averageRating?: number;
 };
 
 const ProductCarousel = () => {
@@ -31,7 +33,21 @@ const ProductCarousel = () => {
     const fetchProducts = async () => {
       try {
         const data = await getAllProduk();
-        setProducts(data.slice(0, 10)); // Take only first 10 products for carousel
+        const first10 = data.slice(0, 10);
+        
+        // Fetch rating untuk setiap produk secara paralel
+        const productsWithRatings = await Promise.all(
+          first10.map(async (product) => {
+            try {
+              const rating = await getAverageRatingPublic(product.id);
+              return { ...product, averageRating: rating };
+            } catch (error) {
+              return { ...product, averageRating: 0 };
+            }
+          })
+        );
+        
+        setProducts(productsWithRatings);
       } catch (error) {
         console.error("Error fetching products for carousel:", error);
       } finally {
