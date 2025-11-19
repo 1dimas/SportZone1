@@ -8,6 +8,7 @@ import { getVarianByProduk } from "@/components/lib/services/produk.service";
 import { useCart } from "@/context/cart-context";
 import { addKeranjangItem } from "@/components/lib/services/keranjang.service";
 import { useRouter } from "next/navigation";
+import { formatRupiah } from "@/lib/utils";
 
 type ProductData = {
   variants: ProductVariant[];
@@ -283,7 +284,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
             <p className="mt-1">Stok tersedia: {selectedVariant.stok}</p>
             {selectedVariant.harga && (
               <p className="mt-1">
-                Harga variant: Rp {selectedVariant.harga.toLocaleString("id-ID")}
+                Harga variant: {formatRupiah(selectedVariant.harga)}
               </p>
             )}
           </div>

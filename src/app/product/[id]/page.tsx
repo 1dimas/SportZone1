@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FiHeart, FiShare2 } from "react-icons/fi";
 import { ProductActions } from "@/components/Detailpage/ProductActions";
+import { formatRupiah } from "@/lib/utils";
 import { RatingList } from "@/components/Detailpage/RatingList";
 import type { ProductVariant } from "@/app/data/products";
 import {
@@ -184,7 +185,7 @@ export default function ProductDetailPage() {
               {product.nama}
             </h1>
             <p className="text-3xl font-semibold text-orange-600">
-              Rp {product.harga.toLocaleString("id-ID")}
+              {formatRupiah(product.harga)}
             </p>
 
             <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
@@ -244,7 +245,7 @@ export default function ProductDetailPage() {
                       {item.nama}
                     </h3>
                     <p className="text-orange-600 font-semibold text-sm">
-                      Rp {item.harga.toLocaleString("id-ID")}
+                      {formatRupiah(item.harga)}
                     </p>
                   </div>
                 </Link>
