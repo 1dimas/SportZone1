@@ -127,9 +127,11 @@ export default function PesananHistoryPage() {
             </div>
           </div>
 
-          {/* =======================================================
-            3. TOMBOL BELANJA LAGI DIHAPUS DARI SINI
-            ======================================================= */}
+          <Link href="/pengembalian/history">
+            <Button variant="outline" size="sm">
+              Lihat Riwayat Pengembalian
+            </Button>
+          </Link>
         </div>
 
         {/* ... Sisa kode (Loading, Error, Tabs, Cards) tetap sama ... */}

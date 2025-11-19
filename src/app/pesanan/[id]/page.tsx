@@ -10,7 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pesanan, getPesananById } from "@/components/lib/services/pesanan.service";
-import { IconCheck, IconTruck, IconClock, IconHome, IconX } from "@tabler/icons-react";
+import { getPengembalianByUser, Pengembalian } from "@/components/lib/services/pengembalian.service";
+import { IconCheck, IconTruck, IconClock, IconHome, IconX, IconPackageExport } from "@tabler/icons-react";
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(amount);
@@ -71,6 +72,7 @@ export default function PesananDetailPage() {
   const [order, setOrder] = useState<Pesanan | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [pengembalian, setPengembalian] = useState<Pengembalian | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -79,6 +81,14 @@ export default function PesananDetailPage() {
         if (!id) return;
         const data = await getPesananById(id);
         if (mounted) setOrder(data);
+        
+        try {
+          const pengembalianList = await getPengembalianByUser();
+          const activePengembalian = pengembalianList.find(p => p.pesanan_id === id);
+          if (activePengembalian && mounted) {
+            setPengembalian(activePengembalian);
+          }
+        } catch {}
       } catch (err: any) {
         if (mounted) setError(err?.message || "Gagal mengambil detail pesanan");
       } finally {
@@ -166,6 +176,60 @@ export default function PesananDetailPage() {
               <p className="text-gray-700 whitespace-pre-line">{order.alamat_pengiriman}</p>
             </CardContent>
           </Card>
+
+          {/* Pengembalian */}
+          {(order.status === "dikirim" || order.status === "selesai" || order.status === "dikembalikan") && (
+            <Card>
+              <CardHeader className="border-b">
+                <CardTitle className="flex items-center gap-2">
+                  <IconPackageExport className="size-4" />
+                  Pengembalian
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-4">
+                {pengembalian ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Status Pengembalian:</span>
+                      <Badge className={
+                        pengembalian.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                        pengembalian.status === "approved" ? "bg-green-100 text-green-800" :
+                        "bg-red-100 text-red-800"
+                      }>
+                        {pengembalian.status === "pending" && "Menunggu Persetujuan"}
+                        {pengembalian.status === "approved" && "Disetujui"}
+                        {pengembalian.status === "rejected" && "Ditolak"}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="text-sm text-gray-600">Alasan: </span>
+                      <span className="text-sm capitalize">{pengembalian.alasan}</span>
+                    </div>
+                    {pengembalian.catatan_admin && (
+                      <div className="mt-2 p-2 bg-blue-50 rounded border">
+                        <span className="text-sm font-medium">Catatan Admin:</span>
+                        <p className="text-sm text-gray-700 mt-1">{pengembalian.catatan_admin}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Apakah ada masalah dengan pesanan Anda? Ajukan pengembalian di sini.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => router.push(`/pesanan/${order.id}/pengembalian`)}
+                    >
+                      Ajukan Pengembalian
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Items */}
           <Card className="lg:col-span-2">

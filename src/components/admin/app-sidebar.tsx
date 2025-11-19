@@ -17,6 +17,8 @@ import {
   IconSearch,
   IconSettings,
   IconUsers,
+  IconPackageExport,
+  IconAlertTriangle,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/admin/nav-documents"
@@ -75,6 +77,16 @@ const data = {
       title: "Orders",
       url: "/dashboardadmin/pesanan",
       icon: IconListDetails,
+    },
+    {
+      title: "Returns",
+      url: "/dashboardadmin/pengembalian",
+      icon: IconPackageExport,
+    },
+    {
+      title: "Damaged Products",
+      url: "/dashboardadmin/produk-rusak",
+      icon: IconAlertTriangle,
     },
     {
       title: "Equipment Subcategories",

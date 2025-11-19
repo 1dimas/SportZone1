@@ -10,6 +10,8 @@ import {
   IconReport,
   IconShoppingCart,
   IconUsers,
+  IconPackageExport,
+  IconAlertTriangle,
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/petugas/nav-documents"
@@ -47,6 +49,16 @@ const data = {
       title: "Orders",
       url: "/dashboardpetugas/pesanan",
       icon: IconShoppingCart,
+    },
+    {
+      title: "Returns",
+      url: "/dashboardpetugas/pengembalian",
+      icon: IconPackageExport,
+    },
+    {
+      title: "Damaged Products",
+      url: "/dashboardpetugas/produk-rusak",
+      icon: IconAlertTriangle,
     },
   ],
   navClouds: [
