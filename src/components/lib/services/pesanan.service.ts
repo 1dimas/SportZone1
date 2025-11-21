@@ -36,6 +36,10 @@ export interface Pesanan {
   total_harga: number;
   status: string;
   alamat_pengiriman: string;
+  kota?: string;
+  provinsi?: string;
+  eta_min?: number;
+  eta_max?: number;
   created_at: string;
   updated_at: string;
   user?: {
@@ -67,6 +71,8 @@ export interface CreatePesananDto {
   tanggal_pesanan: string;
   total_harga: number;
   alamat_pengiriman: string;
+  kota: string;
+  provinsi: string;
   metode_pembayaran: string;
   items: CreatePesananItemDto[];
 }

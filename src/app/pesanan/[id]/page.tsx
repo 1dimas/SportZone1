@@ -172,8 +172,33 @@ export default function PesananDetailPage() {
                 Alamat Pengiriman
               </CardTitle>
             </CardHeader>
-            <CardContent className="py-4">
+            <CardContent className="py-4 space-y-3">
               <p className="text-gray-700 whitespace-pre-line">{order.alamat_pengiriman}</p>
+              
+              {order.kota && order.provinsi && (
+                <div className="text-sm text-gray-600">
+                  <p><span className="font-medium">Kota:</span> {order.kota}</p>
+                  <p><span className="font-medium">Provinsi:</span> {order.provinsi}</p>
+                </div>
+              )}
+              
+              {/* Show ETA for pending, diproses, dikirim status */}
+              {(order.status === "pending" || 
+                order.status === "diproses" || 
+                order.status === "dikirim") && 
+                order.eta_min && 
+                order.eta_max && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-xs font-semibold text-blue-800 mb-1">
+                    📦 Estimasi Kedatangan
+                  </p>
+                  <p className="text-sm font-medium text-blue-700">
+                    {order.eta_min === order.eta_max 
+                      ? `${order.eta_min} hari kerja`
+                      : `${order.eta_min}-${order.eta_max} hari kerja`}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

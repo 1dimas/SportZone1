@@ -21,7 +21,7 @@ import {
   type RatingData,
 } from "@/components/lib/services/rating.service";
 import Footer from "@/components/Home/Footer";
-import Header from "@/components/Home/Header"; // <-- Import ini sudah ada
+import Header from "@/components/Home/Header"; 
 
 type APIProduct = {
   id: string;

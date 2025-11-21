@@ -292,6 +292,24 @@ export default function PesananHistoryPage() {
                                     + {otherItemsCount} produk lain
                                   </p>
                                 )}
+                                
+                                {/* Show ETA for pending, diproses, dikirim status */}
+                                {(order.status === "pending" || 
+                                  order.status === "diproses" || 
+                                  order.status === "dikirim") && 
+                                  order.eta_min && 
+                                  order.eta_max && (
+                                  <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                                    <p className="text-xs font-semibold text-blue-800 mb-1">
+                                      📦 Estimasi Kedatangan
+                                    </p>
+                                    <p className="text-sm text-blue-700">
+                                      {order.eta_min === order.eta_max 
+                                        ? `${order.eta_min} hari`
+                                        : `${order.eta_min}-${order.eta_max} hari`}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ) : (
