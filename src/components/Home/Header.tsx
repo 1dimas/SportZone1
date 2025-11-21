@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-// --- 1. IMPORT IMAGE ---
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import {
   FiSearch,
   FiShoppingCart,
@@ -15,6 +14,7 @@ import {
   FiList,
   FiChevronDown,
 } from "react-icons/fi";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,11 +25,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { CascadingMenu } from "./CascadingMenu";
-import { menuData } from "@/app/data/menuData";
+import { getMenuData } from "@/components/lib/services/menu.service";
+import { MenuItem } from "@/app/data/menuData";
 import { logout } from "@/components/lib/services/auth.service";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
@@ -38,8 +40,27 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // State for fetched menu data
+  const [menuData, setMenuData] = useState<MenuItem[]>([]);
+  const [menuLoading, setMenuLoading] = useState(true);
+  const [menuError, setMenuError] = useState<string | null>(null);
+
   useEffect(() => {
-    // ... (Kode useEffect Anda untuk token tetap di sini)
+    // Fetch menu data
+    const fetchMenu = async () => {
+      try {
+        setMenuLoading(true);
+        const data = await getMenuData();
+        setMenuData(data);
+      } catch (err) {
+        setMenuError(err instanceof Error ? err.message : "Failed to load menu");
+      } finally {
+        setMenuLoading(false);
+      }
+    };
+    fetchMenu();
+
+    // Check for login token
     const token = localStorage.getItem("token");
     const storedUserId = localStorage.getItem("userId");
     if (token) {
@@ -81,10 +102,12 @@ export default function Header() {
     }
   }, [isSearchOpen]);
 
-  const closeMenu = () => setIsMenuOpen(false);
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+    setOpenCategory(null); // Close accordion on menu close
+  }
 
   const handleLogout = async () => {
-    // ... (Kode handleLogout Anda)
     try {
       await logout();
       localStorage.removeItem("token");
@@ -100,21 +123,16 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-
     router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-
     setIsSearchOpen(false);
     setSearchQuery("");
   };
 
+  const sportsMenuItem = menuData.find(item => item.title === 'SPORTS');
+
   return (
     <>
       <header className="bg-white text-gray-800 shadow-sm sticky top-0 z-50">
-        {/*
-          =======================================================
-          TAMPILAN HEADER NORMAL
-          =======================================================
-        */}
         <div
           className={`
             container mx-auto px-4 sm:px-6 lg:px-8
@@ -122,44 +140,31 @@ export default function Header() {
           `}
         >
           <div className="flex items-center justify-between h-20 gap-4">
-            {/* --- 2. LOGO HEADER NORMAL DIUBAH --- */}
             <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-              {/* Ganti "logo-sz.png" jika nama file Anda berbeda */}
               <Image
                 src="/images/logo.png"
                 alt="SportZone Logo"
                 width={40}
                 height={40}
-                className="h-10 w-10" // Sesuaikan ukuran (misal: h-10 w-10)
+                className="h-10 w-10"
               />
               <span className="hidden sm:block text-2xl font-bold text-gray-900">
                 Sport<span className="text-orange-500">Zone</span>
               </span>
             </Link>
-            {/* --- --------------------------- --- */}
 
-            {/* Menu SPORTS */}
             <div className="flex-1 flex justify-center items-center gap-4">
               <div className="hidden lg:flex items-center">
-                {menuData
-                  .filter((item) => item.title === "SPORTS")
-                  .map((item) =>
-                    item.columns.length > 0 ? (
-                      <CascadingMenu key={item.title} menuItem={item} />
-                    ) : (
-                      <Link
-                        key={item.title}
-                        href={item.href}
-                        className="font-medium text-gray-700 hover:text-orange-500 transition-colors"
-                      >
-                        {item.title}
-                      </Link>
-                    )
-                  )}
+                {menuLoading ? (
+                  <p className="text-sm text-gray-500">Loading...</p>
+                ) : menuError ? (
+                  <p className="text-sm text-red-500">Error</p>
+                ) : (
+                  sportsMenuItem && <CascadingMenu menuItem={sportsMenuItem} />
+                )}
               </div>
             </div>
 
-            {/* Icon dan Akun */}
             <div className="flex items-center gap-3 sm:gap-4">
               <button
                 onClick={() => setIsSearchOpen(true)}
@@ -238,11 +243,9 @@ export default function Header() {
           </div>
         </div>
 
-        {/* TAMPILAN SEARCH BAR (Saat Terbuka) */}
         {isSearchOpen && (
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center h-20 gap-4">
-              {/* --- 3. LOGO HEADER SEARCH DIUBAH --- */}
               <Link href="/" className="flex items-center gap-2 flex-shrink-0">
                 <Image
                   src="/images/logo.png"
@@ -255,8 +258,6 @@ export default function Header() {
                   Sport<span className="text-orange-500">Zone</span>
                 </span>
               </Link>
-              {/* --- -------------------------- --- */}
-
               <form onSubmit={handleSearch} className="flex-1 relative">
                 <input
                   ref={searchInputRef}
@@ -286,14 +287,10 @@ export default function Header() {
         )}
       </header>
 
-      {/* ======================================================= */}
-      {/* ================ MENU MOBILE (MODIFIED) =============== */}
-      {/* ======================================================= */}
       {isMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-[100]">
           <div className="fixed inset-0 bg-black/40" onClick={closeMenu}></div>
           <div className="fixed top-0 left-0 w-3/4 max-w-sm h-full bg-white z-50 p-6 shadow-xl overflow-y-auto">
-            {/* --- 4. HEADER MENU MOBILE DIUBAH --- */}
             <div className="flex items-center justify-between mb-8">
               <Link
                 href="/"
@@ -305,9 +302,49 @@ export default function Header() {
                 </span>
               </Link>
             </div>
-            {/* --- --------------------------- --- */}
 
-            <div className="flex flex-col gap-3 mb-6">
+            <nav className="flex flex-col gap-1">
+              <span className="py-2 px-3 font-bold text-gray-900 text-lg">
+                Kategori Olahraga
+              </span>
+              {menuLoading ? (
+                <p className="text-sm text-gray-500 p-3">Loading...</p>
+              ) : menuError ? (
+                <p className="text-sm text-red-500 p-3">Gagal memuat kategori.</p>
+              ) : (
+                sportsMenuItem?.columns.map((column) => (
+                  <div key={column.heading}>
+                    <button
+                      onClick={() => setOpenCategory(openCategory === column.heading ? null : column.heading)}
+                      className="w-full flex justify-between items-center py-2.5 px-3 rounded-lg text-base text-gray-700 hover:bg-gray-100 hover:text-orange-500 transition-colors"
+                    >
+                      <span>{column.heading}</span>
+                      <FiChevronDown
+                        className={`transform transition-transform ${
+                          openCategory === column.heading ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    {openCategory === column.heading && (
+                      <div className="pl-6 pr-2 pt-1 pb-2 flex flex-col gap-1 border-l ml-3">
+                        {column.links.map((link) => (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={closeMenu}
+                            className="py-2 px-3 rounded-lg text-base text-gray-600 hover:bg-gray-100 hover:text-orange-500 transition-colors block"
+                          >
+                            {link.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </nav>
+
+            <div className="flex flex-col gap-3 mb-6 mt-6 border-t pt-6">
               {isLoggedIn ? (
                 <>
                   <Link href="/pesanan/history" onClick={closeMenu}>
@@ -318,8 +355,6 @@ export default function Header() {
                       <FiList className="mr-2" /> Riwayat Pesanan
                     </Button>
                   </Link>
-
-                  {/* --- 5. TOMBOL PROFIL DIKEMBALIKAN --- */}
                   <Link href="/profile" onClick={closeMenu}>
                     <Button
                       variant="outline"
@@ -328,8 +363,6 @@ export default function Header() {
                       <FiUser className="mr-2" /> Profil Saya
                     </Button>
                   </Link>
-                  {/* --- ----------------------------- --- */}
-
                   <Button
                     variant="outline"
                     className="w-full text-red-500 border-red-500"
@@ -346,52 +379,6 @@ export default function Header() {
                 </Link>
               )}
             </div>
-
-            {/* Navigasi Kategori */}
-            {/* ======================================================= */}
-            {/* ================ NAVIGASI KATEGORI MOBILE =============== */}
-            {/* ======================================================= */}
-            <nav className="flex flex-col gap-2 border-t pt-6">
-              {menuData
-                .filter((item) => item.title === "SPORTS")
-                .map((item) => {
-                  // Pastikan item memiliki columns dan kolom pertama memiliki links
-                  const hasLinks = item.columns?.[0]?.links?.length > 0;
-
-                  return (
-                    <div key={item.title} className="flex flex-col">
-                      {/* TITLE SPORTS */}
-                      <span className="py-3 px-3 rounded-lg font-bold text-gray-900 text-lg">
-                        {item.title}
-                      </span>
-
-                      {/* SUB MENU (HANYA DITAMPILKAN JIKA ADA LINKS) */}
-                      {hasLinks && (
-                        <div className="flex flex-col pl-5 pt-1 gap-1 border-l ml-3">
-                          {/* Cek setiap kolom dan loop setiap link di dalamnya */}
-                          {item.columns.map((column, colIndex) => (
-                            // Tambahkan fragment atau div jika perlu, tapi fokus pada links
-                            <div key={colIndex}>
-                              {column.links?.map((link) => (
-                                <Link
-                                  key={link.text} // Key unik
-                                  href={link.href}
-                                  onClick={closeMenu}
-                                  // Pastikan kelas ini membuatnya terlihat dan interaktif
-                                  className="py-2 px-3 rounded-lg text-base text-gray-700 hover:bg-gray-100 hover:text-orange-500 transition-colors block"
-                                >
-                                  {link.text}
-                                </Link>
-                              ))}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {/* Jika SPORTS tidak punya links, tidak ada yang ditampilkan di sini */}
-                    </div>
-                  );
-                })}
-            </nav>
           </div>
         </div>
       )}
