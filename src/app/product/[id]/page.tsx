@@ -63,6 +63,7 @@ export default function ProductDetailPage() {
   const [averageRating, setAverageRating] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -174,7 +175,7 @@ export default function ProductDetailPage() {
           <div className="space-y-4">
             <div className="aspect-square relative rounded-2xl overflow-hidden border border-gray-200">
               <Image
-                src={product.gambar[0]}
+                src={product.gambar[selectedImageIndex]}
                 alt={product.nama}
                 fill
                 className="object-cover hover:scale-105 transition-transform duration-500"
@@ -186,7 +187,10 @@ export default function ProductDetailPage() {
                 {product.gambar.map((img, idx) => (
                   <div
                     key={idx}
-                    className="relative w-20 h-20 border border-gray-200 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer hover:border-orange-500 transition"
+                    onClick={() => setSelectedImageIndex(idx)}
+                    className={`relative w-20 h-20 border-2 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer hover:border-orange-500 transition ${
+                      selectedImageIndex === idx ? "border-orange-500" : "border-gray-200"
+                    }`}
                   >
                     <Image
                       src={img}
