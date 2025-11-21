@@ -1,0 +1,16 @@
+"use client";
+
+import { useCart } from "@/context/cart-context";
+import { formatRupiah } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { FiMinus, FiPlus, FiShoppingCart, FiStar, FiX } from "react-icons/fi";
+import { useMemo, useState, useEffect } from "react";
+import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
+import CartRatingDisplay from "@/components/Cart/CartRatingDisplay";
+
+export default function CartPage() {
+  const { state, dispatch } = useCart();
+  const router = useRouter();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [productRatings, setProductRatings] = useState<Record<string, number>>({});
+

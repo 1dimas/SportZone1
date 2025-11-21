@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { FiHeart, FiShare2 } from "react-icons/fi";
+import { FiHeart, FiShare2, FiStar } from "react-icons/fi";
 import { ProductActions } from "@/components/Detailpage/ProductActions";
 import { formatRupiah } from "@/lib/utils";
 import { RatingList } from "@/components/Detailpage/RatingList";
@@ -28,6 +28,9 @@ type APIProduct = {
   gambar: string[];
   stok?: number;
   slug?: string;
+  rating?: number;
+  averageRating?: number;
+  totalSold?: number;
   subkategori?: {
     nama: string;
     kategoriOlahraga: {
@@ -184,6 +187,16 @@ export default function ProductDetailPage() {
             <h1 className="text-4xl font-bold text-gray-900 leading-tight">
               {product.nama}
             </h1>
+            <div className="flex items-center">
+              <FiStar className="text-yellow-400 fill-yellow-400" size={20} />
+              <span className="ml-2 text-lg font-semibold text-gray-800">
+                {averageRating > 0 ? averageRating.toFixed(1) : "Belum ada rating"}
+              </span>
+              <span className="mx-2 text-gray-400">•</span>
+              <span className="text-gray-600">
+                {ratings.length} ulasan
+              </span>
+            </div>
             <p className="text-3xl font-semibold text-orange-600">
               {formatRupiah(product.harga)}
             </p>
@@ -228,46 +241,58 @@ export default function ProductDetailPage() {
     <p className="text-gray-600">Tidak ada produk lain.</p>
   ) : (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-      {related.map((item) => (
-        <Link
-          key={item.id}
-          href={`/product/${item.id}`}
-          className="
-            bg-white border border-gray-200 rounded-xl overflow-hidden
-            shadow-sm hover:shadow-md transition duration-300
-            hover:-translate-y-1
-          "
-        >
-          {/* Gambar */}
-          <div className="relative w-full aspect-square bg-gray-50">
-            <Image
-              src={item.gambar[0]}
-              alt={item.nama}
-              fill
-              className="object-cover transition-transform duration-500 hover:scale-105"
-            />
-          </div>
+      {related.map((item) => {
+        // Gunakan averageRating dari API jika ada, fallback ke rating atau 0
+        const rating = item.averageRating ?? item.rating ?? 0;
+        
+        // Gunakan totalSold dari API jika ada
+        const sold = item.totalSold ?? 0;
 
-          {/* Detail Produk */}
-          <div className="p-3 space-y-1.5">
-            <h3 className="text-sm font-medium text-gray-800 line-clamp-2 min-h-[36px]">
-              {item.nama}
-            </h3>
-
-            <p className="text-orange-600 font-semibold text-sm">
-              {formatRupiah(item.harga)}
-            </p>
-
-            {/* ⭐ Rating + Terjual */}
-            <div className="flex items-center gap-1 text-[11px] text-gray-600">
-              <span className="text-yellow-400 text-xs">★</span>
-              <span>4.6</span>
-              <span className="text-gray-400">•</span>
-              <span>Terjual 50+</span>
+        return (
+          <Link
+            key={item.id}
+            href={`/product/${item.id}`}
+            className="
+              bg-white border border-gray-200 rounded-xl overflow-hidden
+              shadow-sm hover:shadow-md transition duration-300
+              hover:-translate-y-1
+            "
+          >
+            {/* Gambar */}
+            <div className="relative w-full aspect-square bg-gray-50">
+              <Image
+                src={item.gambar[0]}
+                alt={item.nama}
+                fill
+                className="object-cover transition-transform duration-500 hover:scale-105"
+              />
             </div>
-          </div>
-        </Link>
-      ))}
+
+            {/* Detail Produk */}
+            <div className="p-3 space-y-1.5">
+              <h3 className="text-sm font-medium text-gray-800 line-clamp-2 min-h-[36px]">
+                {item.nama}
+              </h3>
+
+              <p className="text-orange-600 font-semibold text-sm">
+                {formatRupiah(item.harga)}
+              </p>
+
+              {/* ⭐ Rating + Terjual */}
+              <div className="flex items-center gap-1 text-[11px] text-gray-600">
+                <span className="text-yellow-400 text-xs">★</span>
+                <span>{rating > 0 ? rating.toFixed(1) : "Belum ada rating"}</span>
+                {sold > 0 && (
+                  <>
+                    <span className="text-gray-400">•</span>
+                    <span>Terjual {sold >= 1000 ? `${(sold / 1000).toFixed(1)}rb` : sold}+</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   )}
 </div>

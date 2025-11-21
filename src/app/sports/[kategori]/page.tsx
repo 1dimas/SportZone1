@@ -9,6 +9,7 @@ import Footer from "@/components/Home/Footer";
 import { getAllKategoriOlahraga } from "@/components/lib/services/olahraga.service";
 import { getSubkategoriPeralatanByKategoriOlahraga } from "@/components/lib/services/subkategori-peralatan.service";
 import { getProdukByKategori } from "@/components/lib/services/produk.service";
+import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 
 type Params = {
   kategori: string;
@@ -43,6 +44,7 @@ type Produk = {
     id: string;
     nama: string;
   };
+  averageRating?: number;
 };
 
 const formatRupiah = (price: number) =>
@@ -60,6 +62,7 @@ export default function KategoriPage({ params }: { params: Promise<Params> }) {
   const [subkategories, setSubkategories] = useState<SubkategoriPeralatan[]>([]);
   const [products, setProducts] = useState<Produk[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Produk[]>([]);
+  const [productsWithRatings, setProductsWithRatings] = useState<Produk[]>([]);
   const [selectedSubkategori, setSelectedSubkategori] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -105,15 +108,45 @@ export default function KategoriPage({ params }: { params: Promise<Params> }) {
     fetchData();
   }, [kategori]);
 
-  // Filter products when subkategori selected
+  // Fetch ratings for products and update the state
+  useEffect(() => {
+    const fetchProductRatings = async () => {
+      if (products.length > 0) {
+        const productsWithRatings = await Promise.all(
+          products.map(async (product) => {
+            try {
+              const rating = await getAverageRatingPublic(product.id);
+              return { ...product, averageRating: rating };
+            } catch (error) {
+              console.error(`Error fetching rating for product ${product.id}:`, error);
+              return { ...product, averageRating: 0 };
+            }
+          })
+        );
+        setProductsWithRatings(productsWithRatings);
+        
+        // Update filtered products as well
+        if (selectedSubkategori === null) {
+          setFilteredProducts(productsWithRatings);
+        } else {
+          const filtered = productsWithRatings.filter((p) => p.subkategori_id === selectedSubkategori);
+          setFilteredProducts(filtered);
+        }
+      }
+    };
+
+    fetchProductRatings();
+  }, [products]);
+
+  // Update filtered products when selected subkategori changes
   useEffect(() => {
     if (selectedSubkategori === null) {
-      setFilteredProducts(products);
+      setFilteredProducts(productsWithRatings);
     } else {
-      const filtered = products.filter((p) => p.subkategori_id === selectedSubkategori);
+      const filtered = productsWithRatings.filter((p) => p.subkategori_id === selectedSubkategori);
       setFilteredProducts(filtered);
     }
-  }, [selectedSubkategori, products]);
+  }, [selectedSubkategori, productsWithRatings]);
 
   const handleFilterChange = (subkategoriId: string | null) => {
     setSelectedSubkategori(subkategoriId);
@@ -167,7 +200,7 @@ export default function KategoriPage({ params }: { params: Promise<Params> }) {
                   <FiFilter className="text-orange-600" />
                   <h3 className="font-semibold text-lg">Filter Produk</h3>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-3">
                   <button
                     onClick={() => handleFilterChange(null)}
@@ -178,11 +211,11 @@ export default function KategoriPage({ params }: { params: Promise<Params> }) {
                     }`}
                   >
                     Semua Produk
-                    <span className="ml-2 text-sm">({products.length})</span>
+                    <span className="ml-2 text-sm">({productsWithRatings.length})</span>
                   </button>
-                  
+
                   {subkategories.map((subkategori) => {
-                    const count = products.filter((p) => p.subkategori_id === subkategori.id).length;
+                    const count = productsWithRatings.filter((p) => p.subkategori_id === subkategori.id).length;
                     return (
                       <button
                         key={subkategori.id}
@@ -253,7 +286,11 @@ export default function KategoriPage({ params }: { params: Promise<Params> }) {
                           </p>
                           <div className="mt-0.5 flex items-center text-[11px] text-gray-600">
                             <FiStar className="text-yellow-400 mr-1 fill-yellow-400" size={12} />
-                            <span>4.6</span>
+                            <span>
+                              {product.averageRating && product.averageRating > 0 
+                                ? product.averageRating.toFixed(1) 
+                                : "Belum ada rating"}
+                            </span>
                             <span className="mx-1">•</span>
                             <span>Terjual 100+</span>
                           </div>

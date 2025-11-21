@@ -1,45 +1,77 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { getAllProduk } from "@/components/lib/services/produk.service";
+import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 import Header from "@/components/Home/Header";
+import { FiStar } from "react-icons/fi";
+import { formatRupiah } from "@/lib/utils";
+import { useState, useEffect } from "react";
 
-// ⭐ Component Rating
-function StarRating({ rating }: { rating: number }) {
-  const stars = [];
-
-  for (let i = 1; i <= 5; i++) {
-    if (rating >= i) {
-      stars.push(<span key={i} className="text-yellow-400">★</span>);
-    } else if (rating >= i - 0.5) {
-      stars.push(<span key={i} className="text-yellow-400">☆</span>);
-    } else {
-      stars.push(<span key={i} className="text-gray-300">★</span>);
-    }
-  }
-
-  return <div className="flex text-xs mt-1">{stars}</div>;
-}
-
-export default async function SearchPage({ searchParams }: any) {
+export default function SearchPage({ searchParams }: any) {
   const q = (searchParams.q || "").toLowerCase();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [productRatings, setProductRatings] = useState<Record<string, number>>({});
 
-  // Ambil semua produk
-  const allProducts = await getAllProduk();
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const allProducts = await getAllProduk();
+        const filteredProducts = allProducts.filter((item: any) =>
+          item.nama.toLowerCase().includes(q)
+        );
+        setProducts(filteredProducts);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Filter berdasarkan nama
-  let results = allProducts.filter((item: any) =>
-    item.nama.toLowerCase().includes(q)
-  );
+    fetchProducts();
+  }, [q]);
+
+  // Fetch ratings when products change
+  useEffect(() => {
+    const fetchRatings = async () => {
+      if (products.length > 0) {
+        const ratings: Record<string, number> = {};
+        for (const product of products) {
+          try {
+            const rating = await getAverageRatingPublic(product.id);
+            ratings[product.id] = rating;
+          } catch (error) {
+            console.error(`Error fetching rating for product ${product.id}:`, error);
+            ratings[product.id] = 0;
+          }
+        }
+        setProductRatings(ratings);
+      }
+    };
+
+    fetchRatings();
+  }, [products]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-6xl mx-auto px-4 py-8 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        
-        {/* ============================== */}
-        {/*        HEADER TITLE AREA       */}
-        {/* ============================== */}
+        {/* Header Title Area */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight">
             Hasil pencarian:{" "}
@@ -47,73 +79,74 @@ export default async function SearchPage({ searchParams }: any) {
           </h1>
           <p className="text-gray-600 mt-1 text-sm">
             Menampilkan{" "}
-            <span className="font-semibold">{results.length}</span> produk ditemukan
+            <span className="font-semibold">{products.length}</span> produk ditemukan
           </p>
         </div>
 
-        {/* ============================== */}
-        {/*         PRODUCT GRID           */}
-        {/* ============================== */}
+        {/* Product Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
-          {results.map((product: any) => (
+          {products.map((product: any) => (
             <Link
-  key={product.id}
-  href={`/product/${product.id}`}
-  className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition-all"
->
-  {/* IMAGE */}
-  <div className="relative w-full h-48 bg-gray-100">
-    <Image
-      src={
-        Array.isArray(product.gambar)
-          ? product.gambar[0]
-          : "/images/no-image.png"
-      }
-      fill
-      className="object-cover"
-      alt={product.nama}
-    />
+              key={product.id}
+              href={`/product/${product.id}`}
+              className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition-all"
+            >
+              {/* Image */}
+              <div className="relative w-full h-48 bg-gray-100">
+                <Image
+                  src={
+                    Array.isArray(product.gambar)
+                      ? product.gambar[0]
+                      : "/products/kao.jpeg"
+                  }
+                  fill
+                  className="object-cover"
+                  alt={product.nama}
+                />
 
-    {product.diskon && (
-      <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-        {product.diskon}%
-      </div>
-    )}
-  </div>
+                {product.diskon && (
+                  <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                    {product.diskon}%
+                  </div>
+                )}
+              </div>
 
-  {/* CONTENT */}
-  <div className="p-2">
+              {/* Content */}
+              <div className="p-2">
+                <h3 className="text-xs font-medium text-gray-800 line-clamp-2 h-8">
+                  {product.nama}
+                </h3>
 
-    <h3 className="text-xs font-medium text-gray-800 line-clamp-2 h-8">
-      {product.nama}
-    </h3>
+                <p className="text-sm font-bold text-orange-500 mt-1">
+                  {formatRupiah(product.harga)}
+                </p>
 
-    <p className="text-sm font-bold text-orange-600 mt-1">
-      Rp {product.harga.toLocaleString()}
-    </p>
+                {product.diskon && (
+                  <p className="text-[10px] text-gray-400 line-through -mt-0.5">
+                    {formatRupiah(product.harga / (1 - product.diskon / 100))}
+                  </p>
+                )}
 
-    {product.diskon && (
-      <p className="text-[10px] text-gray-400 line-through -mt-0.5">
-        Rp {(product.harga / (1 - product.diskon / 100)).toLocaleString()}
-      </p>
-    )}
-
-    <div className="flex items-center gap-1 text-[10px] text-gray-600 mt-1">
-      ⭐ {product.rating || 4.7}
-      <span>•</span>
-      <span>{product.terjual || "100+"} terjual</span>
-    </div>
-
-   
-  </div>
-</Link>
-
-
-
+                <div className="mt-0.5 flex items-center text-[11px] text-gray-600">
+                  <FiStar className="text-yellow-400 mr-1 fill-yellow-400" size={12} />
+                  <span>
+                    {productRatings[product.id] !== undefined && productRatings[product.id] > 0 
+                      ? productRatings[product.id].toFixed(1) 
+                      : "Belum ada rating"}
+                  </span>
+                  {product.totalSold && (
+                    <>
+                      <span className="mx-1">•</span>
+                      <span>Terjual {product.totalSold >= 1000 ? `${(product.totalSold / 1000).toFixed(1)}rb` : product.totalSold}+</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
 
-        {results.length === 0 && (
+        {products.length === 0 && (
           <div className="mt-12 text-center text-gray-500 text-lg">
             Tidak ada produk ditemukan.
           </div>

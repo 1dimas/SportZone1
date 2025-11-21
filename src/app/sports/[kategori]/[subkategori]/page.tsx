@@ -9,6 +9,7 @@ import Footer from "@/components/Home/Footer";
 import { getAllKategoriOlahraga } from "@/components/lib/services/olahraga.service";
 import { getSubkategoriPeralatanByKategoriOlahraga } from "@/components/lib/services/subkategori-peralatan.service";
 import { getProdukBySubkategori } from "@/components/lib/services/produk.service";
+import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 
 type Params = {
   kategori: string;
@@ -44,6 +45,7 @@ type Produk = {
     id: string;
     nama: string;
   };
+  averageRating?: number;
 };
 
 const formatRupiah = (price: number) =>
@@ -63,6 +65,7 @@ export default function SubkategoriPage({
   const router = useRouter();
 
   const [products, setProducts] = useState<Produk[]>([]);
+  const [productsWithRatings, setProductsWithRatings] = useState<Produk[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [kategoriName, setKategoriName] = useState("");
@@ -74,57 +77,47 @@ export default function SubkategoriPage({
         setIsLoading(true);
         setError(null);
 
-        console.log("Fetching kategori:", kategori);
         const kategoriData = (await getAllKategoriOlahraga()) as KategoriOlahraga[];
-        console.log("All kategori data:", kategoriData);
-        
         const foundKategori = kategoriData.find(
           (k) => k.nama.toLowerCase() === decodeURIComponent(kategori).toLowerCase()
         );
 
         if (!foundKategori) {
-          console.log("Kategori not found");
           setError("Kategori tidak ditemukan");
           setIsLoading(false);
           return;
         }
 
-        console.log("Found kategori:", foundKategori);
         setKategoriName(foundKategori.nama);
 
         const subkategoriData = (await getSubkategoriPeralatanByKategoriOlahraga(
           foundKategori.id
         )) as SubkategoriPeralatan[];
-        console.log("All subkategori data:", subkategoriData);
-        
+
         const decodedSubkategori = decodeURIComponent(subkategori).toLowerCase();
-        console.log("Looking for subkategori slug:", decodedSubkategori);
-        
+
         // Coba beberapa metode matching
         let foundSubkategori = subkategoriData.find(
           (s) => s.nama.toLowerCase().replace(/\s+/g, "-") === decodedSubkategori
         );
-        
+
         // Fallback 1: Coba tanpa replace spasi
         if (!foundSubkategori) {
-          console.log("Trying fallback 1: exact name match");
           foundSubkategori = subkategoriData.find(
             (s) => s.nama.toLowerCase() === decodedSubkategori
           );
         }
-        
+
         // Fallback 2: Coba dengan replace - ke spasi
         if (!foundSubkategori) {
-          console.log("Trying fallback 2: slug to name");
           const nameFromSlug = decodedSubkategori.replace(/-/g, " ");
           foundSubkategori = subkategoriData.find(
             (s) => s.nama.toLowerCase() === nameFromSlug
           );
         }
-        
+
         // Fallback 3: Coba partial match
         if (!foundSubkategori) {
-          console.log("Trying fallback 3: partial match");
           foundSubkategori = subkategoriData.find(
             (s) => s.nama.toLowerCase().includes(decodedSubkategori) ||
                    decodedSubkategori.includes(s.nama.toLowerCase())
@@ -132,35 +125,17 @@ export default function SubkategoriPage({
         }
 
         if (!foundSubkategori) {
-          console.log("Subkategori not found after all fallbacks");
-          console.log("Available subkategori names:", subkategoriData.map(s => s.nama));
           setError("Subkategori tidak ditemukan");
           setIsLoading(false);
           return;
         }
 
-        console.log("Found subkategori:", foundSubkategori);
         setSubkategoriName(foundSubkategori.nama);
 
         const produkData = (await getProdukBySubkategori(
           foundSubkategori.id
         )) as Produk[];
-        console.log("All produk data:", produkData);
-        console.log("Number of products:", produkData.length);
-        
-        // Log detail setiap produk untuk debugging
-        produkData.forEach((p, index) => {
-          console.log(`Product ${index + 1}:`, {
-            id: p.id,
-            nama: p.nama,
-            stok: p.stok,
-            status: p.status,
-            subkategori_id: p.subkategori_id,
-          });
-        });
-        
-        // Tampilkan semua produk tanpa filter untuk sementara
-        console.log("Showing all products without filter for debugging");
+
         setProducts(produkData);
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -172,6 +147,28 @@ export default function SubkategoriPage({
 
     fetchProducts();
   }, [kategori, subkategori]);
+
+  // Fetch ratings for products
+  useEffect(() => {
+    const fetchProductRatings = async () => {
+      if (products.length > 0) {
+        const productsWithRatings = await Promise.all(
+          products.map(async (product) => {
+            try {
+              const rating = await getAverageRatingPublic(product.id);
+              return { ...product, averageRating: rating };
+            } catch (error) {
+              console.error(`Error fetching rating for product ${product.id}:`, error);
+              return { ...product, averageRating: 0 };
+            }
+          })
+        );
+        setProductsWithRatings(productsWithRatings);
+      }
+    };
+
+    fetchProductRatings();
+  }, [products]);
 
   const handleProductClick = (productId: string) => {
     router.push(`/product/${productId}`);
@@ -216,7 +213,7 @@ export default function SubkategoriPage({
           )}
 
           {/* Empty State */}
-          {!isLoading && !error && products.length === 0 && (
+          {!isLoading && !error && productsWithRatings.length === 0 && (
             <div className="bg-white rounded-lg shadow-md p-12 text-center">
               <div className="text-gray-400 mb-4">
                 <FiShoppingCart size={64} className="mx-auto" />
@@ -240,10 +237,10 @@ export default function SubkategoriPage({
           )}
 
           {/* Products Grid */}
-          {!isLoading && !error && products.length > 0 && (
+          {!isLoading && !error && productsWithRatings.length > 0 && (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6 sm:gap-x-4 sm:gap-y-8">
-                {products.map((product) => (
+                {productsWithRatings.map((product) => (
                   <div
                     key={product.id}
                     onClick={() => handleProductClick(product.id)}
@@ -273,7 +270,11 @@ export default function SubkategoriPage({
                       </p>
                       <div className="mt-0.5 flex items-center text-[11px] text-gray-600">
                         <FiStar className="text-yellow-400 mr-1 fill-yellow-400" size={12} />
-                        <span>4.6</span>
+                        <span>
+                          {product.averageRating && product.averageRating > 0 
+                            ? product.averageRating.toFixed(1) 
+                            : "Belum ada rating"}
+                        </span>
                         <span className="mx-1">•</span>
                         <span>Terjual 100+</span>
                       </div>
