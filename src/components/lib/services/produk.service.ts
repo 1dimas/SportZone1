@@ -388,4 +388,26 @@ export async function getProdukByBrand(brandId: string) {
   return Array.isArray(data) ? data : [data];
 }
 
+// =====================
+// GET TOTAL SOLD BY PRODUCT
+// =====================
+export async function getTotalSoldByProduct(produkId: string): Promise<number> {
+  try {
+    const response = await fetch(`${API_URL}/produk/${produkId}/sold-count`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!response.ok) {
+      return 0;
+    }
+
+    const data = await response.json();
+    return typeof data?.totalSold === "number" ? data.totalSold : 0;
+  } catch (error) {
+    console.error(`Error fetching total sold for product ${produkId}:`, error);
+    return 0;
+  }
+}
+
 

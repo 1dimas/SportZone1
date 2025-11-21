@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { getAllProduk } from "@/components/lib/services/produk.service";
+import { getAllProduk, getTotalSoldByProduct } from "@/components/lib/services/produk.service";
 import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 import Header from "@/components/Home/Header";
 import { FiStar } from "react-icons/fi";
@@ -14,6 +14,7 @@ export default function SearchPage({ searchParams }: any) {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [productRatings, setProductRatings] = useState<Record<string, number>>({});
+  const [productSoldCounts, setProductSoldCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -34,25 +35,36 @@ export default function SearchPage({ searchParams }: any) {
     fetchProducts();
   }, [q]);
 
-  // Fetch ratings when products change
+  // Fetch ratings and total sold when products change
   useEffect(() => {
-    const fetchRatings = async () => {
+    const fetchRatingsAndSold = async () => {
       if (products.length > 0) {
         const ratings: Record<string, number> = {};
-        for (const product of products) {
-          try {
-            const rating = await getAverageRatingPublic(product.id);
-            ratings[product.id] = rating;
-          } catch (error) {
-            console.error(`Error fetching rating for product ${product.id}:`, error);
-            ratings[product.id] = 0;
-          }
-        }
+        const soldCounts: Record<string, number> = {};
+        
+        await Promise.all(
+          products.map(async (product) => {
+            try {
+              const [rating, totalSold] = await Promise.all([
+                getAverageRatingPublic(product.id),
+                getTotalSoldByProduct(product.id),
+              ]);
+              ratings[product.id] = rating;
+              soldCounts[product.id] = totalSold;
+            } catch (error) {
+              console.error(`Error fetching data for product ${product.id}:`, error);
+              ratings[product.id] = 0;
+              soldCounts[product.id] = 0;
+            }
+          })
+        );
+        
         setProductRatings(ratings);
+        setProductSoldCounts(soldCounts);
       }
     };
 
-    fetchRatings();
+    fetchRatingsAndSold();
   }, [products]);
 
   if (loading) {
@@ -134,10 +146,10 @@ export default function SearchPage({ searchParams }: any) {
                       ? productRatings[product.id].toFixed(1) 
                       : "Belum ada rating"}
                   </span>
-                  {product.totalSold && (
+                  {productSoldCounts[product.id] !== undefined && productSoldCounts[product.id] > 0 && (
                     <>
                       <span className="mx-1">•</span>
-                      <span>Terjual {product.totalSold >= 1000 ? `${(product.totalSold / 1000).toFixed(1)}rb` : product.totalSold}+</span>
+                      <span>Terjual {productSoldCounts[product.id] >= 1000 ? `${(productSoldCounts[product.id] / 1000).toFixed(1)}rb` : productSoldCounts[product.id]}+</span>
                     </>
                   )}
                 </div>

@@ -8,7 +8,7 @@ import Header from "@/components/Home/Header";
 import Footer from "@/components/Home/Footer";
 import { getAllKategoriOlahraga } from "@/components/lib/services/olahraga.service";
 import { getSubkategoriPeralatanByKategoriOlahraga } from "@/components/lib/services/subkategori-peralatan.service";
-import { getProdukByKategori } from "@/components/lib/services/produk.service";
+import { getProdukByKategori, getTotalSoldByProduct } from "@/components/lib/services/produk.service";
 import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 
 type Params = {
@@ -45,6 +45,7 @@ type Produk = {
     nama: string;
   };
   averageRating?: number;
+  totalSold?: number;
 };
 
 const formatRupiah = (price: number) =>
@@ -108,34 +109,37 @@ export default function KategoriPage({ params }: { params: Promise<Params> }) {
     fetchData();
   }, [kategori]);
 
-  // Fetch ratings for products and update the state
+  // Fetch ratings and total sold for products and update the state
   useEffect(() => {
-    const fetchProductRatings = async () => {
+    const fetchProductRatingsAndSold = async () => {
       if (products.length > 0) {
-        const productsWithRatings = await Promise.all(
+        const productsWithRatingsAndSold = await Promise.all(
           products.map(async (product) => {
             try {
-              const rating = await getAverageRatingPublic(product.id);
-              return { ...product, averageRating: rating };
+              const [rating, totalSold] = await Promise.all([
+                getAverageRatingPublic(product.id),
+                getTotalSoldByProduct(product.id),
+              ]);
+              return { ...product, averageRating: rating, totalSold };
             } catch (error) {
-              console.error(`Error fetching rating for product ${product.id}:`, error);
-              return { ...product, averageRating: 0 };
+              console.error(`Error fetching data for product ${product.id}:`, error);
+              return { ...product, averageRating: 0, totalSold: 0 };
             }
           })
         );
-        setProductsWithRatings(productsWithRatings);
+        setProductsWithRatings(productsWithRatingsAndSold);
         
         // Update filtered products as well
         if (selectedSubkategori === null) {
-          setFilteredProducts(productsWithRatings);
+          setFilteredProducts(productsWithRatingsAndSold);
         } else {
-          const filtered = productsWithRatings.filter((p) => p.subkategori_id === selectedSubkategori);
+          const filtered = productsWithRatingsAndSold.filter((p) => p.subkategori_id === selectedSubkategori);
           setFilteredProducts(filtered);
         }
       }
     };
 
-    fetchProductRatings();
+    fetchProductRatingsAndSold();
   }, [products]);
 
   // Update filtered products when selected subkategori changes
@@ -291,8 +295,12 @@ export default function KategoriPage({ params }: { params: Promise<Params> }) {
                                 ? product.averageRating.toFixed(1) 
                                 : "Belum ada rating"}
                             </span>
-                            <span className="mx-1">•</span>
-                            <span>Terjual 100+</span>
+                            {product.totalSold !== undefined && product.totalSold > 0 && (
+                              <>
+                                <span className="mx-1">•</span>
+                                <span>Terjual {product.totalSold >= 1000 ? `${(product.totalSold / 1000).toFixed(1)}rb` : product.totalSold}+</span>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>

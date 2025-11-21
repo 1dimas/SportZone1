@@ -7,7 +7,7 @@ import ProductCard from "@/components/Home/ProductCard";
 import { HeroSlider } from "@/components/Home/Heroslider";
 import PopularBrands from "@/components/Home/PopularBrands";
 import ProductCarousel from "@/components/Home/ProductCarousel";
-import { getAllProduk } from "@/components/lib/services/produk.service";
+import { getAllProduk, getTotalSoldByProduct } from "@/components/lib/services/produk.service";
 import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 
 type ProductVariant = {
@@ -44,20 +44,23 @@ const Page = () => {
         setError(null);
         const data = await getAllProduk();
         
-        // Fetch rating untuk setiap produk secara paralel
-        const productsWithRatings = await Promise.all(
+        // Fetch rating dan total sold untuk setiap produk secara paralel
+        const productsWithRatingsAndSold = await Promise.all(
           data.map(async (product) => {
             try {
-              const rating = await getAverageRatingPublic(product.id);
-              return { ...product, averageRating: rating };
+              const [rating, totalSold] = await Promise.all([
+                getAverageRatingPublic(product.id),
+                getTotalSoldByProduct(product.id),
+              ]);
+              return { ...product, averageRating: rating, totalSold };
             } catch (error) {
-              console.error(`Error fetching rating for product ${product.id}:`, error);
-              return { ...product, averageRating: 0 };
+              console.error(`Error fetching data for product ${product.id}:`, error);
+              return { ...product, averageRating: 0, totalSold: 0 };
             }
           })
         );
         
-        setProducts(productsWithRatings);
+        setProducts(productsWithRatingsAndSold);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Gagal memuat data produk");
       } finally {

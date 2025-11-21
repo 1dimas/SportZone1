@@ -12,10 +12,12 @@ import type { ProductVariant } from "@/app/data/products";
 import {
   getProdukById,
   getAllProduk,
+  getTotalSoldByProduct,
 } from "@/components/lib/services/produk.service";
 import {
   getRatingsByProduct,
   getAverageRating,
+  getAverageRatingPublic,
   type RatingData,
 } from "@/components/lib/services/rating.service";
 import Footer from "@/components/Home/Footer";
@@ -72,7 +74,23 @@ export default function ProductDetailPage() {
         ]);
         setProduct(produkData);
         const filtered = allProduk.filter((p) => p.id !== id);
-        setRelated(filtered.slice(0, 8));
+        const relatedProducts = filtered.slice(0, 8);
+
+        // Fetch rating dan total sold untuk produk lainnya secara paralel
+        const relatedWithRatingsAndSold = await Promise.all(
+          relatedProducts.map(async (product) => {
+            try {
+              const [rating, totalSold] = await Promise.all([
+                getAverageRatingPublic(product.id),
+                getTotalSoldByProduct(product.id),
+              ]);
+              return { ...product, averageRating: rating, totalSold };
+            } catch (error) {
+              return { ...product, averageRating: 0, totalSold: 0 };
+            }
+          })
+        );
+        setRelated(relatedWithRatingsAndSold);
 
         try {
           const [ratingsData, avgRating] = await Promise.all([
