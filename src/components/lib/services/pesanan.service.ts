@@ -211,6 +211,31 @@ export async function updatePesananStatus(
 }
 
 // =====================
+// CANCEL ORDER
+// =====================
+export async function cancelOrder(id: string): Promise<Pesanan> {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const response = await fetch(`${API_URL}/pesanan/${id}/cancel`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Gagal membatalkan pesanan: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}
+
+// =====================
 // RETURN ORDER (DIKEMBALIKAN)
 // =====================
 export async function returnOrder(id: string): Promise<Pesanan> {

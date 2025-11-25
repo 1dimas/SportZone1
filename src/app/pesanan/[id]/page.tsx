@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Pesanan, getPesananById } from "@/components/lib/services/pesanan.service";
+import { Pesanan, getPesananById, cancelOrder } from "@/components/lib/services/pesanan.service";
 import { getPengembalianByUser, Pengembalian } from "@/components/lib/services/pengembalian.service";
 import { IconCheck, IconTruck, IconClock, IconHome, IconX, IconPackageExport } from "@tabler/icons-react";
 
@@ -73,6 +73,7 @@ export default function PesananDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pengembalian, setPengembalian] = useState<Pengembalian | null>(null);
+  const [cancelingOrder, setCancelingOrder] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -105,6 +106,27 @@ export default function PesananDetailPage() {
     return order.pesanan_items.reduce((sum, item) => sum + Number(item.harga_satuan) * item.kuantitas, 0);
   }, [order]);
 
+  const handleCancelOrder = async () => {
+    if (!id) return;
+    if (!confirm("Apakah Anda yakin ingin membatalkan pesanan ini?")) {
+      return;
+    }
+
+    try {
+      setCancelingOrder(true);
+      await cancelOrder(id);
+      alert("Pesanan berhasil dibatalkan");
+      
+      // Refresh order data
+      const data = await getPesananById(id);
+      setOrder(data);
+    } catch (err: any) {
+      alert(err?.message || "Gagal membatalkan pesanan");
+    } finally {
+      setCancelingOrder(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
@@ -114,6 +136,16 @@ export default function PesananDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => router.push("/pesanan/history")}>Kembali ke Riwayat</Button>
+          {order && (order.status === "pending" || order.status === "diproses") && (
+            <Button 
+              variant="destructive" 
+              disabled={cancelingOrder}
+              onClick={handleCancelOrder}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {cancelingOrder ? "Membatalkan..." : "Batalkan Pesanan"}
+            </Button>
+          )}
           {order && (
             <Button variant="ghost" onClick={() => navigator.clipboard.writeText(order.id)}>Copy ID</Button>
           )}
