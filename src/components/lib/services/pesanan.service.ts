@@ -36,6 +36,10 @@ export interface Pesanan {
   total_harga: number;
   status: string;
   alamat_pengiriman: string;
+  kota?: string;
+  provinsi?: string;
+  eta_min?: number;
+  eta_max?: number;
   created_at: string;
   updated_at: string;
   user?: {
@@ -67,6 +71,8 @@ export interface CreatePesananDto {
   tanggal_pesanan: string;
   total_harga: number;
   alamat_pengiriman: string;
+  kota: string;
+  provinsi: string;
   metode_pembayaran: string;
   items: CreatePesananItemDto[];
 }
@@ -120,7 +126,10 @@ export async function getPesananById(id: string): Promise<Pesanan> {
     );
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log("Response getPesananById:", data);
+  console.log("Pesanan kota:", data.kota, "provinsi:", data.provinsi);
+  return data;
 }
 
 // =====================
@@ -146,6 +155,10 @@ export async function getPesananHistory(): Promise<Pesanan[]> {
   }
 
   const data = await response.json();
+  console.log("Response getPesananHistory:", data);
+  if (Array.isArray(data) && data.length > 0) {
+    console.log("Sample pesanan kota:", data[0].kota, "provinsi:", data[0].provinsi);
+  }
   return Array.isArray(data) ? data : [data];
 }
 
@@ -198,6 +211,31 @@ export async function updatePesananStatus(
     const errorText = await response.text();
     throw new Error(
       `Gagal mengupdate status pesanan: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}
+
+// =====================
+// CANCEL ORDER
+// =====================
+export async function cancelOrder(id: string): Promise<Pesanan> {
+  const token = getToken();
+  if (!token) throw new Error("Belum login");
+
+  const response = await fetch(`${API_URL}/pesanan/${id}/cancel`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Gagal membatalkan pesanan: ${response.status} ${response.statusText} - ${errorText}`
     );
   }
 

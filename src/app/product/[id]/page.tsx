@@ -20,11 +20,12 @@ import {
   type RatingData,
 } from "@/components/lib/services/rating.service";
 import Footer from "@/components/Home/Footer";
-import Header from "@/components/Home/Header"; // <-- Import ini sudah ada
+import Header from "@/components/Home/Header"; 
 
 type APIProduct = {
   id: string;
   nama: string;
+  deskripsi?: string;
   harga: number;
   gambar: string[];
   stok?: number;
@@ -214,10 +215,46 @@ export default function ProductDetailPage() {
               {formatRupiah(product.harga)}
             </p>
 
+            {/* Informasi Produk */}
+            <div className="bg-gray-50 rounded-xl p-5 border border-gray-200 space-y-3">
+              <h3 className="font-semibold text-gray-800 mb-3">Informasi Produk</h3>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {product.brand && (
+                  <div>
+                    <span className="text-gray-500">Brand:</span>
+                    <p className="font-medium text-gray-800">{product.brand.nama}</p>
+                  </div>
+                )}
+                {product.subkategori && (
+                  <div>
+                    <span className="text-gray-500">Kategori:</span>
+                    <p className="font-medium text-gray-800">
+                      {product.subkategori.kategoriOlahraga.nama} - {product.subkategori.nama}
+                    </p>
+                  </div>
+                )}
+                {typeof product.stok === 'number' && (
+                  <div>
+                    <span className="text-gray-500">Stok:</span>
+                    <p className="font-medium text-gray-800">
+                      {product.stok > 0 ? `${product.stok} unit` : "Habis"}
+                    </p>
+                  </div>
+                )}
+                {product.totalSold !== undefined && product.totalSold > 0 && (
+                  <div>
+                    <span className="text-gray-500">Terjual:</span>
+                    <p className="font-medium text-gray-800">{product.totalSold}+</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Deskripsi Produk */}
             <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-              <h3 className="font-semibold text-gray-800 mb-2">Deskripsi</h3>
-              <p className="text-gray-600 text-sm">
-                Deskripsi produk belum tersedia.
+              <h3 className="font-semibold text-gray-800 mb-3">Deskripsi Produk</h3>
+              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                {product.deskripsi || "Deskripsi produk belum tersedia."}
               </p>
             </div>
 

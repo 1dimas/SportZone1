@@ -56,6 +56,8 @@ export default function CheckoutPage() {
   // Form state
   const [formData, setFormData] = useState({
     address: "",
+    kota: "",
+    provinsi: "",
     paymentMethod: "cod" as "cod" | "qris" | "dana",
   });
 
@@ -173,6 +175,16 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!formData.kota.trim()) {
+      alert("Mohon lengkapi kota pengiriman");
+      return;
+    }
+
+    if (!formData.provinsi.trim()) {
+      alert("Mohon lengkapi provinsi pengiriman");
+      return;
+    }
+
     if (!token) {
       alert("Token tidak ditemukan. Login dulu.");
       return;
@@ -206,12 +218,16 @@ export default function CheckoutPage() {
         tanggal_pesanan: new Date().toISOString().split("T")[0],
         total_harga: grandTotal,
         alamat_pengiriman: formData.address,
+        kota: formData.kota,
+        provinsi: formData.provinsi,
         metode_pembayaran: formData.paymentMethod,
         items,
       };
 
+      console.log("Sending order data:", orderData);
       const order = await createPesanan(orderData);
       console.log("Order created:", order);
+      console.log("Order kota:", order.kota, "provinsi:", order.provinsi);
 
       if (formData.paymentMethod === "cod") {
         await createCodPayment(order.id);
@@ -382,6 +398,46 @@ export default function CheckoutPage() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
                       placeholder="Masukkan alamat lengkap pengiriman"
                     />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label
+                        htmlFor="kota"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Kota *
+                      </label>
+                      <input
+                        type="text"
+                        id="kota"
+                        name="kota"
+                        value={formData.kota}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                        placeholder="Contoh: Depok"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="provinsi"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Provinsi *
+                      </label>
+                      <input
+                        type="text"
+                        id="provinsi"
+                        name="provinsi"
+                        value={formData.provinsi}
+                        onChange={handleInputChange}
+                        required
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                        placeholder="Contoh: Jawa Barat"
+                      />
+                    </div>
                   </div>
 
                   <div className="mt-8">

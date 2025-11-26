@@ -120,6 +120,20 @@ export const columns: ColumnDef<
     ),
   },
   {
+    id: "lokasi",
+    header: "Kota/Provinsi",
+    cell: ({ row }) => {
+      const kota = row.original.kota;
+      const provinsi = row.original.provinsi;
+      const lokasi = [kota, provinsi].filter(Boolean).join(", ");
+      return (
+        <div className="text-sm text-muted-foreground">
+          {lokasi || "-"}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "total_harga",
     header: "Total",
     cell: ({ row }) => (

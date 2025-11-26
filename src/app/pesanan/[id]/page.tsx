@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Pesanan, getPesananById } from "@/components/lib/services/pesanan.service";
+import { Pesanan, getPesananById, cancelOrder } from "@/components/lib/services/pesanan.service";
 import { getPengembalianByUser, Pengembalian } from "@/components/lib/services/pengembalian.service";
 import { IconCheck, IconTruck, IconClock, IconHome, IconX, IconPackageExport } from "@tabler/icons-react";
 
@@ -73,6 +73,7 @@ export default function PesananDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pengembalian, setPengembalian] = useState<Pengembalian | null>(null);
+  const [cancelingOrder, setCancelingOrder] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -105,6 +106,27 @@ export default function PesananDetailPage() {
     return order.pesanan_items.reduce((sum, item) => sum + Number(item.harga_satuan) * item.kuantitas, 0);
   }, [order]);
 
+  const handleCancelOrder = async () => {
+    if (!id) return;
+    if (!confirm("Apakah Anda yakin ingin membatalkan pesanan ini?")) {
+      return;
+    }
+
+    try {
+      setCancelingOrder(true);
+      await cancelOrder(id);
+      alert("Pesanan berhasil dibatalkan");
+      
+      // Refresh order data
+      const data = await getPesananById(id);
+      setOrder(data);
+    } catch (err: any) {
+      alert(err?.message || "Gagal membatalkan pesanan");
+    } finally {
+      setCancelingOrder(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
@@ -114,6 +136,16 @@ export default function PesananDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => router.push("/pesanan/history")}>Kembali ke Riwayat</Button>
+          {order && (order.status === "pending" || order.status === "diproses") && (
+            <Button 
+              variant="destructive" 
+              disabled={cancelingOrder}
+              onClick={handleCancelOrder}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {cancelingOrder ? "Membatalkan..." : "Batalkan Pesanan"}
+            </Button>
+          )}
           {order && (
             <Button variant="ghost" onClick={() => navigator.clipboard.writeText(order.id)}>Copy ID</Button>
           )}
@@ -172,8 +204,38 @@ export default function PesananDetailPage() {
                 Alamat Pengiriman
               </CardTitle>
             </CardHeader>
-            <CardContent className="py-4">
-              <p className="text-gray-700 whitespace-pre-line">{order.alamat_pengiriman}</p>
+            <CardContent className="py-4 space-y-3">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Alamat:</p>
+                <p className="text-sm text-gray-700 whitespace-pre-line">{order.alamat_pengiriman}</p>
+              </div>
+              
+              {(order.kota || order.provinsi) && (
+                <div className="pt-2 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 mb-1">Kota/Provinsi:</p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {[order.kota, order.provinsi].filter(Boolean).join(", ")}
+                  </p>
+                </div>
+              )}
+              
+              {/* Show ETA for pending, diproses, dikirim status */}
+              {(order.status === "pending" || 
+                order.status === "diproses" || 
+                order.status === "dikirim") && 
+                order.eta_min && 
+                order.eta_max && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-xs font-semibold text-blue-800 mb-1">
+                    📦 Estimasi Kedatangan
+                  </p>
+                  <p className="text-sm font-medium text-blue-700">
+                    {order.eta_min === order.eta_max 
+                      ? `${order.eta_min} hari kerja`
+                      : `${order.eta_min}-${order.eta_max} hari kerja`}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

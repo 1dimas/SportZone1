@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   getPesananHistory,
   Pesanan,
+  cancelOrder,
 } from "@/components/lib/services/pesanan.service";
 // Import ShoppingBag (dipakai di Card) dan FiArrowLeft (untuk tombol kembali)
 import { ShoppingBag, ArrowLeft, Star } from "lucide-react";
@@ -47,6 +48,7 @@ export default function PesananHistoryPage() {
   const [currentReview, setCurrentReview] = useState<string>("");
   const [pending, setPending] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [cancelingOrderId, setCancelingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -83,6 +85,26 @@ export default function PesananHistoryPage() {
       .filter((o) => o.status === tab)
       .sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
   }, [orders, tab]);
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!confirm("Apakah Anda yakin ingin membatalkan pesanan ini?")) {
+      return;
+    }
+
+    try {
+      setCancelingOrderId(orderId);
+      await cancelOrder(orderId);
+      alert("Pesanan berhasil dibatalkan");
+      
+      // Refresh order list
+      const data = await getPesananHistory();
+      setOrders(data);
+    } catch (err: any) {
+      alert(err?.message || "Gagal membatalkan pesanan");
+    } finally {
+      setCancelingOrderId(null);
+    }
+  };
 
   const statusTabs = [
     { key: "semua", label: "Semua" },
@@ -292,6 +314,34 @@ export default function PesananHistoryPage() {
                                     + {otherItemsCount} produk lain
                                   </p>
                                 )}
+                                
+                                {/* Kota dan Provinsi */}
+                                {(order.kota || order.provinsi) && (
+                                  <div className="mt-3 pt-3 border-t border-gray-200">
+                                    <p className="text-xs text-gray-500 mb-1">Dikirim ke:</p>
+                                    <p className="text-sm text-gray-700">
+                                      {[order.kota, order.provinsi].filter(Boolean).join(", ")}
+                                    </p>
+                                  </div>
+                                )}
+                                
+                                {/* Show ETA for pending, diproses, dikirim status */}
+                                {(order.status === "pending" || 
+                                  order.status === "diproses" || 
+                                  order.status === "dikirim") && 
+                                  order.eta_min && 
+                                  order.eta_max && (
+                                  <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                                    <p className="text-xs font-semibold text-blue-800 mb-1">
+                                      📦 Estimasi Kedatangan
+                                    </p>
+                                    <p className="text-sm text-blue-700">
+                                      {order.eta_min === order.eta_max 
+                                        ? `${order.eta_min} hari`
+                                        : `${order.eta_min}-${order.eta_max} hari`}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ) : (
@@ -310,6 +360,19 @@ export default function PesananHistoryPage() {
                               </p>
                             </div>
                             <div className="flex gap-2">
+                              {/* Tombol Batalkan Pesanan untuk status pending dan diproses */}
+                              {(order.status === "pending" || order.status === "diproses") && (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  disabled={cancelingOrderId === order.id}
+                                  onClick={() => handleCancelOrder(order.id)}
+                                  className="bg-red-600 hover:bg-red-700 text-white font-semibold shadow-md"
+                                >
+                                  {cancelingOrderId === order.id ? "Membatalkan..." : "Batalkan"}
+                                </Button>
+                              )}
+                              
                               <Link href={`/pesanan/${order.id}`}>
                                 <Button
                                   size="sm"
