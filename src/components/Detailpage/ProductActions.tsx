@@ -19,23 +19,30 @@ type ProductData = {
   stock?: number;
 };
 
+type ApiVariant = {
+  id: string;
+  ukuran?: string;
+  size?: string;
+  warna?: string;
+  color?: string;
+  stok: number;
+  stock: number;
+  harga: number;
+};
+
 type ProductActionsProps = {
   product: ProductData;
-  onAddToCart: (variant: ProductVariant, quantity: number) => void;
-  onOrderNow?: (variant: ProductVariant, quantity: number) => void;
 };
 
 export const ProductActions: React.FC<ProductActionsProps> = ({
   product,
-  onAddToCart,
-  onOrderNow,
 }) => {
   const { dispatch } = useCart();
   const router = useRouter();
   const [selectedSize, setSelectedSize] = useState<string | number | undefined>(undefined);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
   const [quantity, setQuantity] = useState(1);
-  const [apiVariants, setApiVariants] = useState<any[]>([]);
+  const [apiVariants, setApiVariants] = useState<ApiVariant[]>([]);
   const [loadingVariants, setLoadingVariants] = useState(false);
 
   // Fetch variants from API
@@ -271,9 +278,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
 
       {/* Informasi Variant yang Dipilih */}
       {selectedVariant && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-orange-900 mb-2">Variant Dipilih:</h4>
-          <div className="text-sm text-orange-800">
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+          <h4 className="text-xs font-medium text-orange-900 mb-1">Variant Dipilih:</h4>
+          <div className="text-xs text-orange-800">
             {hasSizes && hasColors && (
               <p>
                 Ukuran: {selectedSize} | Warna: {selectedColor}
@@ -293,17 +300,23 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
 
       {/* Jumlah */}
       <div className="flex items-center gap-2">
-        <button onClick={() => setQuantity((q) => Math.max(1, q - 1))} className="p-2 border rounded">
+        <button
+          onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+          className="p-2 border rounded-md text-sm"
+        >
           <FiMinus />
         </button>
-        <span className="px-3">{quantity}</span>
-        <button onClick={() => setQuantity((q) => q + 1)} className="p-2 border rounded">
+        <span className="px-4 py-1 border-t border-b">{quantity}</span>
+        <button
+          onClick={() => setQuantity((q) => q + 1)}
+          className="p-2 border rounded-md text-sm"
+        >
           <FiPlus />
         </button>
       </div>
 
       {/* Tombol Aksi */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         {/* Tambah ke Keranjang */}
         <button
           onClick={handleAddToCart}

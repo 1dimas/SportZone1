@@ -93,6 +93,7 @@ export function NavUser({
                   <span className="text-muted-foreground truncate text-xs">
                     {user.email}
                   </span>
+
                 </div>
               </div>
             </DropdownMenuLabel>

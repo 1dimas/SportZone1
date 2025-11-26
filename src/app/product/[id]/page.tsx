@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { FiHeart, FiShare2, FiStar } from "react-icons/fi";
+import { FiStar } from "react-icons/fi";
 import { ProductActions } from "@/components/Detailpage/ProductActions";
 import { formatRupiah } from "@/lib/utils";
 import { RatingList } from "@/components/Detailpage/RatingList";
-import type { ProductVariant } from "@/app/data/products";
 import {
   getProdukById,
   getAllProduk,
@@ -54,7 +53,6 @@ type UnionProduct = APIProduct;
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const id = params.id as string;
 
   const [product, setProduct] = useState<UnionProduct | null>(null);
@@ -112,14 +110,7 @@ export default function ProductDetailPage() {
     fetchData();
   }, [id]);
 
-  const handleAddToCart = (variant: ProductVariant, quantity: number) => {
-    console.log("Adding to cart:", { variant, quantity });
-    alert(`Ditambahkan ${quantity} ke keranjang`);
-  };
-
-  const handleOrderNow = (variant: ProductVariant, quantity: number) => {
-    router.push("/checkout");
-  };
+  
 
   const getVariants = (product: UnionProduct): ProductVariant[] => {
     if (product.variants && Array.isArray(product.variants)) {
@@ -170,7 +161,7 @@ export default function ProductDetailPage() {
         {/* Tombol Kembali DIHAPUS DARI SINI */}
 
         {/* Detail Produk */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-16">
           {/* Gambar Produk */}
           <div className="space-y-4">
             <div className="aspect-square relative rounded-2xl overflow-hidden border border-gray-200">
@@ -205,8 +196,8 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Info Produk */}
-          <div className="space-y-6">
-            <h1 className="text-4xl font-bold text-gray-900 leading-tight">
+          <div className="space-y-4 lg:space-y-6">
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
               {product.nama}
             </h1>
             <div className="flex items-center">
@@ -219,7 +210,7 @@ export default function ProductDetailPage() {
                 {ratings.length} ulasan
               </span>
             </div>
-            <p className="text-3xl font-semibold text-orange-600">
+            <p className="text-2xl lg:text-3xl font-semibold text-orange-600">
               {formatRupiah(product.harga)}
             </p>
 
@@ -240,8 +231,6 @@ export default function ProductDetailPage() {
                   id: product.id,
                   stock: product.stok,
                 }}
-                onAddToCart={handleAddToCart}
-                onOrderNow={handleOrderNow}
               />
             </div>
           </div>
@@ -262,7 +251,7 @@ export default function ProductDetailPage() {
   {related.length === 0 ? (
     <p className="text-gray-600">Tidak ada produk lain.</p>
   ) : (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
       {related.map((item) => {
         // Gunakan averageRating dari API jika ada, fallback ke rating atau 0
         const rating = item.averageRating ?? item.rating ?? 0;
@@ -292,7 +281,7 @@ export default function ProductDetailPage() {
 
             {/* Detail Produk */}
             <div className="p-3 space-y-1.5">
-              <h3 className="text-sm font-medium text-gray-800 line-clamp-2 min-h-[36px]">
+              <h3 className="text-sm font-medium text-gray-800 line-clamp-2">
                 {item.nama}
               </h3>
 
