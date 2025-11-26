@@ -224,8 +224,10 @@ export default function CheckoutPage() {
         items,
       };
 
+      console.log("Sending order data:", orderData);
       const order = await createPesanan(orderData);
       console.log("Order created:", order);
+      console.log("Order kota:", order.kota, "provinsi:", order.provinsi);
 
       if (formData.paymentMethod === "cod") {
         await createCodPayment(order.id);

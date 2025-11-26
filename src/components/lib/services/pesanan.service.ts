@@ -126,7 +126,10 @@ export async function getPesananById(id: string): Promise<Pesanan> {
     );
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log("Response getPesananById:", data);
+  console.log("Pesanan kota:", data.kota, "provinsi:", data.provinsi);
+  return data;
 }
 
 // =====================
@@ -152,6 +155,10 @@ export async function getPesananHistory(): Promise<Pesanan[]> {
   }
 
   const data = await response.json();
+  console.log("Response getPesananHistory:", data);
+  if (Array.isArray(data) && data.length > 0) {
+    console.log("Sample pesanan kota:", data[0].kota, "provinsi:", data[0].provinsi);
+  }
   return Array.isArray(data) ? data : [data];
 }
 

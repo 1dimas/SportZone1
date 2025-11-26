@@ -205,12 +205,17 @@ export default function PesananDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="py-4 space-y-3">
-              <p className="text-gray-700 whitespace-pre-line">{order.alamat_pengiriman}</p>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Alamat:</p>
+                <p className="text-sm text-gray-700 whitespace-pre-line">{order.alamat_pengiriman}</p>
+              </div>
               
-              {order.kota && order.provinsi && (
-                <div className="text-sm text-gray-600">
-                  <p><span className="font-medium">Kota:</span> {order.kota}</p>
-                  <p><span className="font-medium">Provinsi:</span> {order.provinsi}</p>
+              {(order.kota || order.provinsi) && (
+                <div className="pt-2 border-t border-gray-100">
+                  <p className="text-xs text-gray-500 mb-1">Kota/Provinsi:</p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {[order.kota, order.provinsi].filter(Boolean).join(", ")}
+                  </p>
                 </div>
               )}
               

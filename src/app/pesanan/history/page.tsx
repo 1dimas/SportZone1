@@ -315,6 +315,16 @@ export default function PesananHistoryPage() {
                                   </p>
                                 )}
                                 
+                                {/* Kota dan Provinsi */}
+                                {(order.kota || order.provinsi) && (
+                                  <div className="mt-3 pt-3 border-t border-gray-200">
+                                    <p className="text-xs text-gray-500 mb-1">Dikirim ke:</p>
+                                    <p className="text-sm text-gray-700">
+                                      {[order.kota, order.provinsi].filter(Boolean).join(", ")}
+                                    </p>
+                                  </div>
+                                )}
+                                
                                 {/* Show ETA for pending, diproses, dikirim status */}
                                 {(order.status === "pending" || 
                                   order.status === "diproses" || 

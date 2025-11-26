@@ -102,6 +102,16 @@ export function PesananDetail({ id }: PesananDetailProps) {
       <div className="mb-4">
         <strong>Alamat Pengiriman:</strong> {pesanan.alamat_pengiriman}
       </div>
+      {(pesanan.kota || pesanan.provinsi) && (
+        <div className="mb-4">
+          <strong>Kota/Provinsi:</strong> {[pesanan.kota, pesanan.provinsi].filter(Boolean).join(", ")}
+        </div>
+      )}
+      {pesanan.eta_min && pesanan.eta_max && (
+        <div className="mb-4">
+          <strong>Estimasi Kedatangan:</strong> {pesanan.eta_min === pesanan.eta_max ? `${pesanan.eta_min} hari` : `${pesanan.eta_min}-${pesanan.eta_max} hari`}
+        </div>
+      )}
       <div className="mb-4">
         <strong>Total Harga:</strong> Rp{" "}
         {pesanan.total_harga.toLocaleString("id-ID")}
