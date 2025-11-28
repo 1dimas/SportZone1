@@ -3,65 +3,129 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pesanan, getPesananById, cancelOrder } from "@/components/lib/services/pesanan.service";
 import { getPengembalianByUser, Pengembalian } from "@/components/lib/services/pengembalian.service";
-import { IconCheck, IconTruck, IconClock, IconHome, IconX, IconPackageExport } from "@tabler/icons-react";
+import { 
+  IconCheck, 
+  IconTruck, 
+  IconClock, 
+  IconMapPin, 
+  IconX, 
+  IconPackageExport,
+  IconPackage,
+  IconReceipt,
+  IconArrowLeft,
+  IconCopy,
+  IconAlertCircle
+} from "@tabler/icons-react";
 
 const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(amount);
+  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
 
 const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString("id-ID", { year: "numeric", month: "short", day: "numeric" });
+  new Date(dateString).toLocaleDateString("id-ID", { 
+    weekday: 'long',
+    year: "numeric", 
+    month: "long", 
+    day: "numeric" 
+  });
 
 const STATUS_FLOW = ["pending", "diproses", "dikirim", "selesai"] as const;
-type StatusKey = typeof STATUS_FLOW[number] | "dibatalkan";
+type StatusKey = typeof STATUS_FLOW[number] | "dibatalkan" | "dikembalikan";
+
+const getStatusBadgeStyle = (status: StatusKey) => {
+  const styles = {
+    pending: "bg-amber-50 text-amber-700 border-amber-200",
+    diproses: "bg-blue-50 text-blue-700 border-blue-200",
+    dikirim: "bg-purple-50 text-purple-700 border-purple-200",
+    selesai: "bg-green-50 text-green-700 border-green-200",
+    dibatalkan: "bg-gray-50 text-gray-700 border-gray-200",
+    dikembalikan: "bg-red-50 text-red-700 border-red-200",
+  };
+  return styles[status] || styles.pending;
+};
 
 function StatusTimeline({ status }: { status: StatusKey }) {
   const currentIndex = STATUS_FLOW.indexOf(status as any);
   const cancelled = status === "dibatalkan";
+  const returned = status === "dikembalikan";
 
   const items = [
     { key: "pending", label: "Pending", icon: IconClock },
     { key: "diproses", label: "Diproses", icon: IconCheck },
     { key: "dikirim", label: "Dikirim", icon: IconTruck },
-    { key: "selesai", label: "Selesai", icon: IconCheck },
+    { key: "selesai", label: "Selesai", icon: IconPackage },
   ] as const;
 
-  return (
-    <div className="flex items-center gap-4">
-      {cancelled ? (
-        <div className="flex items-center gap-2 text-red-600">
-          <IconX className="size-5" />
-          <span className="font-medium">Dibatalkan</span>
+  if (cancelled) {
+    return (
+      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-lg border border-gray-100">
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100">
+          <IconX className="w-5 h-5 text-gray-600" />
         </div>
-      ) : (
-        items.map((item, idx) => {
+        <div>
+          <p className="text-sm font-medium text-gray-900">Pesanan Dibatalkan</p>
+          <p className="text-xs text-gray-500">Pesanan ini telah dibatalkan</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (returned) {
+    return (
+      <div className="flex items-center gap-3 px-4 py-3 bg-red-50 rounded-lg border border-red-100">
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
+          <IconPackageExport className="w-5 h-5 text-red-600" />
+        </div>
+        <div>
+          <p className="text-sm font-medium text-red-900">Pesanan Dikembalikan</p>
+          <p className="text-xs text-red-600">Pengembalian telah diproses</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <div className="flex items-center justify-between">
+        {items.map((item, idx) => {
           const Icon = item.icon;
           const done = currentIndex >= idx;
+          const active = currentIndex === idx;
+          
           return (
-            <div key={item.key} className="flex items-center gap-2">
-              <span
-                className={
-                  done
-                    ? "bg-orange-600 text-white rounded-full p-1"
-                    : "bg-gray-200 text-gray-600 rounded-full p-1"
-                }
-                aria-label={item.label}
-              >
-                <Icon className="size-4" />
+            <div key={item.key} className="flex flex-col items-center flex-1 relative">
+              {/* Connector Line */}
+              {idx < items.length - 1 && (
+                <div className={`absolute top-5 left-[50%] w-full h-0.5 ${
+                  done ? 'bg-orange-500' : 'bg-gray-200'
+                }`} style={{ zIndex: 0 }} />
+              )}
+              
+              {/* Icon Circle */}
+              <div className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                done 
+                  ? 'bg-orange-500 shadow-lg shadow-orange-500/30' 
+                  : 'bg-white border-2 border-gray-200'
+              }`}>
+                <Icon className={`w-5 h-5 ${done ? 'text-white' : 'text-gray-400'}`} />
+              </div>
+              
+              {/* Label */}
+              <span className={`mt-2 text-xs font-medium text-center ${
+                active ? 'text-orange-600' : done ? 'text-gray-700' : 'text-gray-400'
+              }`}>
+                {item.label}
               </span>
-              <span className={done ? "text-orange-700 font-medium" : "text-gray-600"}>{item.label}</span>
-              {idx < items.length - 1 && <Separator className="mx-2 w-10" />}
             </div>
           );
-        })
-      )}
+        })}
+      </div>
     </div>
   );
 }
@@ -74,6 +138,7 @@ export default function PesananDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [pengembalian, setPengembalian] = useState<Pengembalian | null>(null);
   const [cancelingOrder, setCancelingOrder] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -117,7 +182,6 @@ export default function PesananDetailPage() {
       await cancelOrder(id);
       alert("Pesanan berhasil dibatalkan");
       
-      // Refresh order data
       const data = await getPesananById(id);
       setOrder(data);
     } catch (err: any) {
@@ -127,244 +191,337 @@ export default function PesananDetailPage() {
     }
   };
 
+  const handleCopyId = () => {
+    if (order) {
+      navigator.clipboard.writeText(order.id);
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Detail Pesanan</h1>
-          <p className="text-sm text-gray-600 mt-1">Ringkasan, status, dan item pesanan Anda.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => router.push("/pesanan/history")}>Kembali ke Riwayat</Button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => router.push("/pesanan/history")}
+              className="mb-3 -ml-2 text-gray-600 hover:text-gray-900"
+            >
+              <IconArrowLeft className="w-4 h-4 mr-2" />
+              Kembali ke Riwayat
+            </Button>
+            <h1 className="text-3xl font-bold text-gray-900">Detail Pesanan</h1>
+            <p className="text-sm text-gray-500 mt-1">Informasi lengkap pesanan Anda</p>
+          </div>
+
           {order && (order.status === "pending" || order.status === "diproses") && (
             <Button 
               variant="destructive" 
               disabled={cancelingOrder}
               onClick={handleCancelOrder}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-500 hover:bg-red-600 shadow-sm"
             >
+              <IconX className="w-4 h-4 mr-2" />
               {cancelingOrder ? "Membatalkan..." : "Batalkan Pesanan"}
             </Button>
           )}
-          {order && (
-            <Button variant="ghost" onClick={() => navigator.clipboard.writeText(order.id)}>Copy ID</Button>
-          )}
         </div>
-      </div>
 
-      {loading && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-        </div>
-      )}
+        {/* Loading State */}
+        {loading && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Skeleton className="h-64 rounded-2xl lg:col-span-2" />
+            <Skeleton className="h-64 rounded-2xl" />
+            <Skeleton className="h-96 rounded-2xl lg:col-span-2" />
+            <Skeleton className="h-96 rounded-2xl" />
+          </div>
+        )}
 
-      {error && (
-        <div className="text-red-600">
-          {error}
-          {error.toLowerCase().includes("unauthorized") && (
-            <span className="block mt-2 text-sm text-gray-600">
-              Sesi berakhir. Silakan <Link href="/login" className="text-orange-600 underline">login</Link> kembali.
-            </span>
-          )}
-        </div>
-      )}
-
-      {order && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Summary & Status */}
-          <Card className="lg:col-span-2">
-            <CardHeader className="border-b">
-              <CardTitle className="flex items-center justify-between">
-                <span className="font-mono text-sm text-gray-700">{order.id}</span>
-                <Badge variant="outline" className="capitalize">{order.status}</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="py-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="text-sm">
-                  <span className="text-gray-500 mr-2">Tanggal</span>
-                  <span className="font-medium">{formatDate(order.tanggal_pesanan)}</span>
-                </div>
-                <div className="text-sm">
-                  <span className="text-gray-500 mr-2">Total</span>
-                  <span className="font-medium">{formatCurrency(order.total_harga)}</span>
+        {/* Error State */}
+        {error && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-3">
+                <IconAlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                <div>
+                  <p className="font-medium text-red-900">{error}</p>
+                  {error.toLowerCase().includes("unauthorized") && (
+                    <p className="text-sm text-red-700 mt-1">
+                      Sesi berakhir. Silakan <Link href="/login" className="underline font-medium">login</Link> kembali.
+                    </p>
+                  )}
                 </div>
               </div>
-              <StatusTimeline status={order.status as StatusKey} />
             </CardContent>
           </Card>
+        )}
 
-          {/* Pengiriman */}
-          <Card>
-            <CardHeader className="border-b">
-              <CardTitle className="flex items-center gap-2">
-                <IconHome className="size-4" />
-                Alamat Pengiriman
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="py-4 space-y-3">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Alamat:</p>
-                <p className="text-sm text-gray-700 whitespace-pre-line">{order.alamat_pengiriman}</p>
-              </div>
-              
-              {(order.kota || order.provinsi) && (
-                <div className="pt-2 border-t border-gray-100">
-                  <p className="text-xs text-gray-500 mb-1">Kota/Provinsi:</p>
-                  <p className="text-sm font-medium text-gray-800">
-                    {[order.kota, order.provinsi].filter(Boolean).join(", ")}
-                  </p>
-                </div>
-              )}
-              
-              {/* Show ETA for pending, diproses, dikirim status */}
-              {(order.status === "pending" || 
-                order.status === "diproses" || 
-                order.status === "dikirim") && 
-                order.eta_min && 
-                order.eta_max && (
-                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                  <p className="text-xs font-semibold text-blue-800 mb-1">
-                    📦 Estimasi Kedatangan
-                  </p>
-                  <p className="text-sm font-medium text-blue-700">
-                    {order.eta_min === order.eta_max 
-                      ? `${order.eta_min} hari kerja`
-                      : `${order.eta_min}-${order.eta_max} hari kerja`}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Pengembalian */}
-          {(order.status === "dikirim" || order.status === "selesai" || order.status === "dikembalikan") && (
-            <Card>
-              <CardHeader className="border-b">
-                <CardTitle className="flex items-center gap-2">
-                  <IconPackageExport className="size-4" />
-                  Pengembalian
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="py-4">
-                {pengembalian ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Status Pengembalian:</span>
-                      <Badge className={
-                        pengembalian.status === "pending" ? "bg-yellow-100 text-yellow-800" :
-                        pengembalian.status === "approved" ? "bg-green-100 text-green-800" :
-                        "bg-red-100 text-red-800"
-                      }>
-                        {pengembalian.status === "pending" && "Menunggu Persetujuan"}
-                        {pengembalian.status === "approved" && "Disetujui"}
-                        {pengembalian.status === "rejected" && "Ditolak"}
-                      </Badge>
+        {/* Content */}
+        {order && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Informasi Pesanan & Status */}
+            <Card className="lg:col-span-2 border-0 shadow-lg shadow-gray-200/50 rounded-2xl">
+              <CardHeader className="border-b border-gray-100 pb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-orange-50 rounded-lg">
+                      <IconReceipt className="w-6 h-6 text-orange-600" />
                     </div>
                     <div>
-                      <span className="text-sm text-gray-600">Alasan: </span>
-                      <span className="text-sm capitalize">{pengembalian.alasan}</span>
-                    </div>
-                    {pengembalian.catatan_admin && (
-                      <div className="mt-2 p-2 bg-blue-50 rounded border">
-                        <span className="text-sm font-medium">Catatan Admin:</span>
-                        <p className="text-sm text-gray-700 mt-1">{pengembalian.catatan_admin}</p>
+                      <p className="text-xs text-gray-500 mb-1">ID Pesanan</p>
+                      <div className="flex items-center gap-2">
+                        <code className="text-sm font-mono font-semibold text-gray-900">
+                          #{order.id.slice(0, 8)}...
+                        </code>
+                        <button
+                          onClick={handleCopyId}
+                          className="p-1 hover:bg-gray-100 rounded transition-colors"
+                          title="Copy ID"
+                        >
+                          <IconCopy className="w-4 h-4 text-gray-400" />
+                        </button>
+                        {copiedId && (
+                          <span className="text-xs text-green-600 font-medium">Tersalin!</span>
+                        )}
                       </div>
-                    )}
+                    </div>
+                  </div>
+                  <Badge className={`${getStatusBadgeStyle(order.status as StatusKey)} px-4 py-1.5 font-medium capitalize border`}>
+                    {order.status}
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              <CardContent className="py-6 space-y-6">
+                {/* Tanggal & Total */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                    <IconClock className="w-5 h-5 text-gray-400 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Tanggal Pesanan</p>
+                      <p className="text-sm font-semibold text-gray-900">{formatDate(order.tanggal_pesanan)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-4 bg-orange-50 rounded-xl">
+                    <IconReceipt className="w-5 h-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-orange-700 mb-1">Total Pembayaran</p>
+                      <p className="text-lg font-bold text-orange-600">{formatCurrency(order.total_harga)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Status Timeline */}
+                <div className="pt-4">
+                  <p className="text-sm font-semibold text-gray-700 mb-4">Status Pengiriman</p>
+                  <StatusTimeline status={order.status as StatusKey} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Alamat Pengiriman */}
+            <Card className="border-0 shadow-lg shadow-gray-200/50 rounded-2xl">
+              <CardHeader className="border-b border-gray-100 pb-4">
+                <div className="flex items-center gap-2">
+                  <IconMapPin className="w-5 h-5 text-orange-600" />
+                  <h3 className="font-semibold text-gray-900">Alamat Pengiriman</h3>
+                </div>
+              </CardHeader>
+              <CardContent className="py-6 space-y-4">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 mb-2">Alamat Lengkap</p>
+                  <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                    {order.alamat_pengiriman}
+                  </p>
+                </div>
+                
+                {(order.kota || order.provinsi) && (
+                  <>
+                    <Separator className="bg-gray-100" />
+                    <div>
+                      <p className="text-xs font-medium text-gray-500 mb-2">Kota/Provinsi</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {[order.kota, order.provinsi].filter(Boolean).join(", ")}
+                      </p>
+                    </div>
+                  </>
+                )}
+                
+                {/* ETA Badge */}
+                {(order.status === "pending" || 
+                  order.status === "diproses" || 
+                  order.status === "dikirim") && 
+                  order.eta_min && 
+                  order.eta_max && (
+                  <>
+                    <Separator className="bg-gray-100" />
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                      <IconTruck className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <p className="text-xs font-medium text-blue-900 mb-0.5">Estimasi Tiba</p>
+                        <p className="text-sm font-semibold text-blue-700">
+                          {order.eta_min === order.eta_max 
+                            ? `${order.eta_min} hari kerja`
+                            : `${order.eta_min}-${order.eta_max} hari kerja`}
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Info Pengembalian */}
+            {(order.status === "dikirim" || order.status === "selesai" || order.status === "dikembalikan") && (
+              <Card className="lg:col-span-3 border-0 shadow-lg shadow-gray-200/50 rounded-2xl">
+                <CardHeader className="border-b border-gray-100 pb-4">
+                  <div className="flex items-center gap-2">
+                    <IconPackageExport className="w-5 h-5 text-orange-600" />
+                    <h3 className="font-semibold text-gray-900">Pengembalian Produk</h3>
+                  </div>
+                </CardHeader>
+                <CardContent className="py-6">
+                  {pengembalian ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 mb-2">Status Pengembalian</p>
+                          <Badge className={`
+                            ${pengembalian.status === "pending" ? "bg-yellow-100 text-yellow-800 border-yellow-200" : ""}
+                            ${pengembalian.status === "approved" ? "bg-green-100 text-green-800 border-green-200" : ""}
+                            ${pengembalian.status === "rejected" ? "bg-red-100 text-red-800 border-red-200" : ""}
+                            px-3 py-1 font-medium border
+                          `}>
+                            {pengembalian.status === "pending" && "Menunggu Persetujuan"}
+                            {pengembalian.status === "approved" && "Disetujui"}
+                            {pengembalian.status === "rejected" && "Ditolak"}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 mb-2">Alasan</p>
+                          <p className="text-sm font-medium text-gray-900 capitalize">{pengembalian.alasan}</p>
+                        </div>
+                      </div>
+                      {pengembalian.catatan_admin && (
+                        <div className="md:col-span-2 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                          <p className="text-xs font-semibold text-blue-900 mb-2">Catatan dari Admin</p>
+                          <p className="text-sm text-blue-800">{pengembalian.catatan_admin}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <IconPackageExport className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-sm text-gray-600 mb-4">
+                        Ada masalah dengan pesanan Anda? Ajukan pengembalian sekarang.
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={() => router.push(`/pesanan/${order.id}/pengembalian`)}
+                        className="shadow-sm"
+                      >
+                        <IconPackageExport className="w-4 h-4 mr-2" />
+                        Ajukan Pengembalian
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Daftar Item Produk */}
+            <Card className="lg:col-span-2 border-0 shadow-lg shadow-gray-200/50 rounded-2xl">
+              <CardHeader className="border-b border-gray-100 pb-4">
+                <div className="flex items-center gap-2">
+                  <IconPackage className="w-5 h-5 text-orange-600" />
+                  <h3 className="font-semibold text-gray-900">Item Pesanan</h3>
+                </div>
+              </CardHeader>
+              <CardContent className="py-6">
+                {order.pesanan_items && order.pesanan_items.length > 0 ? (
+                  <div className="space-y-4">
+                    {order.pesanan_items.map((item, index) => (
+                      <div key={item.id}>
+                        <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 mb-1">
+                              {item.produk?.nama || "Produk"}
+                            </h4>
+                            <p className="text-xs text-gray-500 mb-2">
+                              {item.produk_varian
+                                ? (
+                                    [
+                                      item.produk_varian.warna_varian,
+                                      item.produk_varian.ukuran,
+                                    ]
+                                      .filter((v) => v && String(v).trim().length > 0)
+                                      .join(" • ") || "Varian standar"
+                                  )
+                                : "Varian standar"}
+                            </p>
+                            <div className="flex items-center gap-4 text-sm">
+                              <span className="text-gray-600">
+                                {formatCurrency(Number(item.harga_satuan))} × {item.kuantitas}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-500 mb-1">Subtotal</p>
+                            <p className="text-lg font-bold text-gray-900">
+                              {formatCurrency(Number(item.harga_satuan) * item.kuantitas)}
+                            </p>
+                          </div>
+                        </div>
+                        {index < order.pesanan_items.length - 1 && (
+                          <Separator className="my-2 bg-gray-100" />
+                        )}
+                      </div>
+                    ))}
                   </div>
                 ) : (
-                  <div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      Apakah ada masalah dengan pesanan Anda? Ajukan pengembalian di sini.
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => router.push(`/pesanan/${order.id}/pengembalian`)}
-                    >
-                      Ajukan Pengembalian
-                    </Button>
+                  <div className="text-center py-8 text-gray-500">
+                    <IconPackage className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                    <p className="text-sm">Tidak ada item</p>
                   </div>
                 )}
               </CardContent>
             </Card>
-          )}
 
-          {/* Items */}
-          <Card className="lg:col-span-2">
-            <CardHeader className="border-b">
-              <CardTitle>Item Pesanan</CardTitle>
-            </CardHeader>
-            <CardContent className="py-4">
-              {order.pesanan_items && order.pesanan_items.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Produk</TableHead>
-                      <TableHead>Varian</TableHead>
-                      <TableHead className="text-right">Harga</TableHead>
-                      <TableHead className="text-center">Qty</TableHead>
-                      <TableHead className="text-right">Subtotal</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {order.pesanan_items.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.produk?.nama || "Produk"}</TableCell>
-                        <TableCell className="text-gray-600">
-                          {item.produk_varian
-                            ? ([
-                                item.produk_varian.warna_varian,
-                                item.produk_varian.ukuran,
-                              ]
-                                .filter((v) => v && String(v).trim().length > 0)
-                                .join(" / ") || "-")
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right">{formatCurrency(Number(item.harga_satuan))}</TableCell>
-                        <TableCell className="text-center">{item.kuantitas}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(Number(item.harga_satuan) * item.kuantitas)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-sm text-gray-600">Tidak ada item untuk pesanan ini.</div>
-              )}
-            </CardContent>
-            <CardFooter className="border-t">
-              <div className="ml-auto text-right">
-                <div className="text-sm text-gray-600">Subtotal</div>
-                <div className="text-lg font-semibold">{formatCurrency(subtotal)}</div>
-              </div>
-            </CardFooter>
-          </Card>
-
-          {/* Payment Summary */}
-          <Card>
-            <CardHeader className="border-b">
-              <CardTitle>Ringkasan Pembayaran</CardTitle>
-            </CardHeader>
-            <CardContent className="py-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">{formatCurrency(subtotal)}</span>
-              </div>
-              {/* Tambahkan biaya ongkir/discount jika tersedia di masa depan */}
-              <Separator className="my-2" />
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Total Dibayar</span>
-                <span className="font-semibold">{formatCurrency(order.total_harga)}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+            {/* Ringkasan Pembayaran */}
+            <Card className="border-0 shadow-lg shadow-gray-200/50 rounded-2xl">
+              <CardHeader className="border-b border-gray-100 pb-4">
+                <div className="flex items-center gap-2">
+                  <IconReceipt className="w-5 h-5 text-orange-600" />
+                  <h3 className="font-semibold text-gray-900">Ringkasan</h3>
+                </div>
+              </CardHeader>
+              <CardContent className="py-6 space-y-4">
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-sm text-gray-600">Subtotal Produk</span>
+                  <span className="text-sm font-semibold text-gray-900">
+                    {formatCurrency(subtotal)}
+                  </span>
+                </div>
+                
+                <Separator className="bg-gray-100" />
+                
+                <div className="flex items-center justify-between py-3 px-4 bg-orange-50 rounded-xl">
+                  <span className="text-base font-semibold text-orange-900">Total</span>
+                  <span className="text-xl font-bold text-orange-600">
+                    {formatCurrency(order.total_harga)}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
