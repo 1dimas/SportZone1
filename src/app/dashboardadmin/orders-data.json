@@ -1,0 +1,122 @@
+[
+    {
+        "id": 1,
+        "customer": "Ahmad Rizki",
+        "date": "2025-01-15",
+        "city": "Jakarta",
+        "province": "DKI Jakarta",
+        "total": "Rp 1.250.000",
+        "status": "Diproses",
+        "itemCount": 3,
+        "paymentMethod": "Transfer Bank",
+        "paymentStatus": "Lunas"
+    },
+    {
+        "id": 2,
+        "customer": "Siti Nurhaliza",
+        "date": "2025-01-14",
+        "city": "Bandung",
+        "province": "Jawa Barat",
+        "total": "Rp 850.000",
+        "status": "Dikirim",
+        "itemCount": 2,
+        "paymentMethod": "COD",
+        "paymentStatus": "Belum Lunas"
+    },
+    {
+        "id": 3,
+        "customer": "Budi Santoso",
+        "date": "2025-01-13",
+        "city": "Surabaya",
+        "province": "Jawa Timur",
+        "total": "Rp 2.100.000",
+        "status": "Selesai",
+        "itemCount": 5,
+        "paymentMethod": "E-Wallet",
+        "paymentStatus": "Lunas"
+    },
+    {
+        "id": 4,
+        "customer": "Dewi Lestari",
+        "date": "2025-01-12",
+        "city": "Yogyakarta",
+        "province": "DI Yogyakarta",
+        "total": "Rp 675.000",
+        "status": "Diproses",
+        "itemCount": 1,
+        "paymentMethod": "Transfer Bank",
+        "paymentStatus": "Lunas"
+    },
+    {
+        "id": 5,
+        "customer": "Eko Prasetyo",
+        "date": "2025-01-11",
+        "city": "Semarang",
+        "province": "Jawa Tengah",
+        "total": "Rp 1.450.000",
+        "status": "Dikirim",
+        "itemCount": 4,
+        "paymentMethod": "Kartu Kredit",
+        "paymentStatus": "Lunas"
+    },
+    {
+        "id": 6,
+        "customer": "Fitri Handayani",
+        "date": "2025-01-10",
+        "city": "Medan",
+        "province": "Sumatera Utara",
+        "total": "Rp 920.000",
+        "status": "Selesai",
+        "itemCount": 2,
+        "paymentMethod": "Transfer Bank",
+        "paymentStatus": "Lunas"
+    },
+    {
+        "id": 7,
+        "customer": "Hendra Wijaya",
+        "date": "2025-01-09",
+        "city": "Makassar",
+        "province": "Sulawesi Selatan",
+        "total": "Rp 1.800.000",
+        "status": "Diproses",
+        "itemCount": 3,
+        "paymentMethod": "E-Wallet",
+        "paymentStatus": "Lunas"
+    },
+    {
+        "id": 8,
+        "customer": "Indah Permata",
+        "date": "2025-01-08",
+        "city": "Denpasar",
+        "province": "Bali",
+        "total": "Rp 1.125.000",
+        "status": "Dikirim",
+        "itemCount": 2,
+        "paymentMethod": "COD",
+        "paymentStatus": "Belum Lunas"
+    },
+    {
+        "id": 9,
+        "customer": "Joko Widodo",
+        "date": "2025-01-07",
+        "city": "Solo",
+        "province": "Jawa Tengah",
+        "total": "Rp 3.200.000",
+        "status": "Selesai",
+        "itemCount": 6,
+        "paymentMethod": "Transfer Bank",
+        "paymentStatus": "Lunas"
+    },
+    {
+        "id": 10,
+        "customer": "Kartika Sari",
+        "date": "2025-01-06",
+        "city": "Palembang",
+        "province": "Sumatera Selatan",
+        "total": "Rp 560.000",
+        "status": "Diproses",
+        "itemCount": 1,
+        "paymentMethod": "E-Wallet",
+        "paymentStatus": "Lunas"
+    }
+]

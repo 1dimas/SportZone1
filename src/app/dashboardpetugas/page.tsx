@@ -1,15 +1,13 @@
 
 import { AppSidebar } from "@/components/petugas/app-sidebar"
 import { ChartAreaInteractive } from "@/components/petugas/chart-area-interactive"
-import { DataTable } from "@/components/petugas/data-table"
+import { OrderListTable } from "@/components/petugas/order-list-table"
 import { SectionCards } from "@/components/petugas/section-cards"
 import { SiteHeader } from "@/components/petugas/site-header"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-
-import data from "./data.json"
 
 export default function PetugasDashboard() {
   return (
@@ -31,7 +29,7 @@ export default function PetugasDashboard() {
               <div className="px-4 lg:px-6">
                 <ChartAreaInteractive />
               </div>
-              <DataTable data={data} />
+              <OrderListTable />
             </div>
           </div>
         </div>

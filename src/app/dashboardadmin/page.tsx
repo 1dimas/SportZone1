@@ -1,14 +1,12 @@
 import { AppSidebar } from "@/components/admin/app-sidebar"
 import { ChartAreaInteractive } from "@/components/admin/chart-area-interactive"
-import { DataTable } from "@/components/admin/data-table"
+import { OrderListTable } from "@/components/admin/order-list-table"
 import { SectionCards } from "@/components/admin/section-cards"
 import { SiteHeader } from "@/components/admin/site-header"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-
-import data from "./data.json"
 
 export default function AdminDashboard() {
   return (
@@ -30,7 +28,7 @@ export default function AdminDashboard() {
               <div className="px-4 lg:px-6">
                 <ChartAreaInteractive />
               </div>
-              <DataTable data={data} />
+              <OrderListTable />
             </div>
           </div>
         </div>
