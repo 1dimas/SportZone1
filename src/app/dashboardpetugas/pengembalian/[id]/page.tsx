@@ -9,16 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Pengembalian,
   getPengembalianById,
-  approvePengembalian,
-  rejectPengembalian,
 } from "@/components/lib/services/pengembalian.service";
-import { ArrowLeft, CheckCircle, XCircle, User, Package, Calendar, FileText } from "lucide-react";
+import { ArrowLeft, User, Package } from "lucide-react";
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(amount);
@@ -51,8 +47,6 @@ export default function PengembalianDetailPage() {
   const [pengembalian, setPengembalian] = useState<Pengembalian | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
-  const [catatanAdmin, setCatatanAdmin] = useState("");
 
   useEffect(() => {
     loadData();
@@ -70,41 +64,7 @@ export default function PengembalianDetailPage() {
     }
   };
 
-  const handleApprove = async () => {
-    if (!pengembalian) return;
-    if (!confirm("Apakah Anda yakin ingin menyetujui pengembalian ini?")) return;
 
-    try {
-      setProcessing(true);
-      await approvePengembalian(pengembalian.id, catatanAdmin.trim() || undefined);
-      alert("Pengembalian berhasil disetujui");
-      loadData();
-    } catch (err: any) {
-      alert(err?.message || "Gagal menyetujui pengembalian");
-    } finally {
-      setProcessing(false);
-    }
-  };
-
-  const handleReject = async () => {
-    if (!pengembalian) return;
-    if (!catatanAdmin.trim()) {
-      alert("Silakan isi catatan penolakan");
-      return;
-    }
-    if (!confirm("Apakah Anda yakin ingin menolak pengembalian ini?")) return;
-
-    try {
-      setProcessing(true);
-      await rejectPengembalian(pengembalian.id, catatanAdmin.trim());
-      alert("Pengembalian berhasil ditolak");
-      loadData();
-    } catch (err: any) {
-      alert(err?.message || "Gagal menolak pengembalian");
-    } finally {
-      setProcessing(false);
-    }
-  };
 
   return (
     <SidebarProvider
@@ -278,44 +238,7 @@ export default function PengembalianDetailPage() {
                         </CardContent>
                       </Card>
 
-                      {pengembalian.status === "pending" && (
-                        <Card>
-                          <CardHeader className="border-b">
-                            <CardTitle>Proses Pengembalian</CardTitle>
-                          </CardHeader>
-                          <CardContent className="py-4 space-y-4">
-                            <div>
-                              <Label htmlFor="catatan">Catatan Admin</Label>
-                              <Textarea
-                                id="catatan"
-                                placeholder="Tambahkan catatan (wajib untuk penolakan)"
-                                value={catatanAdmin}
-                                onChange={(e) => setCatatanAdmin(e.target.value)}
-                                rows={4}
-                                className="mt-2"
-                              />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <Button
-                                onClick={handleApprove}
-                                disabled={processing}
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Setujui Pengembalian
-                              </Button>
-                              <Button
-                                onClick={handleReject}
-                                disabled={processing}
-                                variant="destructive"
-                              >
-                                <XCircle className="w-4 h-4 mr-2" />
-                                Tolak Pengembalian
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )}
+
                     </div>
                   </div>
                 )}

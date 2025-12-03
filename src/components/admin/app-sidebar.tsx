@@ -159,14 +159,9 @@ const data = {
   ],
   documents: [
     {
-      name: "Product Report",
-      url: "#",
+      name: "Laporan Produk",
+      url: "/dashboardadmin/laporan-produk",
       icon: IconReport,
-    },
-    {
-      name: "Sales Report",
-      url: "#",
-      icon: IconFileWord,
     },
   ],
 };
