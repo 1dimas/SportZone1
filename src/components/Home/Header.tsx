@@ -27,13 +27,14 @@ import { Button } from "@/components/ui/button";
 import { CascadingMenu } from "./CascadingMenu";
 import { getMenuData } from "@/components/lib/services/menu.service";
 import { MenuItem } from "@/app/data/menuData";
-import { logout } from "@/components/lib/services/auth.service";
+import { logout, getProfile } from "@/components/lib/services/auth.service";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>("");
   const router = useRouter();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -60,12 +61,21 @@ export default function Header() {
     };
     fetchMenu();
 
-    // Check for login token
+    // Check for login token and fetch user profile
     const token = localStorage.getItem("token");
     const storedUserId = localStorage.getItem("userId");
     if (token) {
       setIsLoggedIn(true);
       if (storedUserId) setUserId(storedUserId);
+      
+      // Fetch user profile to get username
+      getProfile()
+        .then((profile) => {
+          setUsername(profile.username || profile.nama || "User");
+        })
+        .catch(() => {
+          setUsername("User");
+        });
     } else {
       const urlParams = new URLSearchParams(window.location.search);
       const tokenFromUrl =
@@ -196,7 +206,9 @@ export default function Header() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuLabel>Halo!</DropdownMenuLabel>
+                      <DropdownMenuLabel>
+                        Hallo, {username || "User"}!
+                      </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link

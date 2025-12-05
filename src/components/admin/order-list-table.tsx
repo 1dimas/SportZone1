@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import { getAllPesanan, type Pesanan } from "@/components/lib/services/pesanan.service"
 
 export function OrderListTable() {
@@ -80,19 +81,6 @@ export function OrderListTable() {
     }).format(amount)
   }
 
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-4 px-4 lg:px-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Daftar Pesanan</h2>
-        </div>
-        <div className="flex items-center justify-center h-64 rounded-lg border">
-          <p className="text-muted-foreground">Memuat data pesanan...</p>
-        </div>
-      </div>
-    )
-  }
-
   if (error) {
     return (
       <div className="flex flex-col gap-4 px-4 lg:px-6">
@@ -126,7 +114,20 @@ export function OrderListTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentPageData.length > 0 ? (
+            {loading ? (
+              // Show skeleton rows while loading
+              Array.from({ length: 5 }).map((_, idx) => (
+                <TableRow key={`skeleton-${idx}`}>
+                  <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-5 w-28 ml-auto" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                  <TableCell className="text-center"><Skeleton className="h-5 w-8 mx-auto" /></TableCell>
+                  <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                </TableRow>
+              ))
+            ) : currentPageData.length > 0 ? (
               currentPageData.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">

@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { getAllPembayaran } from "@/components/lib/services/pembayaran.service";
 import { getAllPesanan } from "@/components/lib/services/pesanan.service";
 import { getAllProdukRusak, getAllPengembalian } from "@/components/lib/services/pengembalian.service";
@@ -143,6 +144,15 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
         </div>
       )}
       <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+        {loading ? (
+          <>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </>
+        ) : (
+          <>
         <Card className="@container/card bg-gradient-to-br from-orange-500 to-orange-600 border-none shadow-lg">
           <CardHeader>
             <div className="flex items-center gap-4">
@@ -203,6 +213,8 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
             </div>
           </CardHeader>
         </Card>
+          </>
+        )}
       </div>
     </>
   )

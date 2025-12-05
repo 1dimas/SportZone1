@@ -5,6 +5,7 @@ import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import { getAllPesanan, Pesanan } from "@/components/lib/services/pesanan.service"
 
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Card,
   CardAction,
@@ -47,6 +48,7 @@ export function ChartAreaInteractive() {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("90d")
   const [chartData, setChartData] = React.useState<any[]>([])
+  const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
     if (isMobile) {
@@ -56,22 +58,27 @@ export function ChartAreaInteractive() {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const pesananData = await getAllPesanan()
-      const ordersByDate = pesananData.reduce((acc, order) => {
-        const date = new Date(order.tanggal_pesanan).toISOString().split('T')[0]
-        if (!acc[date]) {
-          acc[date] = 0
-        }
-        acc[date]++
-        return acc
-      }, {} as Record<string, number>)
+      try {
+        setLoading(true)
+        const pesananData = await getAllPesanan()
+        const ordersByDate = pesananData.reduce((acc, order) => {
+          const date = new Date(order.tanggal_pesanan).toISOString().split('T')[0]
+          if (!acc[date]) {
+            acc[date] = 0
+          }
+          acc[date]++
+          return acc
+        }, {} as Record<string, number>)
 
-      const formattedData = Object.keys(ordersByDate).map(date => ({
-        date,
-        total: ordersByDate[date],
-      }))
+        const formattedData = Object.keys(ordersByDate).map(date => ({
+          date,
+          total: ordersByDate[date],
+        }))
 
-      setChartData(formattedData)
+        setChartData(formattedData)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchData()
@@ -136,7 +143,16 @@ export function ChartAreaInteractive() {
         </CardAction>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer
+        {loading ? (
+          <div className="aspect-auto h-[250px] w-full flex flex-col gap-4">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-full" />
+          </div>
+        ) : (
+          <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
@@ -193,6 +209,7 @@ export function ChartAreaInteractive() {
             />
           </AreaChart>
         </ChartContainer>
+        )}
       </CardContent>
     </Card>
   )
