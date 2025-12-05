@@ -1,2 +1,7 @@
-// Re-export the shared component for backward compatibility
-export { DashboardSectionCards as SectionCards } from "@/components/shared/dashboard-section-cards";
+"use client"
+
+import { DashboardSectionCards } from "@/components/shared/dashboard-section-cards";
+
+export function SectionCards() {
+  return <DashboardSectionCards userRole="ADMIN" showPermissionWarning={true} />;
+}

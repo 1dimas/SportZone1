@@ -47,7 +47,7 @@ import { Button } from "@/components/ui/button"
 const data = {
   user: {
     name: "admin",
-    email: "m@example.com",
+    email: "admin@sportzone.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
@@ -167,30 +167,20 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { open, toggleSidebar } = useSidebar()
-  
   return (
-    <Sidebar collapsible="icon" {...props} className="relative">
-      <SidebarHeader>
+    <Sidebar collapsible="none" {...props} className="relative">
+      <SidebarHeader className="p-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-2"
             >
-              <a href="#" className={`flex items-center ${open ? 'justify-start gap-3' : 'justify-center'}`}>
-                {open ? (
-                  <>
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                      <IconUserShield className="!size-6" />
-                    </div>
-                    <span className="text-xl font-bold tracking-tight">Admin</span>
-                  </>
-                ) : (
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                    <IconUserShield className="!size-6" />
-                  </div>
-                )}
+              <a href="#" className="flex items-center justify-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white">
+                  <IconUserShield className="!size-6" />
+                </div>
+                <span className="text-xl font-bold tracking-tight text-orange-600">Admin</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -204,23 +194,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
-      
-      {/* Circular Toggle Button on Border */}
-      <div className="absolute -right-4 top-6 z-50">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-8 w-8 rounded-full border bg-background shadow-md hover:bg-accent transition-all duration-200"
-          onClick={toggleSidebar}
-        >
-          {open ? (
-            <IconChevronsLeft className="h-4 w-4" />
-          ) : (
-            <IconChevronsRight className="h-4 w-4" />
-          )}
-          <span className="sr-only">Toggle Sidebar</span>
-        </Button>
-      </div>
     </Sidebar>
   )
 }

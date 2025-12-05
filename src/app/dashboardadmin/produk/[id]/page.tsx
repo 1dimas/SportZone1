@@ -5,30 +5,33 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   ArrowLeft,
-  Edit,
-  Package,
+  MoreVertical,
+  Copy,
+  Box,
+  Tag,
+  Layers,
   Image as ImageIcon,
-  Plus,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import {
   getProdukById,
   getVarianByProduk,
 } from "@/components/lib/services/produk.service";
 
+// --- Interfaces ---
 interface ProdukDetail {
   id: string;
   nama: string;
@@ -37,21 +40,8 @@ interface ProdukDetail {
   stok: number;
   status: string;
   gambar?: string[];
-  subkategori?: {
-    id: string;
-    nama: string;
-    kategoriOlahraga?: {
-      id: string;
-      nama: string;
-    };
-  };
-  brand?: {
-    id: string;
-    nama: string;
-    deskripsi?: string;
-    logo?: string;
-  };
-  varian?: any[];
+  subkategori?: { id: string; nama: string };
+  brand?: { id: string; nama: string; logo?: string };
   created_at: string;
   updated_at: string;
 }
@@ -71,16 +61,6 @@ export default function AdminProdukDetailPage() {
   const [produk, setProduk] = React.useState<ProdukDetail | null>(null);
   const [varian, setVarian] = React.useState<VarianItem[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [selectedImage, setSelectedImage] = React.useState("");
-  const fetchVarian = async () => {
-    try {
-      const varianData = await getVarianByProduk(params.id as string);
-      setVarian(varianData);
-    } catch (error) {
-      console.error("Error fetching variants:", error);
-      toast.error("Gagal memuat varian");
-    }
-  };
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -92,399 +72,279 @@ export default function AdminProdukDetailPage() {
         ]);
         setProduk(produkData);
         setVarian(varianData);
-        if (produkData.gambar && produkData.gambar.length > 0) {
-          setSelectedImage(produkData.gambar[0]);
-        }
       } catch (error) {
-        console.error("Error fetching product details:", error);
-        toast.error("Gagal memuat detail produk");
+        toast.error("Gagal memuat data produk");
       } finally {
         setLoading(false);
       }
     };
-
-    if (params.id) {
-      fetchData();
-    }
+    if (params.id) fetchData();
   }, [params.id]);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
+  const formatCurrency = (val: number) =>
+    new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "aktif":
-        return "bg-green-100 text-green-800 hover:bg-green-200";
-      case "nonaktif":
-        return "bg-red-100 text-red-800 hover:bg-red-200";
-      case "stok habis":
-        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
-    }
-  };
+      maximumFractionDigits: 0,
+    }).format(val);
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10" />
-          <Skeleton className="h-8 w-48" />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Skeleton className="aspect-square rounded-lg" />
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-6 w-1/2" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-        </div>
+      <div className="h-screen flex items-center justify-center text-gray-400">
+        Memuat data...
       </div>
     );
   }
 
-  if (!produk) {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Produk tidak ditemukan
-          </h1>
-          <Button onClick={() => router.back()} className="mt-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Kembali
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  if (!produk) return null;
+
+  // Hitung total stok dari varian (jika ada), atau gunakan stok induk
+  const totalStok =
+    varian.length > 0
+      ? varian.reduce((a, b) => a + b.stok, 0)
+      : produk.stok;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{produk.nama}</h1>
-            <p className="text-gray-600">Detail Produk</p>
+    <div className="min-h-screen bg-white text-gray-900">
+      {/* 1. HEADER: Judul & Tombol Aksi Standar */}
+      <div className="border-b sticky top-0 bg-white/80 backdrop-blur-md z-10">
+        <div className="container max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              className="-ml-2"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="h-6 border-r mx-2" />
+            <h1 className="font-semibold text-lg truncate max-w-md">
+              {produk.nama}
+            </h1>
+            <Badge
+              variant="outline"
+              className={`font-normal capitalize ${
+                produk.status === "aktif"
+                  ? "text-green-600 border-green-200 bg-green-50"
+                  : "text-gray-500"
+              }`}
+            >
+              {produk.status}
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Tombol Edit */}
+            {/* <Button variant="default" size="sm" className="px-4 gap-2">
+              <Edit className="w-4 h-4" /> Edit
+            </Button> */}
+
+            {/* Menu Hapus */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="text-red-600 cursor-pointer">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Hapus Produk
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Image Gallery */}
-        <div className="space-y-4">
-          {/* Main Image */}
-          <div className="aspect-square rounded-xl overflow-hidden border-2 border-gray-200 bg-gray-50">
-            {selectedImage ? (
-              <img
-                src={selectedImage}
-                alt={produk.nama}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <ImageIcon className="w-16 h-16 text-gray-400" />
-              </div>
-            )}
+      <div className="container max-w-5xl mx-auto px-6 py-8">
+        {/* 2. OVERVIEW CARDS (Statistik Utama) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="p-4 rounded-xl border bg-gray-50/50">
+            <p className="text-sm text-gray-500 mb-1">Harga Dasar</p>
+            <p className="text-2xl font-semibold tracking-tight">
+              {formatCurrency(produk.harga)}
+            </p>
           </div>
-
-          {/* Thumbnail Gallery */}
-          {produk.gambar && produk.gambar.length > 1 && (
-            <div className="grid grid-cols-4 gap-2">
-              {produk.gambar.map((image: string, index: number) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(image)}
-                  className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                    selectedImage === image
-                      ? "border-blue-500 ring-2 ring-blue-200"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${produk.nama} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+          <div className="p-4 rounded-xl border bg-gray-50/50">
+            <p className="text-sm text-gray-500 mb-1">Total Stok</p>
+            <div className="flex items-center gap-2">
+              <p className="text-2xl font-semibold tracking-tight">
+                {totalStok}
+              </p>
+              <span className="text-sm text-gray-400">Unit</span>
             </div>
-          )}
+          </div>
+          <div className="p-4 rounded-xl border bg-gray-50/50 flex flex-col justify-center">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm text-gray-500">ID Produk</span>
+              <Copy
+                className="w-3 h-3 text-gray-400 cursor-pointer hover:text-black"
+                onClick={() => {
+                  navigator.clipboard.writeText(produk.id);
+                  toast.success("ID Disalin");
+                }}
+              />
+            </div>
+            <p className="font-mono text-sm text-gray-700 truncate">
+              {produk.id}
+            </p>
+          </div>
         </div>
 
-        {/* Product Information */}
-        <div className="space-y-6">
-          {/* Basic Info */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-xl">Informasi Produk</CardTitle>
-                <Badge className={getStatusColor(produk.status)}>
-                  {produk.status === "aktif"
-                    ? "Aktif"
-                    : produk.status === "nonaktif"
-                    ? "Nonaktif"
-                    : "Stok Habis"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Harga
-                </label>
-                <p className="text-2xl font-bold text-green-600">
-                  {formatCurrency(produk.harga)}
-                </p>
-              </div>
+        {/* 3. TABS CONTENT */}
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="bg-gray-100 p-1 rounded-lg">
+            <TabsTrigger value="overview" className="px-6 rounded-md">
+              Ringkasan & Foto
+            </TabsTrigger>
+            <TabsTrigger value="variants" className="px-6 rounded-md">
+              Stok & Varian ({varian.length})
+            </TabsTrigger>
+          </TabsList>
 
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Deskripsi
-                </label>
-                <p className="text-gray-900 mt-1">{produk.deskripsi}</p>
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">
-                    Kategori Olahraga
-                  </label>
-                  <p className="text-gray-900 mt-1">
-                    {produk.subkategori?.kategoriOlahraga?.nama || "Tidak ada"}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">
-                    Subkategori
-                  </label>
-                  <p className="text-gray-900 mt-1">
-                    {produk.subkategori?.nama || "Tidak ada"}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Brand
-                </label>
-                <div className="flex items-center gap-3 mt-1">
-                  {produk.brand?.logo && (
+          {/* TAB 1: Detail & Gambar */}
+          <TabsContent
+            value="overview"
+            className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+          >
+            <div className="grid md:grid-cols-12 gap-8 mt-6">
+              {/* Gambar Produk (Sudah diperbaiki: object-contain) */}
+              <div className="md:col-span-4">
+                <div className="aspect-square bg-white rounded-xl overflow-hidden border flex items-center justify-center relative shadow-sm">
+                  {produk.gambar && produk.gambar.length > 0 ? (
                     <img
-                      src={produk.brand.logo}
-                      alt={produk.brand.nama}
-                      className="w-8 h-8 rounded-full object-cover"
+                      src={produk.gambar[0]}
+                      alt={produk.nama}
+                      className="w-full h-full object-contain p-4" // FOTO TIDAK KEPOTONG
                     />
-                  )}
-                  <span className="text-gray-900">
-                    {produk.brand?.nama || "Tidak ada"}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Statistics */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Statistik</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {produk.gambar?.length || 0}
-                  </p>
-                  <p className="text-sm text-gray-600">Gambar</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {varian.length}
-                  </p>
-                  <p className="text-sm text-gray-600">Varian</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {varian.length > 0
-                      ? varian.reduce((sum, v) => sum + (v.stok || 0), 0) || 0
-                      : produk.stok || 0}
-                  </p>
-                  <p className="text-sm text-gray-600">Total Stok</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Tabs for additional information */}
-      <Tabs defaultValue="varian" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="varian">Varian Produk</TabsTrigger>
-          <TabsTrigger value="detail">Detail Tambahan</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="varian" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Varian Produk</CardTitle>
-              <CardDescription>
-                Lihat varian produk seperti ukuran, warna, dan stok
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {varian.length > 0 ? (
-                <div className="space-y-4">
-                  {varian.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <p className="font-medium">
-                            {item.ukuran && item.warna
-                              ? `${item.ukuran} - ${item.warna}`
-                              : item.ukuran || item.warna || "Varian Default"}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            SKU: {item.sku || "Tidak ada"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">{item.stok} unit</p>
-                        {item.harga && (
-                          <p className="text-sm text-green-600">
-                            {formatCurrency(item.harga)}
-                          </p>
-                        )}
-                      </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-gray-400">
+                      <ImageIcon className="w-10 h-10 mb-2 opacity-20" />
+                      <span className="text-xs">Tidak ada gambar</span>
                     </div>
-                  ))}
+                  )}
                 </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">
-                    Belum ada varian untuk produk ini
+                {produk.gambar && produk.gambar.length > 1 && (
+                  <div className="flex justify-center mt-3">
+                    <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full font-medium">
+                      +{produk.gambar.length - 1} foto lainnya
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Deskripsi & Meta Info */}
+              <div className="md:col-span-8 space-y-6">
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-2">
+                    Deskripsi Produk
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed whitespace-pre-line text-sm">
+                    {produk.deskripsi}
                   </p>
+                </div>
+
+                <Separator />
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                      <Tag className="w-3 h-3" /> Kategori
+                    </div>
+                    <p className="font-medium">
+                      {produk.subkategori?.nama || "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
+                      <Layers className="w-3 h-3" /> Brand
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {produk.brand?.logo && (
+                        <img
+                          src={produk.brand.logo}
+                          className="w-5 h-5 object-contain"
+                          alt="brand"
+                        />
+                      )}
+                      <p className="font-medium">
+                        {produk.brand?.nama || "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* TAB 2: Tabel Varian */}
+          <TabsContent
+            value="variants"
+            className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+          >
+            <div className="border rounded-xl overflow-hidden mt-6">
+              {varian.length > 0 ? (
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b">
+                    <tr>
+                      <th className="px-6 py-4 text-left font-medium text-gray-500">
+                        Varian
+                      </th>
+                      <th className="px-6 py-4 text-left font-medium text-gray-500">
+                        SKU
+                      </th>
+                      <th className="px-6 py-4 text-right font-medium text-gray-500">
+                        Harga
+                      </th>
+                      <th className="px-6 py-4 text-right font-medium text-gray-500">
+                        Stok
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {varian.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-gray-50/50 transition-colors"
+                      >
+                        <td className="px-6 py-4 font-medium text-gray-900">
+                          {item.ukuran}{" "}
+                          <span className="text-gray-300 mx-1">/</span>{" "}
+                          {item.warna}
+                        </td>
+                        <td className="px-6 py-4 font-mono text-gray-500 text-xs">
+                          {item.sku || "-"}
+                        </td>
+                        <td className="px-6 py-4 text-right text-gray-600">
+                          {item.harga ? formatCurrency(item.harga) : "-"}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <span
+                            className={`${
+                              item.stok === 0
+                                ? "text-red-500 font-medium"
+                                : "text-gray-900"
+                            }`}
+                          >
+                            {item.stok}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="p-12 text-center text-gray-400">
+                  <Box className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                  <p>Tidak ada varian data.</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="detail" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Informasi Waktu</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">
-                    Dibuat
-                  </label>
-                  <p className="text-gray-900">
-                    {new Date(produk.created_at).toLocaleDateString("id-ID", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">
-                    Terakhir Diupdate
-                  </label>
-                  <p className="text-gray-900">
-                    {new Date(produk.updated_at).toLocaleDateString("id-ID", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Ringkasan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">ID Produk:</span>
-                    <span className="font-mono text-xs">{produk.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
-                    <Badge
-                      variant="outline"
-                      className={getStatusColor(produk.status)}
-                    >
-                      {produk.status}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Gambar:</span>
-                    <span>{produk.gambar?.length || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total Varian:</span>
-                    <span>{varian.length}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
-  );
-}
-
-function VarianForm({
-  produkId,
-  varian,
-  onClose,
-}: {
-  produkId: string;
-  varian?: VarianItem | null;
-  onClose: () => void;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{varian ? "Edit Varian" : "Tambah Varian"}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>
-          Form untuk {varian ? "edit" : "tambah"} varian akan diimplementasikan
-          di sini.
-        </p>
-        <Button onClick={onClose} className="mt-4">
-          Tutup
-        </Button>
-      </CardContent>
-    </Card>
   );
 }

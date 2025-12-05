@@ -39,7 +39,7 @@ const chartConfig = {
   },
   total: {
     label: "Total",
-    color: "var(--primary)",
+    color: "hsl(24, 98%, 50%)", // Orange-500
   },
 } satisfies ChartConfig
 
@@ -92,7 +92,7 @@ export function ChartAreaInteractive() {
   })
 
   return (
-    <Card className="@container/card">
+    <Card className="@container/card bg-white border border-gray-200 shadow-sm">
       <CardHeader>
         <CardTitle>Total Orders</CardTitle>
         <CardDescription>
@@ -146,12 +146,12 @@ export function ChartAreaInteractive() {
                 <stop
                   offset="5%"
                   stopColor="var(--color-total)"
-                  stopOpacity={1.0}
+                  stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
                   stopColor="var(--color-total)"
-                  stopOpacity={0.1}
+                  stopOpacity={0.3}
                 />
               </linearGradient>
             </defs>

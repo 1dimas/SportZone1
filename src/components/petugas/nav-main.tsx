@@ -23,7 +23,7 @@ export function NavMain({
   const pathname = usePathname()
   
   return (
-    <SidebarGroup>
+    <SidebarGroup className="px-3 py-4">
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
           {items.map((item) => {

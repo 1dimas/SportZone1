@@ -11,6 +11,7 @@ import {
 export default function AdminDashboard() {
   return (
     <SidebarProvider
+      defaultOpen={true}
       style={
         {
           "--sidebar-width": "calc(var(--spacing) * 72)",

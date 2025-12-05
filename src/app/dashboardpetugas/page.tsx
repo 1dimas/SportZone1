@@ -12,6 +12,7 @@ import {
 export default function PetugasDashboard() {
   return (
     <SidebarProvider
+      defaultOpen={true}
       style={
         {
           "--sidebar-width": "calc(var(--spacing) * 72)",
@@ -20,9 +21,9 @@ export default function PetugasDashboard() {
       }
     >
       <AppSidebar variant="inset" />
-      <SidebarInset className="overflow-auto h-screen">
+      <SidebarInset className="overflow-auto h-screen bg-white">
         <SiteHeader />
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col bg-orange-50/30">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 pt-4 pb-4 md:gap-6 md:pt-4 md:pb-6">
               <SectionCards />
