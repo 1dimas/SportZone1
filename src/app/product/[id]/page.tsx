@@ -8,6 +8,7 @@ import { FiStar } from "react-icons/fi";
 import { ProductActions } from "@/components/Detailpage/ProductActions";
 import { formatRupiah } from "@/lib/utils";
 import { RatingList } from "@/components/Detailpage/RatingList";
+import { RatingForm } from "@/components/Detailpage/RatingForm";
 import {
   getProdukById,
   getAllProduk,
@@ -19,6 +20,7 @@ import {
   getAverageRatingPublic,
   type RatingData,
 } from "@/components/lib/services/rating.service";
+import { getProfile } from "@/components/lib/services/auth.service";
 import Footer from "@/components/Home/Footer";
 import Header from "@/components/Home/Header";
 
@@ -60,11 +62,19 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
+
+        try {
+          const profile = await getProfile();
+          setCurrentUserId(profile.id);
+        } catch {
+          setCurrentUserId(null);
+        }
 
         const [produkData, allProduk] = await Promise.all([
           getProdukById(id),

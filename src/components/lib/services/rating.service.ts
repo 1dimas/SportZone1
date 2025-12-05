@@ -129,6 +129,27 @@ export async function getRatingsByUser(userId: string) {
   return res.json();
 }
 
+export async function checkUserRating(userId: string, produkId: string): Promise<boolean> {
+  const token = getToken();
+  if (!token) return false;
+
+  try {
+    const res = await fetch(`${API_URL}/rating/check/${userId}/${produkId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data?.hasRated === true;
+  } catch {
+    return false;
+  }
+}
+
 export async function getAverageRating(produkId: string): Promise<number> {
   const res = await fetch(`${API_URL}/rating/product/${produkId}/average`, {
     method: "GET",

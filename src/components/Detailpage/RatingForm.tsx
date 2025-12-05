@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { FiStar } from "react-icons/fi";
-import { createRating } from "@/components/lib/services/rating.service";
+import { useState, useEffect } from "react";
+import { FiStar, FiCheckCircle } from "react-icons/fi";
+import { createRating, checkUserRating } from "@/components/lib/services/rating.service";
 
 type RatingFormProps = {
   produkId: string;
@@ -16,6 +16,28 @@ export function RatingForm({ produkId, userId, onSuccess }: RatingFormProps) {
   const [review, setReview] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasRated, setHasRated] = useState(false);
+  const [isCheckingRating, setIsCheckingRating] = useState(true);
+
+  useEffect(() => {
+    const checkRating = async () => {
+      if (!userId || !produkId) {
+        setIsCheckingRating(false);
+        return;
+      }
+
+      try {
+        const alreadyRated = await checkUserRating(userId, produkId);
+        setHasRated(alreadyRated);
+      } catch {
+        setHasRated(false);
+      } finally {
+        setIsCheckingRating(false);
+      }
+    };
+
+    checkRating();
+  }, [userId, produkId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +60,7 @@ export function RatingForm({ produkId, userId, onSuccess }: RatingFormProps) {
 
       setRating(0);
       setReview("");
+      setHasRated(true);
       if (onSuccess) onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal mengirim ulasan");
@@ -45,6 +68,32 @@ export function RatingForm({ produkId, userId, onSuccess }: RatingFormProps) {
       setIsSubmitting(false);
     }
   };
+
+  if (isCheckingRating) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl p-6">
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin h-8 w-8 rounded-full border-b-2 border-orange-500" />
+        </div>
+      </div>
+    );
+  }
+
+  if (hasRated) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl p-6">
+        <div className="flex flex-col items-center justify-center py-8 text-center space-y-3">
+          <FiCheckCircle className="w-16 h-16 text-green-500" />
+          <h3 className="text-xl font-semibold text-gray-900">
+            Terima Kasih!
+          </h3>
+          <p className="text-gray-600">
+            Anda sudah memberikan ulasan untuk produk ini.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-6">

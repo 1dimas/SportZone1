@@ -13,8 +13,8 @@ import {
   Pesanan,
   cancelOrder,
 } from "@/components/lib/services/pesanan.service";
-import { 
-  IconArrowLeft, 
+import {
+  IconArrowLeft,
   IconPackage,
   IconMapPin,
   IconCalendar,
@@ -25,7 +25,7 @@ import {
   IconAlertCircle,
   IconBox
 } from "@tabler/icons-react";
-import { createRating } from "@/components/lib/services/rating.service";
+import { createRating, checkUserRating } from "@/components/lib/services/rating.service";
 import { getProfile } from "@/components/lib/services/auth.service";
 
 const formatCurrency = (amount: number) =>
@@ -74,6 +74,7 @@ export default function PesananHistoryPage() {
   const [pending, setPending] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [cancelingOrderId, setCancelingOrderId] = useState<string | null>(null);
+  const [ratedItems, setRatedItems] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     (async () => {
@@ -90,6 +91,12 @@ export default function PesananHistoryPage() {
       try {
         const data = await getPesananHistory();
         if (mounted) setOrders(data);
+
+        // Check which items have already been rated by the user
+        if (userId && data.length > 0) {
+          const ratedItemsCheck = await checkRatedItems(data, userId);
+          if (mounted) setRatedItems(ratedItemsCheck);
+        }
       } catch (err: any) {
         if (mounted) setError(err?.message || "Gagal mengambil data");
       } finally {
@@ -99,7 +106,7 @@ export default function PesananHistoryPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [userId]);
 
   const filtered = useMemo(() => {
     if (tab === "semua")
@@ -128,6 +135,23 @@ export default function PesananHistoryPage() {
     } finally {
       setCancelingOrderId(null);
     }
+  };
+
+  // Check which items have already been rated by the user
+  const checkRatedItems = async (orders: Pesanan[], userId: string) => {
+    const ratedItems: Record<string, boolean> = {};
+
+    for (const order of orders) {
+      if (order.pesanan_items) {
+        for (const item of order.pesanan_items) {
+          // Create a unique key for each order-item combination
+          const itemKey = `${order.id}-${item.id_produk}`;
+          ratedItems[itemKey] = await checkUserRating(userId, item.id_produk);
+        }
+      }
+    }
+
+    return ratedItems;
   };
 
   const statusTabs = [
@@ -427,98 +451,113 @@ export default function PesananHistoryPage() {
                               {/* Review Button */}
                               {order.status === "selesai" && (
                                 <div className="w-full sm:w-auto">
-                                  {activeReviewOrderId === order.id ? (
-                                    <div className="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 mt-3">
-                                      <p className="text-sm font-semibold text-gray-900 mb-3">
-                                        Beri Rating & Ulasan
-                                      </p>
-                                      <div className="flex items-center gap-1 mb-3">
-                                        {[1, 2, 3, 4, 5].map((v) => (
-                                          <button
-                                            key={v}
-                                            disabled={pending}
-                                            onClick={() => setCurrentRating(v)}
-                                            className={`p-1.5 rounded-lg transition-colors ${
-                                              pending ? "opacity-50" : "hover:bg-gray-100"
-                                            }`}
-                                          >
-                                            <IconStar
-                                              className={`w-6 h-6 ${
-                                                v <= currentRating
-                                                  ? "text-yellow-500 fill-yellow-400"
-                                                  : "text-gray-300"
-                                              }`}
-                                            />
-                                          </button>
-                                        ))}
-                                      </div>
-                                      <Textarea
-                                        placeholder="Bagikan pengalaman Anda (opsional)"
-                                        value={currentReview}
-                                        onChange={(e) => setCurrentReview(e.target.value)}
-                                        className="mb-3 bg-white"
-                                        rows={3}
-                                      />
-                                      <div className="flex justify-end gap-2">
+                                  {order.pesanan_items && order.pesanan_items.length > 0 ? (
+                                    (() => {
+                                      const firstItem = order.pesanan_items[0];
+                                      const itemKey = `${order.id}-${firstItem.id_produk}`;
+                                      const hasRated = ratedItems[itemKey] || false;
+
+                                      return hasRated ? (
+                                        <div key={itemKey} className="inline-flex items-center gap-2 text-sm text-green-600">
+                                          <IconStar className="w-4 h-4 text-green-500" />
+                                          <span>Terima kasih atas ulasan Anda!</span>
+                                        </div>
+                                      ) : activeReviewOrderId === order.id ? (
+                                        <div className="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 mt-3">
+                                          <p className="text-sm font-semibold text-gray-900 mb-3">
+                                            Beri Rating & Ulasan
+                                          </p>
+                                          <div className="flex items-center gap-1 mb-3">
+                                            {[1, 2, 3, 4, 5].map((v) => (
+                                              <button
+                                                key={v}
+                                                disabled={pending}
+                                                onClick={() => setCurrentRating(v)}
+                                                className={`p-1.5 rounded-lg transition-colors ${
+                                                  pending ? "opacity-50" : "hover:bg-gray-100"
+                                                }`}
+                                              >
+                                                <IconStar
+                                                  className={`w-6 h-6 ${
+                                                    v <= currentRating
+                                                      ? "text-yellow-500 fill-yellow-400"
+                                                      : "text-gray-300"
+                                                  }`}
+                                                />
+                                              </button>
+                                            ))}
+                                          </div>
+                                          <Textarea
+                                            placeholder="Bagikan pengalaman Anda (opsional)"
+                                            value={currentReview}
+                                            onChange={(e) => setCurrentReview(e.target.value)}
+                                            className="mb-3 bg-white"
+                                            rows={3}
+                                          />
+                                          <div className="flex justify-end gap-2">
+                                            <Button
+                                              variant="outline"
+                                              size="sm"
+                                              disabled={pending}
+                                              onClick={() => {
+                                                setActiveReviewOrderId(null);
+                                                setCurrentRating(0);
+                                                setCurrentReview("");
+                                              }}
+                                            >
+                                              Batal
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              disabled={pending}
+                                              className="bg-orange-600 hover:bg-orange-700"
+                                              onClick={async () => {
+                                                if (!userId) return alert("Silakan login kembali");
+                                                if (!currentRating) return alert("Pilih rating 1-5");
+                                                if (!firstItem.id_produk) return alert("Produk tidak ditemukan");
+                                                try {
+                                                  setPending(true);
+                                                  await createRating({
+                                                    userId,
+                                                    produkId: firstItem.id_produk,
+                                                    rating: currentRating,
+                                                    review: currentReview.trim() || undefined,
+                                                  });
+                                                  alert("Terima kasih atas ulasan Anda!");
+                                                  setActiveReviewOrderId(null);
+                                                  setCurrentRating(0);
+                                                  setCurrentReview("");
+                                                  // Update the rated items state after successful rating
+                                                  const itemKey = `${order.id}-${firstItem.id_produk}`;
+                                                  setRatedItems(prev => ({ ...prev, [itemKey]: true }));
+                                                } catch (e: any) {
+                                                  alert(e?.message || "Gagal mengirim ulasan");
+                                                } finally {
+                                                  setPending(false);
+                                                }
+                                              }}
+                                            >
+                                              Kirim Ulasan
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      ) : (
                                         <Button
-                                          variant="outline"
                                           size="sm"
-                                          disabled={pending}
+                                          variant="outline"
                                           onClick={() => {
-                                            setActiveReviewOrderId(null);
+                                            setActiveReviewOrderId(order.id);
                                             setCurrentRating(0);
                                             setCurrentReview("");
                                           }}
+                                          className="shadow-sm"
                                         >
-                                          Batal
+                                          <IconStar className="w-4 h-4 mr-2" />
+                                          Beri Ulasan
                                         </Button>
-                                        <Button
-                                          size="sm"
-                                          disabled={pending}
-                                          className="bg-orange-600 hover:bg-orange-700"
-                                          onClick={async () => {
-                                            if (!userId) return alert("Silakan login kembali");
-                                            if (!currentRating) return alert("Pilih rating 1-5");
-                                            const produkId = order.pesanan_items?.[0]?.id_produk;
-                                            if (!produkId) return alert("Produk tidak ditemukan");
-                                            try {
-                                              setPending(true);
-                                              await createRating({
-                                                userId,
-                                                produkId,
-                                                rating: currentRating,
-                                                review: currentReview.trim() || undefined,
-                                              });
-                                              alert("Terima kasih atas ulasan Anda!");
-                                              setActiveReviewOrderId(null);
-                                              setCurrentRating(0);
-                                              setCurrentReview("");
-                                            } catch (e: any) {
-                                              alert(e?.message || "Gagal mengirim ulasan");
-                                            } finally {
-                                              setPending(false);
-                                            }
-                                          }}
-                                        >
-                                          Kirim Ulasan
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => {
-                                        setActiveReviewOrderId(order.id);
-                                        setCurrentRating(0);
-                                        setCurrentReview("");
-                                      }}
-                                      className="shadow-sm"
-                                    >
-                                      <IconStar className="w-4 h-4 mr-2" />
-                                      Beri Ulasan
-                                    </Button>
-                                  )}
+                                      );
+                                    })()
+                                  ) : null}
                                 </div>
                               )}
                             </div>
