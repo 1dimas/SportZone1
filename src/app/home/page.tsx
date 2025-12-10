@@ -1,12 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import Footer from "@/components/Home/Footer";
 import Header from "@/components/Home/Header";
 import ProductCard from "@/components/Home/ProductCard";
 import { HeroSlider } from "@/components/Home/Heroslider";
 import PopularBrands from "@/components/Home/PopularBrands";
 import ProductCarousel from "@/components/Home/ProductCarousel";
+import { HeroSliderSkeleton } from "@/components/Home/HeroSliderSkeleton";
+import { PopularBrandsSkeleton } from "@/components/Home/PopularBrandsSkeleton";
+import { ProductCarouselSkeleton } from "@/components/Home/ProductCarouselSkeleton";
+import { ProductGridSkeleton } from "@/components/Home/ProductGridSkeleton";
 import { getAllProduk, getTotalSoldByProduct } from "@/components/lib/services/produk.service";
 import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 
@@ -83,13 +87,17 @@ const Page = () => {
 
       {/* Hero Section */}
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 mt-2">
-        <HeroSlider />
+        <Suspense fallback={<HeroSliderSkeleton />}>
+          <HeroSlider />
+        </Suspense>
       </div>
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 py-8">
         {/* Popular Brands */}
-        <PopularBrands onBrandSelect={setSelectedBrand} />
+        <Suspense fallback={<PopularBrandsSkeleton />}>
+          <PopularBrands onBrandSelect={setSelectedBrand} />
+        </Suspense>
 
         {/* Produk Grid */}
         <section className="mt-8">
@@ -106,9 +114,7 @@ const Page = () => {
 
           {/* Loading/Error */}
           {loading && (
-            <p className="text-center text-gray-600 py-8 animate-pulse">
-              Memuat produk...
-            </p>
+            <ProductGridSkeleton />
           )}
           {error && <p className="text-center text-red-500 py-8">{error}</p>}
 
@@ -140,15 +146,14 @@ const Page = () => {
           )}
         </section>
 
-        {/* ===========================================================
-          PERUBAHAN DI SINI: mt-16 diubah menjadi mt-8
-          ===========================================================
-        */}
+        {/* Rekomendasi Produk */}
         <section className="mt-8">
           <h2 className="text-2xl font-bold mb-6 text-gray-800">
             Rekomendasi Produk
           </h2>
-          <ProductCarousel />
+          <Suspense fallback={<ProductCarouselSkeleton />}>
+            <ProductCarousel />
+          </Suspense>
         </section>
       </main>
 

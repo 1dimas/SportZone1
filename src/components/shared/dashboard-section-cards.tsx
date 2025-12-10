@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { IconCurrencyDollar, IconShoppingBag, IconAlertTriangle, IconPackage } from "@tabler/icons-react"
+import { TrendingUp, TrendingDown } from "lucide-react"
 
 import {
   Card,
@@ -21,6 +22,12 @@ interface DashboardSectionCardsProps {
   showPermissionWarning?: boolean;
 }
 
+interface TrendData {
+  change: number; // percentage
+  direction: 'up' | 'down' | 'neutral';
+  isPositive: boolean; // whether the trend is good for business
+}
+
 export function DashboardSectionCards({ userRole = "USER", showPermissionWarning = true }: DashboardSectionCardsProps) {
   const [totalRevenue, setTotalRevenue] = React.useState<number>(0);
   const [totalOrders, setTotalOrders] = React.useState<number>(0);
@@ -28,6 +35,12 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
   const [totalReturns, setTotalReturns] = React.useState<number>(0);
   const [loading, setLoading] = React.useState(true);
   const [hasPermissionError, setHasPermissionError] = React.useState(false);
+
+  // Mock trend data (in real app, this would come from comparing with previous period)
+  const revenueTrend: TrendData = { change: 12.5, direction: 'up', isPositive: true };
+  const ordersTrend: TrendData = { change: 8.3, direction: 'up', isPositive: true };
+  const damagedTrend: TrendData = { change: 15.2, direction: 'down', isPositive: true }; // down is good for damaged
+  const returnsTrend: TrendData = { change: 5.7, direction: 'down', isPositive: true }; // down is good for returns
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -125,6 +138,22 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
     }).format(amount)
   }
 
+  const TrendIndicator = ({ trend }: { trend: TrendData }) => {
+    const TrendIcon = trend.direction === 'up' ? TrendingUp : TrendingDown;
+    const trendColor = trend.isPositive ? 'text-green-100' : 'text-red-100';
+    const bgColor = trend.isPositive ? 'bg-green-500/20' : 'bg-red-500/20';
+    
+    return (
+      <div className={`flex items-center gap-1.5 mt-2 ${bgColor} rounded-full px-2 py-1 w-fit`}>
+        <TrendIcon className={`h-3.5 w-3.5 ${trendColor}`} />
+        <span className={`text-xs font-semibold ${trendColor}`}>
+          {trend.change}%
+        </span>
+        <span className="text-xs text-white/70">vs last month</span>
+      </div>
+    );
+  };
+
   return (
     <>
       {hasPermissionError && showPermissionWarning && (
@@ -153,7 +182,7 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
           </>
         ) : (
           <>
-        <Card className="@container/card bg-gradient-to-br from-orange-500 to-orange-600 border-none shadow-lg">
+        <Card className="@container/card bg-gradient-to-br from-orange-500 to-orange-600 border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-white p-3">
@@ -164,11 +193,12 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
                 <CardTitle className="text-2xl font-bold tabular-nums text-white">
                   {loading ? "Loading..." : formatCurrency(totalRevenue)}
                 </CardTitle>
+                <TrendIndicator trend={revenueTrend} />
               </div>
             </div>
           </CardHeader>
         </Card>
-        <Card className="@container/card bg-gradient-to-br from-orange-500 to-orange-600 border-none shadow-lg">
+        <Card className="@container/card bg-gradient-to-br from-orange-500 to-orange-600 border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-white p-3">
@@ -179,11 +209,12 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
                 <CardTitle className="text-2xl font-bold tabular-nums text-white">
                   {loading ? "..." : totalOrders}
                 </CardTitle>
+                <TrendIndicator trend={ordersTrend} />
               </div>
             </div>
           </CardHeader>
         </Card>
-        <Card className="@container/card bg-gradient-to-br from-orange-500 to-orange-600 border-none shadow-lg">
+        <Card className="@container/card bg-gradient-to-br from-orange-500 to-orange-600 border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-white p-3">
@@ -194,11 +225,12 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
                 <CardTitle className="text-2xl font-bold tabular-nums text-white">
                   {loading ? "..." : totalDamagedProducts}
                 </CardTitle>
+                <TrendIndicator trend={damagedTrend} />
               </div>
             </div>
           </CardHeader>
         </Card>
-        <Card className="@container/card bg-gradient-to-br from-orange-500 to-orange-600 border-none shadow-lg">
+        <Card className="@container/card bg-gradient-to-br from-orange-500 to-orange-600 border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
           <CardHeader>
             <div className="flex items-center gap-4">
               <div className="rounded-full bg-white p-3">
@@ -209,6 +241,7 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
                 <CardTitle className="text-2xl font-bold tabular-nums text-white">
                   {loading ? "..." : totalReturns}
                 </CardTitle>
+                <TrendIndicator trend={returnsTrend} />
               </div>
             </div>
           </CardHeader>

@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { AppSidebar } from "@/components/petugas/app-sidebar"
 import { SiteHeader } from "@/components/petugas/site-header"
 import { ProdukRusakTable } from "@/components/petugas/produk-rusak-table"
@@ -5,6 +6,7 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
+import { TableSkeleton } from "@/components/shared/table-skeleton"
 
 export default function ProdukRusakPage() {
   return (
@@ -16,7 +18,7 @@ export default function ProdukRusakPage() {
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
@@ -29,7 +31,9 @@ export default function ProdukRusakPage() {
                 </p>
               </div>
               <div className="px-4 lg:px-6">
-                <ProdukRusakTable />
+                <Suspense fallback={<TableSkeleton />}>
+                  <ProdukRusakTable />
+                </Suspense>
               </div>
             </div>
           </div>

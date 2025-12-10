@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { AppSidebar } from "@/components/admin/app-sidebar"
 import { SiteHeader } from "@/components/admin/site-header"
 import { LaporanProdukTable } from "@/components/admin/laporan-produk-table"
@@ -5,6 +6,7 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
+import { TableSkeleton } from "@/components/shared/table-skeleton"
 
 export default function LaporanProdukPage() {
   return (
@@ -16,7 +18,7 @@ export default function LaporanProdukPage() {
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
@@ -29,7 +31,9 @@ export default function LaporanProdukPage() {
                 </p>
               </div>
               <div className="px-4 lg:px-6">
-                <LaporanProdukTable />
+                <Suspense fallback={<TableSkeleton />}>
+                  <LaporanProdukTable />
+                </Suspense>
               </div>
             </div>
           </div>

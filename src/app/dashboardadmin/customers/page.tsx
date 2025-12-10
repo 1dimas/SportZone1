@@ -1,56 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense } from "react"
 import { AppSidebar } from "@/components/admin/app-sidebar"
 import { SiteHeader } from "@/components/admin/site-header"
-import { CustomerTable } from "@/components/admin/customer-table"
+import { CustomerTableWrapper } from "@/components/admin/customer-table-wrapper"
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
-import { getAllCustomers } from "@/components/lib/services/customer.service"
-import { toast } from "sonner"
+import { TableSkeleton } from "@/components/shared/table-skeleton"
 
 export default function CustomerListPage() {
-  const [customerData, setCustomerData] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchCustomers = async () => {
-    try {
-      setLoading(true)
-      const data = await getAllCustomers()
-      setCustomerData(data)
-    } catch (err) {
-      console.error("Failed to fetch customers:", err)
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-      setError(`Failed to load customer data: ${errorMessage}`)
-      toast.error(`Failed to load customer data: ${errorMessage}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchCustomers()
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-red-500 text-xl">{error}</div>
-      </div>
-    )
-  }
-
   return (
     <SidebarProvider
       style={
@@ -60,7 +20,7 @@ export default function CustomerListPage() {
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" />
+      <AppSidebar />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">
@@ -71,7 +31,9 @@ export default function CustomerListPage() {
                 <p className="text-muted-foreground">Manage your customers here</p>
               </div>
               <div className="px-4 lg:px-6">
-                <CustomerTable data={customerData} onRefresh={fetchCustomers} />
+                <Suspense fallback={<TableSkeleton />}>
+                  <CustomerTableWrapper />
+                </Suspense>
               </div>
             </div>
           </div>

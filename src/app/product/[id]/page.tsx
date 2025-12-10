@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FiStar } from "react-icons/fi";
 import { ProductActions } from "@/components/Detailpage/ProductActions";
+import { ProductDetailSkeleton } from "@/components/Detailpage/ProductDetailSkeleton";
 import { formatRupiah } from "@/lib/utils";
 import { RatingList } from "@/components/Detailpage/RatingList";
 import { RatingForm } from "@/components/Detailpage/RatingForm";
@@ -132,9 +133,7 @@ export default function ProductDetailPage() {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="animate-spin h-24 w-24 rounded-full border-b-4 border-orange-500" />
-        </div>
+        <ProductDetailSkeleton />
         <Footer />
       </div>
     );

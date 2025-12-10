@@ -152,11 +152,11 @@ export default function Header() {
           <div className="flex items-center justify-between h-20 gap-4">
             <Link href="/" className="flex items-center gap-2 flex-shrink-0">
               <Image
-                src="/images/logo.png"
+                src="/images/LOgobaru.png"
                 alt="SportZone Logo"
-                width={40}
-                height={40}
-                className="h-10 w-10"
+                width={56}
+                height={56}
+                className="h-14 w-14"
               />
               <span className="hidden sm:block text-2xl font-bold text-gray-900">
                 Sport<span className="text-orange-500">Zone</span>
@@ -260,11 +260,11 @@ export default function Header() {
             <div className="flex items-center h-20 gap-4">
               <Link href="/" className="flex items-center gap-2 flex-shrink-0">
                 <Image
-                  src="/images/logo.png"
+                  src="/images/LOgobaru.png"
                   alt="SportZone Logo"
-                  width={40}
-                  height={40}
-                  className="h-10 w-10"
+                  width={56}
+                  height={56}
+                  className="h-14 w-14"
                 />
                 <span className="hidden sm:block text-2xl font-bold text-gray-900">
                   Sport<span className="text-orange-500">Zone</span>

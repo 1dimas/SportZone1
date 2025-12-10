@@ -323,15 +323,15 @@ export function ProdukTable({ data }: ProdukTableProps) {
       </div>
 
       {/* Table container */}
-      <div className="rounded-md border overflow-x-auto shadow-sm">
+      <div className="rounded-md border overflow-x-auto shadow-sm bg-white">
         <Table className="table-fixed w-full">
-          <TableHeader className="bg-muted/40">
+          <TableHeader className="bg-orange-100">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="py-3 text-sm font-semibold text-center"
+                    className="py-3 text-sm font-semibold text-center text-orange-900"
                   >
                     {header.isPlaceholder
                       ? null
@@ -350,7 +350,7 @@ export function ProdukTable({ data }: ProdukTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="even:bg-muted/20 hover:bg-muted/40 transition"
+                  className="even:bg-orange-50/30 hover:bg-orange-50/50 transition"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell

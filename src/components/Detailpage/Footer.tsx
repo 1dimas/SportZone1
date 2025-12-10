@@ -109,7 +109,7 @@ const Footer = () => {
           {/* Kolom 3: Toko */}
           <div>
             <h3 className="text-lg font-semibold text-white uppercase tracking-wider">
-              Toko
+              Peralatan
             </h3>
             <ul className="flex flex-col gap-3 mt-4">
               <li>

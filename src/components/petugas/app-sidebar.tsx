@@ -28,6 +28,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
@@ -112,7 +113,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="none" {...props} className="relative bg-white border-r border-orange-100">
+    <Sidebar collapsible="offcanvas" {...props} className="relative bg-white border-r border-orange-100">
       <SidebarHeader className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
