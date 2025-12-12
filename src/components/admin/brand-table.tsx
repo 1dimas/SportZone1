@@ -74,6 +74,26 @@ export const columns: ColumnDef<z.infer<typeof brandSchema>>[] = [
     header: "Name",
   },
   {
+    accessorKey: "id",
+    header: "ID",
+    cell: ({ row }) => {
+      const id = row.original.id
+      const shortId = id.substring(0, 8) + "..."
+      return (
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(id)
+            toast.success("ID copied to clipboard")
+          }}
+          className="text-xs font-mono text-gray-600 hover:text-gray-900 hover:underline"
+          title={`Click to copy: ${id}`}
+        >
+          {shortId}
+        </button>
+      )
+    },
+  },
+  {
     accessorKey: "deskripsi",
     header: "Description",
     cell: ({ row }) => {
@@ -105,22 +125,6 @@ export const columns: ColumnDef<z.infer<typeof brandSchema>>[] = [
       // Get onRefresh from table options
       const onRefresh = (table.options.meta as BrandTableMeta)?.onRefresh
 
-      const handleDelete = async () => {
-        try {
-          await deleteBrand(brand.id)
-          toast.success("Brand deleted successfully")
-          // Refresh the data - this would typically be handled by the parent component
-          if (onRefresh) {
-            onRefresh()
-          } else {
-            window.location.reload()
-          }
-        } catch (error) {
-          toast.error("Failed to delete brand")
-          console.error(error)
-        }
-      }
-
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -135,15 +139,17 @@ export const columns: ColumnDef<z.infer<typeof brandSchema>>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
             <DropdownMenuItem onClick={() => {
+              // Navigate to detail page
+              window.location.href = `/dashboardadmin/brand/${brand.id}`
+            }}>
+              <span className="mr-2">Detail</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
               // Navigate to edit page
               window.location.href = `/dashboardadmin/brand/${brand.id}/edit`
             }}>
               <IconEdit className="mr-2 size-4" />
               Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete} className="text-red-600">
-              <IconTrash className="mr-2 size-4" />
-              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

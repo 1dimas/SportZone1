@@ -78,6 +78,11 @@ const data = {
       icon: IconTag,
     },
     {
+      title: "Banner",
+      url: "/dashboardadmin/banner",
+      icon: IconFileDescription,
+    },
+    {
       title: "Products",
       url: "/dashboardadmin/produk",
       icon: IconBox,

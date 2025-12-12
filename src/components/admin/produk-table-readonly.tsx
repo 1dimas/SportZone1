@@ -99,6 +99,28 @@ const columns: ColumnDef<Produk>[] = [
     ),
   },
   {
+    accessorKey: "id",
+    header: () => <div className="text-center">ID</div>,
+    cell: ({ row }) => {
+      const id = row.original.id
+      const shortId = id.substring(0, 8) + "..."
+      return (
+        <div className="flex justify-center">
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(id)
+              toast("ID copied to clipboard", { position: "top-center" })
+            }}
+            className="text-xs font-mono text-gray-600 hover:text-gray-900 hover:underline"
+            title={`Click to copy: ${id}`}
+          >
+            {shortId}
+          </button>
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: "harga",
     header: () => <div className="text-center">Harga</div>,
     cell: ({ row }) => {

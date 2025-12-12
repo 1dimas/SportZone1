@@ -4,10 +4,10 @@ import React, { Suspense } from "react";
 import Footer from "@/components/Home/Footer";
 import Header from "@/components/Home/Header";
 import ProductCard from "@/components/Home/ProductCard";
-import { HeroSlider } from "@/components/Home/Heroslider";
+import { BannerCarousel } from "@/components/Home/BannerCarousel";
+import { BannerCarouselSkeleton } from "@/components/Home/BannerCarouselSkeleton";
 import PopularBrands from "@/components/Home/PopularBrands";
 import ProductCarousel from "@/components/Home/ProductCarousel";
-import { HeroSliderSkeleton } from "@/components/Home/HeroSliderSkeleton";
 import { PopularBrandsSkeleton } from "@/components/Home/PopularBrandsSkeleton";
 import { ProductCarouselSkeleton } from "@/components/Home/ProductCarouselSkeleton";
 import { ProductGridSkeleton } from "@/components/Home/ProductGridSkeleton";
@@ -85,10 +85,10 @@ const Page = () => {
         <Header />
       </div>
 
-      {/* Hero Section */}
+      {/* Banner Carousel Section */}
       <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 md:px-8 mt-2">
-        <Suspense fallback={<HeroSliderSkeleton />}>
-          <HeroSlider />
+        <Suspense fallback={<BannerCarouselSkeleton />}>
+          <BannerCarousel />
         </Suspense>
       </div>
 

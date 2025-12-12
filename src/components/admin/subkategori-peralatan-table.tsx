@@ -72,6 +72,26 @@ export const columns: ColumnDef<z.infer<typeof subkategoriPeralatanSchema>>[] = 
     header: "Name",
   },
   {
+    accessorKey: "id",
+    header: "ID",
+    cell: ({ row }) => {
+      const id = row.original.id
+      const shortId = id.substring(0, 8) + "..."
+      return (
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(id)
+            toast.success("ID copied to clipboard")
+          }}
+          className="text-xs font-mono text-gray-600 hover:text-gray-900 hover:underline"
+          title={`Click to copy: ${id}`}
+        >
+          {shortId}
+        </button>
+      )
+    },
+  },
+  {
     accessorKey: "kategoriOlahraga.nama",
     header: "Kategori Olahraga",
     cell: ({ row }) => (
@@ -118,6 +138,12 @@ export const columns: ColumnDef<z.infer<typeof subkategoriPeralatanSchema>>[] = 
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
+            <DropdownMenuItem onClick={() => {
+              // Navigate to detail page
+              window.location.href = `/dashboardadmin/subkategori-peralatan/${subkategori.id}`
+            }}>
+              <span className="mr-2">Detail</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => {
               // Navigate to edit page
               window.location.href = `/dashboardadmin/subkategori-peralatan/${subkategori.id}/edit`
