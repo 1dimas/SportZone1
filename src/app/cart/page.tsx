@@ -7,6 +7,7 @@ import { FiMinus, FiPlus, FiShoppingCart, FiStar, FiX } from "react-icons/fi";
 import { useMemo, useState, useEffect } from "react";
 import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
 import CartRatingDisplay from "@/components/Cart/CartRatingDisplay";
+import { toast } from "sonner";
 
 export default function CartPage() {
   const { state, dispatch } = useCart();
@@ -78,7 +79,7 @@ export default function CartPage() {
 
   const handleCheckoutSelected = () => {
     if (selectedIds.length === 0) {
-      alert("Pilih minimal satu item untuk checkout.");
+      toast.warning("Pilih minimal satu item untuk checkout.");
       return;
     }
     const query = encodeURIComponent(selectedIds.join(","));

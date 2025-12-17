@@ -15,6 +15,7 @@ import {
   FiChevronDown,
 } from "react-icons/fi";
 
+import { useCart } from "@/context/cart-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,10 @@ export default function Header() {
   const [userId, setUserId] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const router = useRouter();
+  const { state: cartState } = useCart();
+
+  // Calculate total cart items
+  const cartItemCount = cartState.items.reduce((total, item) => total + item.quantity, 0);
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -185,9 +190,14 @@ export default function Header() {
               </button>
               <Link
                 href="/cart"
-                className="p-2 text-gray-700 hover:text-orange-500 transition-colors"
+                className="relative p-2 text-gray-700 hover:text-orange-500 transition-colors"
               >
                 <FiShoppingCart size={22} />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg animate-pulse">
+                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                  </span>
+                )}
               </Link>
               <div className="hidden sm:block w-px h-6 bg-gray-200"></div>
               <div className="hidden sm:flex">

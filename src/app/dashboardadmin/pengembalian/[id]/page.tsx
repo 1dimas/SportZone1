@@ -19,6 +19,7 @@ import {
   rejectPengembalian,
 } from "@/components/lib/services/pengembalian.service";
 import { ArrowLeft, CheckCircle, XCircle, User, Package, Calendar, FileText } from "lucide-react";
+import { toast } from "sonner";
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(amount);
@@ -77,10 +78,10 @@ export default function PengembalianDetailPage() {
     try {
       setProcessing(true);
       await approvePengembalian(pengembalian.id, catatanAdmin.trim() || undefined);
-      alert("Pengembalian berhasil disetujui");
+      toast.success("Pengembalian berhasil disetujui");
       loadData();
     } catch (err: any) {
-      alert(err?.message || "Gagal menyetujui pengembalian");
+      toast.error(err?.message || "Gagal menyetujui pengembalian");
     } finally {
       setProcessing(false);
     }
@@ -89,7 +90,7 @@ export default function PengembalianDetailPage() {
   const handleReject = async () => {
     if (!pengembalian) return;
     if (!catatanAdmin.trim()) {
-      alert("Silakan isi catatan penolakan");
+      toast.warning("Silakan isi catatan penolakan");
       return;
     }
     if (!confirm("Apakah Anda yakin ingin menolak pengembalian ini?")) return;
@@ -97,10 +98,10 @@ export default function PengembalianDetailPage() {
     try {
       setProcessing(true);
       await rejectPengembalian(pengembalian.id, catatanAdmin.trim());
-      alert("Pengembalian berhasil ditolak");
+      toast.success("Pengembalian berhasil ditolak");
       loadData();
     } catch (err: any) {
-      alert(err?.message || "Gagal menolak pengembalian");
+      toast.error(err?.message || "Gagal menolak pengembalian");
     } finally {
       setProcessing(false);
     }

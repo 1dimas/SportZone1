@@ -27,6 +27,7 @@ import {
 } from "@tabler/icons-react";
 import { createRating, checkUserRating } from "@/components/lib/services/rating.service";
 import { getProfile } from "@/components/lib/services/auth.service";
+import { toast } from "sonner";
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { 
@@ -126,12 +127,12 @@ export default function PesananHistoryPage() {
     try {
       setCancelingOrderId(orderId);
       await cancelOrder(orderId);
-      alert("Pesanan berhasil dibatalkan");
+      toast.success("Pesanan berhasil dibatalkan");
       
       const data = await getPesananHistory();
       setOrders(data);
     } catch (err: any) {
-      alert(err?.message || "Gagal membatalkan pesanan");
+      toast.error(err?.message || "Gagal membatalkan pesanan");
     } finally {
       setCancelingOrderId(null);
     }
@@ -512,9 +513,9 @@ export default function PesananHistoryPage() {
                                               disabled={pending}
                                               className="bg-orange-600 hover:bg-orange-700"
                                               onClick={async () => {
-                                                if (!userId) return alert("Silakan login kembali");
-                                                if (!currentRating) return alert("Pilih rating 1-5");
-                                                if (!firstItem.id_produk) return alert("Produk tidak ditemukan");
+                                                if (!userId) return toast.warning("Silakan login kembali");
+                                                if (!currentRating) return toast.warning("Pilih rating 1-5");
+                                                if (!firstItem.id_produk) return toast.error("Produk tidak ditemukan");
                                                 try {
                                                   setPending(true);
                                                   await createRating({
@@ -523,7 +524,7 @@ export default function PesananHistoryPage() {
                                                     rating: currentRating,
                                                     review: currentReview.trim() || undefined,
                                                   });
-                                                  alert("Terima kasih atas ulasan Anda!");
+                                                  toast.success("Terima kasih atas ulasan Anda!");
                                                   setActiveReviewOrderId(null);
                                                   setCurrentRating(0);
                                                   setCurrentReview("");
@@ -531,7 +532,7 @@ export default function PesananHistoryPage() {
                                                   const itemKey = `${order.id}-${firstItem.id_produk}`;
                                                   setRatedItems(prev => ({ ...prev, [itemKey]: true }));
                                                 } catch (e: any) {
-                                                  alert(e?.message || "Gagal mengirim ulasan");
+                                                  toast.error(e?.message || "Gagal mengirim ulasan");
                                                 } finally {
                                                   setPending(false);
                                                 }

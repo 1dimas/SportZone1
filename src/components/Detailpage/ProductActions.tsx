@@ -9,6 +9,7 @@ import { useCart } from "@/context/cart-context";
 import { addKeranjangItem } from "@/components/lib/services/keranjang.service";
 import { useRouter } from "next/navigation";
 import { formatRupiah } from "@/lib/utils";
+import { toast } from "sonner";
 
 type ProductData = {
   variants: ProductVariant[];
@@ -110,18 +111,18 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
   const handleAddToCart = () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Silakan login terlebih dahulu untuk menambahkan ke keranjang.");
+      toast.warning("Silakan login terlebih dahulu untuk menambahkan ke keranjang.");
       router.push("/login");
       return;
     }
 
     if (!selectedVariant) {
-      alert("Silakan pilih varian terlebih dahulu.");
+      toast.warning("Silakan pilih varian terlebih dahulu.");
       return;
     }
 
     if (quantity > selectedVariant.stok) {
-      alert(`Stok tidak mencukupi. Maksimal ${selectedVariant.stok} buah`);
+      toast.error(`Stok tidak mencukupi. Maksimal ${selectedVariant.stok} buah`);
       return;
     }
 
@@ -158,22 +159,22 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       produk_varian_id: varianIdToSend ?? undefined,
       kuantitas: quantity,
     }).catch(() => {});
-    alert(`Added ${quantity} ${selectedSize || selectedColor} to cart`);
+    toast.success(`Berhasil menambahkan ${quantity} item ke keranjang`);
   };
 
   const handleOrderNow = () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Silakan login terlebih dahulu untuk melakukan pemesanan.");
+      toast.warning("Silakan login terlebih dahulu untuk melakukan pemesanan.");
       router.push("/login");
       return;
     }
     if (!selectedVariant) {
-      alert("Silakan pilih varian terlebih dahulu.");
+      toast.warning("Silakan pilih varian terlebih dahulu.");
       return;
     }
     if (quantity > selectedVariant.stok) {
-      alert(`Stok tidak mencukupi. Maksimal ${selectedVariant.stok} buah`);
+      toast.error(`Stok tidak mencukupi. Maksimal ${selectedVariant.stok} buah`);
       return;
     }
 
@@ -215,11 +216,11 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       {/* Pilihan Ukuran */}
       {hasSizes && (
         <div>
-          <label className="block text-xs text-gray-500 mb-2">Ukuran:</label>
+          <label className="block text-xs text-gray-700 mb-2 font-medium">Ukuran:</label>
           <div className="flex flex-wrap gap-2">
             {availableSizes.map((size, idx) => {
               const available = isSizeAvailable(size);
@@ -229,16 +230,16 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
                   key={idx}
                   onClick={() => available && setSelectedSize(size)}
                   disabled={!available}
-                  className={`px-4 py-2 border rounded-lg text-sm font-medium transition ${
+                  className={`px-3 py-1.5 border rounded-md text-xs font-medium transition ${
                     !available
                       ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50"
                       : isSelected
-                      ? "bg-orange-500 text-white border-orange-500 shadow-md"
+                      ? "bg-orange-500 text-white border-orange-500"
                       : "bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300"
                   }`}
                 >
                   {size}
-                  {!available && <span className="ml-1 text-xs">(Kosong)</span>}
+                  {!available && <span className="ml-1 text-[10px]">(Kosong)</span>}
                 </button>
               );
             })}
@@ -249,7 +250,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       {/* Pilihan Warna */}
       {hasColors && (
         <div>
-          <label className="block text-xs text-gray-500 mb-2">Warna:</label>
+          <label className="block text-xs text-gray-700 mb-2 font-medium">Warna:</label>
           <div className="flex flex-wrap gap-2">
             {availableColors.map((color, idx) => {
               const available = isColorAvailable(color);
@@ -259,16 +260,16 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
                   key={idx}
                   onClick={() => available && setSelectedColor(color)}
                   disabled={!available}
-                  className={`px-4 py-2 border rounded-lg text-sm font-medium transition ${
+                  className={`px-3 py-1.5 border rounded-md text-xs font-medium transition ${
                     !available
                       ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50"
                       : isSelected
-                      ? "bg-orange-500 text-white border-orange-500 shadow-md"
+                      ? "bg-orange-500 text-white border-orange-500"
                       : "bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300"
                   }`}
                 >
                   {color}
-                  {!available && <span className="ml-1 text-xs">(Kosong)</span>}
+                  {!available && <span className="ml-1 text-[10px]">(Kosong)</span>}
                 </button>
               );
             })}
@@ -280,7 +281,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       {selectedVariant && (
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
           <h4 className="text-xs font-medium text-orange-900 mb-1">Variant Dipilih:</h4>
-          <div className="text-xs text-orange-800">
+          <div className="text-xs text-orange-800 space-y-0.5">
             {hasSizes && hasColors && (
               <p>
                 Ukuran: {selectedSize} | Warna: {selectedColor}
@@ -288,9 +289,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
             )}
             {hasSizes && !hasColors && <p>Ukuran: {selectedSize}</p>}
             {hasColors && !hasSizes && <p>Warna: {selectedColor}</p>}
-            <p className="mt-1">Stok tersedia: {selectedVariant.stok}</p>
+            <p>Stok tersedia: {selectedVariant.stok}</p>
             {selectedVariant.harga && (
-              <p className="mt-1">
+              <p>
                 Harga variant: {formatRupiah(selectedVariant.harga)}
               </p>
             )}
@@ -299,46 +300,46 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       )}
 
       {/* Jumlah */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3 justify-center">
         <button
           onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-          className="p-2 border rounded-md text-sm"
+          className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 transition"
         >
-          <FiMinus />
+          <FiMinus size={14} />
         </button>
-        <span className="px-4 py-1 border-t border-b">{quantity}</span>
+        <span className="min-w-[40px] text-center font-medium text-sm">{quantity}</span>
         <button
           onClick={() => setQuantity((q) => q + 1)}
-          className="p-2 border rounded-md text-sm"
+          className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 transition"
         >
-          <FiPlus />
+          <FiPlus size={14} />
         </button>
       </div>
 
-      {/* Tombol Aksi */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Tombol Aksi - Always Stack Vertically */}
+      <div className="flex flex-col gap-2 w-full">
         {/* Tambah ke Keranjang */}
         <button
           onClick={handleAddToCart}
           disabled={!selectedVariant || selectedVariant.stok === 0}
-          className={`flex-1 px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 border-2 ${
+          className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2 border-2 ${
             !selectedVariant || selectedVariant.stok === 0
               ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
-              : "border-orange-500 text-orange-500 bg-white hover:bg-orange-50 hover:shadow-md"
+              : "border-orange-500 text-orange-500 bg-white hover:bg-orange-50"
           }`}
         >
-          <FiShoppingCart className="w-5 h-5" />
-          Tambah ke Keranjang
+          <FiShoppingCart className="w-4 h-4" />
+          <span className="whitespace-nowrap">Tambah ke Keranjang</span>
         </button>
 
         {/* Pesan Sekarang */}
         <button
           onClick={handleOrderNow}
           disabled={!selectedVariant || selectedVariant.stok === 0}
-          className={`flex-1 px-6 py-3 rounded-lg font-semibold transition ${
+          className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition ${
             !selectedVariant || selectedVariant.stok === 0
               ? "bg-gray-300 text-gray-100 cursor-not-allowed"
-              : "bg-orange-500 hover:bg-orange-600 text-white shadow-sm hover:shadow-md"
+              : "bg-orange-500 hover:bg-orange-600 text-white"
           }`}
         >
           Pesan Sekarang

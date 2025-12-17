@@ -140,16 +140,19 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
 
   const TrendIndicator = ({ trend }: { trend: TrendData }) => {
     const TrendIcon = trend.direction === 'up' ? TrendingUp : TrendingDown;
-    const trendColor = trend.isPositive ? 'text-green-100' : 'text-red-100';
-    const bgColor = trend.isPositive ? 'bg-green-500/20' : 'bg-red-500/20';
+    const isPositiveTrend = trend.isPositive;
+    const colorClass = isPositiveTrend ? 'text-emerald-600' : 'text-red-600';
+    const bgClass = isPositiveTrend ? 'bg-emerald-50' : 'bg-red-50';
     
     return (
-      <div className={`flex items-center gap-1.5 mt-2 ${bgColor} rounded-full px-2 py-1 w-fit`}>
-        <TrendIcon className={`h-3.5 w-3.5 ${trendColor}`} />
-        <span className={`text-xs font-semibold ${trendColor}`}>
-          {trend.change}%
-        </span>
-        <span className="text-xs text-white/70">vs last month</span>
+      <div className={`flex items-center gap-2 mt-3 ${bgClass} rounded-lg px-3 py-2 w-fit`}>
+        <TrendIcon className={`h-4 w-4 ${colorClass}`} />
+        <div className="flex items-baseline gap-1.5">
+          <span className={`text-sm font-bold ${colorClass}`}>
+            {trend.direction === 'up' ? '+' : '-'}{trend.change}%
+          </span>
+          <span className="text-xs text-gray-600">dari bulan lalu</span>
+        </div>
       </div>
     );
   };

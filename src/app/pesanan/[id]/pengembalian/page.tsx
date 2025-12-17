@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Upload, Image as ImageIcon } from "lucide-react";
 import { getPesananById, Pesanan } from "@/components/lib/services/pesanan.service";
 import { createPengembalian, AlasanPengembalian } from "@/components/lib/services/pengembalian.service";
+import { toast } from "sonner";
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(amount);
@@ -56,11 +57,11 @@ export default function FormPengembalianPage() {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       if (selectedFile.size > 5 * 1024 * 1024) {
-        alert("Ukuran file maksimal 5MB");
+        toast.warning("Ukuran file maksimal 5MB");
         return;
       }
       if (!selectedFile.type.startsWith("image/")) {
-        alert("File harus berupa gambar");
+        toast.warning("File harus berupa gambar");
         return;
       }
       setFile(selectedFile);
@@ -77,7 +78,7 @@ export default function FormPengembalianPage() {
     if (!order) return;
 
     if (!keterangan.trim()) {
-      alert("Silakan isi keterangan pengembalian");
+      toast.warning("Silakan isi keterangan pengembalian");
       return;
     }
 
@@ -91,10 +92,10 @@ export default function FormPengembalianPage() {
         },
         file || undefined
       );
-      alert("Pengajuan pengembalian berhasil dikirim. Silakan menunggu konfirmasi dari admin.");
+      toast.success("Pengajuan pengembalian berhasil dikirim. Silakan menunggu konfirmasi dari admin.");
       router.push("/pesanan/history");
     } catch (err: any) {
-      alert(err?.message || "Gagal mengajukan pengembalian");
+      toast.error(err?.message || "Gagal mengajukan pengembalian");
     } finally {
       setSubmitting(false);
     }

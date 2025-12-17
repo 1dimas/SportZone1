@@ -23,6 +23,7 @@ import {
   IconCopy,
   IconAlertCircle
 } from "@tabler/icons-react";
+import { toast } from "sonner";
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
@@ -180,12 +181,12 @@ export default function PesananDetailPage() {
     try {
       setCancelingOrder(true);
       await cancelOrder(id);
-      alert("Pesanan berhasil dibatalkan");
+      toast.success("Pesanan berhasil dibatalkan");
       
       const data = await getPesananById(id);
       setOrder(data);
     } catch (err: any) {
-      alert(err?.message || "Gagal membatalkan pesanan");
+      toast.error(err?.message || "Gagal membatalkan pesanan");
     } finally {
       setCancelingOrder(false);
     }

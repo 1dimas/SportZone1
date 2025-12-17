@@ -16,6 +16,7 @@ import {
   MetodePembayaran,
 } from "@/components/lib/services/pembayaran.service";
 import { getProfile } from "@/components/lib/services/auth.service";
+import { toast } from "sonner";
 
 type SnapPaymentResult = {
   order_id: string;
@@ -66,7 +67,7 @@ export default function CheckoutPage() {
       try {
         const stored = localStorage.getItem("token");
         if (!stored) {
-          alert("Token tidak ditemukan. Login dulu.");
+          toast.warning("Token tidak ditemukan. Login dulu.");
           router.push("/login");
           return;
         }
@@ -84,7 +85,7 @@ export default function CheckoutPage() {
         }
       } catch (error) {
         console.error("Failed to load user data:", error);
-        alert("Gagal memuat data pengguna");
+        toast.error("Gagal memuat data pengguna");
       }
     }
     init();
@@ -171,22 +172,22 @@ export default function CheckoutPage() {
     e.preventDefault();
 
     if (!formData.address.trim()) {
-      alert("Mohon lengkapi alamat pengiriman");
+      toast.warning("Mohon lengkapi alamat pengiriman");
       return;
     }
 
     if (!formData.kota.trim()) {
-      alert("Mohon lengkapi kota pengiriman");
+      toast.warning("Mohon lengkapi kota pengiriman");
       return;
     }
 
     if (!formData.provinsi.trim()) {
-      alert("Mohon lengkapi provinsi pengiriman");
+      toast.warning("Mohon lengkapi provinsi pengiriman");
       return;
     }
 
     if (!token) {
-      alert("Token tidak ditemukan. Login dulu.");
+      toast.warning("Token tidak ditemukan. Login dulu.");
       return;
     }
 
@@ -263,7 +264,7 @@ export default function CheckoutPage() {
         const snapOptions: SnapOptions = {
           onSuccess: function (result: SnapPaymentResult) {
             console.log("Payment success:", result);
-            alert(
+            toast.success(
               "Pembayaran berhasil! Terima kasih telah berbelanja di SportZone."
             );
             const mode = new URLSearchParams(window.location.search).get("mode");
@@ -276,16 +277,16 @@ export default function CheckoutPage() {
           },
           onPending: function (result: SnapPaymentResult) {
             console.log("Payment pending:", result);
-            alert("Pembayaran sedang diproses. Silakan selesaikan pembayaran.");
+            toast.info("Pembayaran sedang diproses. Silakan selesaikan pembayaran.");
             router.push("/pesanan");
           },
           onError: function (result: SnapPaymentResult) {
             console.log("Payment error:", result);
-            alert("Pembayaran gagal. Silakan coba lagi.");
+            toast.error("Pembayaran gagal. Silakan coba lagi.");
           },
           onClose: function () {
             console.log("Payment popup closed");
-            alert("Pembayaran dibatalkan.");
+            toast.warning("Pembayaran dibatalkan.");
           },
         };
 
@@ -300,7 +301,7 @@ export default function CheckoutPage() {
     } catch (error: unknown) {
       console.error("Checkout error:", error);
       const message = error instanceof Error ? error.message : "Terjadi kesalahan saat memproses pesanan";
-      alert(message);
+      toast.error(message);
     } finally {
       setIsProcessing(false);
     }

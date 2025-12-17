@@ -121,7 +121,7 @@ const columns: ColumnDef<Produk>[] = [
           <button
             onClick={() => {
               navigator.clipboard.writeText(id)
-              alert("ID copied to clipboard")
+              toast.success("ID copied to clipboard")
             }}
             className="text-xs font-mono text-gray-600 hover:text-gray-900 hover:underline"
             title={`Click to copy: ${id}`}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { FiHeart, FiShoppingCart, FiX } from "react-icons/fi";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // Define the type for wishlist items
 type WishlistItem = {
@@ -36,7 +37,7 @@ export default function WishlistPage() {
 
   // Function to add to cart
   const addToCart = (item: WishlistItem) => {
-    alert(`${item.name} telah ditambahkan ke keranjang!`);
+    toast.success(`${item.name} telah ditambahkan ke keranjang!`);
     // In a real application, you would dispatch an action to add the item to the cart
     // For now, we'll just remove it from wishlist after adding to cart
     removeFromWishlist(item.id);

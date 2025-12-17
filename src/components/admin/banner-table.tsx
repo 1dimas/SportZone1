@@ -248,6 +248,7 @@ export function BannerTable({ data, onRefresh }: BannerTableProps) {
           onClick={() => {
             window.location.href = "/dashboardadmin/banner/create"
           }}
+          className="bg-orange-500 hover:bg-orange-600 text-white"
         >
           <IconPlus className="mr-2 size-4" />
           Add Banner
