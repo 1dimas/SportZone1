@@ -59,10 +59,11 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
         block 
         w-full 
         bg-white 
-        rounded-md 
-        border border-gray-200 
+        rounded-xl 
+        border border-gray-100 
+        shadow-sm
         overflow-hidden 
-        hover:shadow-md 
+        hover:shadow-lg 
         hover:-translate-y-1 
         transition-all 
         duration-300
@@ -70,7 +71,7 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
       "
     >
       {/* Gambar Produk */}
-      <div className="relative w-full aspect-square bg-gray-50 flex items-center justify-center">
+      <div className="relative w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
         <Image
           src={imageUrl}
           alt={name}
@@ -80,41 +81,42 @@ const ProductCard: FC<ProductCardProps> = ({ product }) => {
             duration-500 
             group-hover:scale-105
             object-contain 
-          " // DIREVISI: Menggunakan object-contain dan menghapus p-2
+          "
           unoptimized={isExternal}
         />
 
         {product.isNew && (
-          <span className="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full z-10">
+          <span className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-semibold px-2.5 py-1 rounded-lg z-10">
             Baru
           </span>
         )}
       </div>
 
       {/* Info Produk */}
-      <div className="p-1.5">
+      <div className="p-3">
         <h3
           className="
-            text-xs 
+            text-sm 
             font-medium 
             text-gray-800 
             line-clamp-2 
-            h-[32px]
+            min-h-[40px]
+            leading-5
           "
         >
           {name}
         </h3>
 
-        <p className="mt-0.5 text-sm font-bold text-orange-500">
+        <p className="mt-2 text-base font-bold text-orange-500">
           {formatRupiah(price)}
         </p>
 
-        <div className="mt-0.5 flex items-center text-[11px] text-gray-600">
-          <FiStar className="text-yellow-400 mr-1 fill-yellow-400" size={12} />
-          <span>{rating > 0 ? rating.toFixed(1) : "Belum ada rating"}</span>
+        <div className="mt-2 flex items-center text-xs text-gray-500">
+          <FiStar className="text-yellow-400 mr-1 fill-yellow-400" size={14} />
+          <span className="font-medium">{rating > 0 ? rating.toFixed(1) : "0"}</span>
           {sold > 0 && (
             <>
-              <span className="mx-1">•</span>
+              <span className="mx-1.5 text-gray-300">•</span>
               <span>Terjual {sold >= 1000 ? `${(sold / 1000).toFixed(1)}rb` : sold}+</span>
             </>
           )}

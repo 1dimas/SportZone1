@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { login, getProfile, API_URL } from "./lib/services/auth.service";
-import { IconEye, IconEyeOff } from "@tabler/icons-react";
-
+import { IconEye, IconEyeOff, IconBrandGoogle } from "@tabler/icons-react";
+import { toast } from "sonner";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
 
 export function LoginForm({
   className,
@@ -21,12 +22,17 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [isError, setIsError] = useState(false);
+
+  // Reset error animation state when user types
+  useEffect(() => {
+    if (isError) setIsError(false);
+  }, [email, password]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setErrorMsg("");
+    setIsError(false);
 
     try {
       const res = await login(email, password);
@@ -35,7 +41,8 @@ export function LoginForm({
         localStorage.setItem("token", res.token);
 
         const profile = await getProfile();
-        console.log("Profile user (raw):", profile);
+        
+        toast.success(`Welcome back, ${profile?.username || 'User'}!`);
 
         if (profile?.role?.name === "admin") {
           router.push("/dashboardadmin");
@@ -45,11 +52,13 @@ export function LoginForm({
           router.push("/home");
         }
       } else {
-        setErrorMsg("Login gagal. Cek email/password.");
+        setIsError(true);
+        toast.error("Login gagal. Cek email/password.");
       }
     } catch (err) {
       console.error(err);
-      setErrorMsg("Terjadi error, coba lagi.");
+      setIsError(true);
+      toast.error("Email atau password salah");
     } finally {
       setLoading(false);
     }
@@ -58,125 +67,143 @@ export function LoginForm({
   // Google login
   function handleGoogleLogin() {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("token"); // clear token lama
+      localStorage.removeItem("token");
       window.location.href = `${API_URL}/auth/google`;
     }
   }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
-          <form onSubmit={handleSubmit} className="p-6 md:p-8">
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold text-[#FB8C00]">
-                  Welcome back
+      <div className={cn(
+        "bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 animate-in fade-in zoom-in-95 duration-500",
+        isError && "animate-shake ring-2 ring-red-500/50"
+      )}>
+        <div className="grid md:grid-cols-2 min-h-[600px]">
+          {/* Left Side - Form */}
+          <div className="p-8 md:p-12 flex flex-col justify-center relative">
+            
+            <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-2">
+                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                  Welcome back! 👋
                 </h1>
-                <p className="text-muted-foreground">Login to your account</p>
+                <p className="text-gray-500 text-sm">
+                  Enter your details to access your account.
+                </p>
               </div>
 
-              {errorMsg && (
-                <div className="text-red-500 text-sm text-center">
-                  {errorMsg}
-                </div>
-              )}
-
-              <div className="grid gap-3 text-[#FB8C00]">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center text-[#FB8C00]">
-                  <Label htmlFor="password">Password</Label>
-                  <a
-                    href="/forgot-password"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <div className="relative">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                <div className="flex flex-col gap-2 group">
+                  <Label htmlFor="email" className="font-medium text-gray-700 ml-1">Email Address</Label>
                   <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="password"
-                    className="pr-10"
+                    className="h-12 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-300"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
-                    {showPassword ? (
-                      <IconEyeOff className="size-5" />
-                    ) : (
-                      <IconEye className="size-5" />
-                    )}
-                  </button>
                 </div>
-              </div>
-              <Button
-                type="submit"
-                className="w-full bg-[#FB8C00] hover:bg-orange-600"
-                disabled={loading}
-              >
-                {loading ? "Logging in..." : "Login"}
-              </Button>
 
-              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                <span className="bg-card text-muted-foreground relative z-10 px-2">
-                  Or continue with
-                </span>
+                <div className="flex flex-col gap-2 group">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password" className="font-medium text-gray-700 ml-1">Password</Label>
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm font-semibold text-orange-600 hover:text-orange-700 hover:underline"
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      placeholder="••••••••"
+                      className="h-12 rounded-xl bg-gray-50 border-gray-200 focus:bg-white focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-300 pr-12"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showPassword ? (
+                        <IconEyeOff className="size-5" />
+                      ) : (
+                        <IconEye className="size-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="h-12 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-lg shadow-sm hover:shadow-md active:scale-95 transform transition-all duration-200 mt-2"
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Logging in...
+                    </div>
+                  ) : (
+                    "Sign In"
+                  )}
+                </Button>
+              </form>
+
+              <div className="relative flex items-center gap-4 py-2">
+                <span className="h-px bg-gray-200 flex-1" />
+                <span className="text-gray-400 text-sm font-medium uppercase tracking-wider">Or continue with</span>
+                <span className="h-px bg-gray-200 flex-1" />
               </div>
 
-              {/* Google */}
               <Button
                 variant="outline"
                 type="button"
-                className="w-full flex items-center justify-center gap-2 border-2 border-[#FB8C00] text-[#FB8C00]  font-semibold"
                 onClick={handleGoogleLogin}
+                className="h-12 rounded-xl border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 text-gray-700 font-bold flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 group"
               >
-                <svg
-                  className="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-                </svg>
-
-                {/* Kelas "sr-only" dihapus agar teks ini muncul */}
-                <span>Login with Google</span>
+                <IconBrandGoogle className="w-5 h-5 text-gray-500 group-hover:text-orange-500 transition-colors" />
+                <span>Google Account</span>
               </Button>
 
-              <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <a href="register" className="underline underline-offset-4">
-                  Sign up
-                </a>
+              <div className="text-center">
+                <p className="text-gray-500">
+                  Don&apos;t have an account?{" "}
+                  <Link href="/register" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">
+                    Create an account
+                  </Link>
+                </p>
               </div>
             </div>
-          </form>
-          <div className=" relative hidden md:block">
-            <img
-              src="images/orange.jpg"
-              alt="Image"
-              className="relative z-10 max-h-full max-w-full object-contain"
-            />
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Right Side - Image/Decoration */}
+          <div className="hidden md:block relative bg-orange-50/50 overflow-hidden border-l border-gray-100">
+            <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-orange-100/40 via-transparent to-transparent" />
+            <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-orange-100/40 via-transparent to-transparent" />
+            
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+              {/* Background Loop */}
+            
+
+              {/* Foreground Image */}
+              <div className="relative z-10 w-64 h-64 opacity-20 grayscale transition-all duration-700 hover:opacity-40 hover:grayscale-0 hover:scale-110">
+                 <img src="/images/logo2.png" alt="SportZone Watermark" className="w-full h-full object-contain" />
+              </div>
+            </div>
+            
+            {/* Abstract Shapes */}
+             <div className="absolute top-1/4 left-10 w-4 h-4 rounded-full bg-orange-400/20 blur-sm" />
+             <div className="absolute bottom-1/3 right-10 w-6 h-6 rounded-full bg-red-400/10 blur-sm" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -315,7 +315,7 @@ export default function CheckoutPage() {
           <div className="mb-6">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 hover:border-gray-300"
+              className="flex items-center gap-2 px-4 py-2 "
             >
               <svg
                 className="w-5 h-5"
@@ -326,7 +326,7 @@ export default function CheckoutPage() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                 
                   d="M15 19l-7-7 7-7"
                 />
               </svg>

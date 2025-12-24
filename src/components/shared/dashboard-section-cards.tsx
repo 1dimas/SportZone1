@@ -194,7 +194,7 @@ export function DashboardSectionCards({ userRole = "USER", showPermissionWarning
               <div className="flex-1">
                 <CardDescription className="text-white/80 text-sm font-medium mb-1">Total Revenue</CardDescription>
                 <CardTitle className="text-2xl font-bold tabular-nums text-white">
-                  {loading ? "Loading..." : formatCurrency(totalRevenue)}
+                  {loading ? "Memuat..." : formatCurrency(totalRevenue)}
                 </CardTitle>
                 <TrendIndicator trend={revenueTrend} />
               </div>

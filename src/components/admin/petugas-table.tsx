@@ -242,7 +242,7 @@ export function PetugasTable({ data, onRefresh }: PetugasTableProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  Tidak ada data petugas.
                 </TableCell>
               </TableRow>
             )}

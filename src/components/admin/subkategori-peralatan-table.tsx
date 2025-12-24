@@ -249,7 +249,7 @@ export function SubkategoriPeralatanTable({ data }: SubkategoriPeralatanTablePro
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  Tidak ada data subkategori.
                 </TableCell>
               </TableRow>
             )}

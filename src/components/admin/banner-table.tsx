@@ -296,7 +296,7 @@ export function BannerTable({ data, onRefresh }: BannerTableProps) {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Tidak ada data banner.
                 </TableCell>
               </TableRow>
             )}

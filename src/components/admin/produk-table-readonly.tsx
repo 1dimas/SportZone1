@@ -228,7 +228,7 @@ function StockCell({
 
   if (loading) {
     return (
-      <div className="text-center text-sm text-muted-foreground">Memuat...</div>
+      <div className="text-center text-sm text-muted-foreground">Memuat data produk...</div>
     );
   }
 

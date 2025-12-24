@@ -15,27 +15,26 @@ export default function HomePage() {
     <>
       <Header />
       
-      
       {/* Bagian utama halaman */}
-      
       <main className="bg-white">
         
         {/* Section 1: Banner Utama */}
         <HeroSlider />
         
-
         {/* Section 2: Keunggulan Toko */}
-        <ValueProps  />
+        <section className="py-12 md:py-20">
+          <ValueProps />
+        </section>
         
         {/* Section 3: Kategori Unggulan */}
-        <FeaturedCategories />
+        <section className="py-12 md:py-20 bg-gray-50" id="about">
+          <FeaturedCategories />
+        </section>
 
-         <Testimonials />
-
-        {/* Section 4: Produk Terlaris (Komponen ini mengambil datanya sendiri dari server)
-        <ProductCarousel /> */}
-
-        {/* Anda bisa menambahkan section lain di sini, seperti Testimoni atau Brand Carousel */}
+        {/* Section 4: Testimonials */}
+        <section className="py-12 md:py-20" id="contact">
+          <Testimonials />
+        </section>
         
       </main>
 

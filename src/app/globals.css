@@ -51,8 +51,8 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.702 0.183 54.85);
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -116,45 +116,70 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
-/* app/globals.css */
+/* Custom Animations */
+@keyframes shake {
 
-/* ... (kode tailwind Anda) ... */
+  0%,
+  100% {
+    transform: translateX(0);
+  }
 
-/* Kustomisasi untuk Hero Slider */
-.hero-slider .swiper-button-next,
-.hero-slider .swiper-button-prev {
-  color: #ffffff !important;
-  background-color: rgba(0, 0, 0, 0.3);
-  width: 52px !important;
-  height: 52px !important;
-  border-radius: 50%;
-  transition: background-color 0.3s, transform 0.2s;
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
 }
 
-.hero-slider .swiper-button-next:hover,
-.hero-slider .swiper-button-prev:hover {
-    background-color: rgba(0, 0, 0, 0.6);
-    transform: scale(1.1);
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
 }
 
-.hero-slider .swiper-pagination-bullet {
-  background: rgba(255, 255, 255, 0.7) !important;
-  width: 12px !important;
-  height: 12px !important;
-  opacity: 1 !important;
-  border: 2px solid transparent;
-  transition: all 0.3s;
+.animate-wave {
+  animation: wave 2s infinite;
+  transform-origin: 70% 70%;
 }
 
-.hero-slider .swiper-pagination-bullet-active {
-  background: #2563EB !important; /* Warna biru */
-  border: 2px solid white;
-  transform: scale(1.2);
+@keyframes wave {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  10% {
+    transform: rotate(14deg);
+  }
+
+  20% {
+    transform: rotate(-8deg);
+  }
+
+  30% {
+    transform: rotate(14deg);
+  }
+
+  40% {
+    transform: rotate(-4deg);
+  }
+
+  50% {
+    transform: rotate(10deg);
+  }
+
+  60% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
 }
 
 /* ... (CSS untuk Product Carousel bisa diletakkan di bawahnya) ... */

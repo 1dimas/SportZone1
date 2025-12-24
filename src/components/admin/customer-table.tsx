@@ -205,7 +205,7 @@ export function CustomerTable({ data, onRefresh }: CustomerTableProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  Tidak ada data customer.
                 </TableCell>
               </TableRow>
             )}

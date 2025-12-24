@@ -249,7 +249,7 @@ export function BrandTable({ data, onRefresh }: BrandTableProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  Tidak ada data brand.
                 </TableCell>
               </TableRow>
             )}

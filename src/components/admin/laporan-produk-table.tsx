@@ -13,7 +13,17 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { IconChevronLeft, IconChevronRight, IconDownload } from "@tabler/icons-react";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Download, 
+  Search,
+  Package,
+  Boxes,
+  TrendingUp,
+  DollarSign,
+  Loader2
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   getAllProduk,
   getVarianByProduk,
@@ -78,77 +89,85 @@ const formatCurrency = (amount: number) => {
 const columns: ColumnDef<ProdukReport>[] = [
   {
     accessorKey: "nama",
-    header: () => <div className="text-left">Nama Produk</div>,
+    header: () => <div className="text-left font-semibold">Nama Produk</div>,
     cell: ({ row }) => (
-      <div className="font-medium truncate max-w-[200px]">
+      <div className="font-medium truncate max-w-[200px] text-gray-900">
         {row.original.nama}
       </div>
     ),
   },
   {
     accessorKey: "subkategori.kategoriOlahraga.nama",
-    header: () => <div className="text-center">Kategori</div>,
+    header: () => <div className="text-center font-semibold">Kategori</div>,
     cell: ({ row }) => (
-      <div className="text-center text-muted-foreground">
-        {row.original.subkategori?.kategoriOlahraga?.nama || "-"}
+      <div className="text-center">
+        <Badge variant="outline" className="font-normal">
+          {row.original.subkategori?.kategoriOlahraga?.nama || "-"}
+        </Badge>
       </div>
     ),
   },
   {
     accessorKey: "brand.nama",
-    header: () => <div className="text-center">Brand</div>,
+    header: () => <div className="text-center font-semibold">Brand</div>,
     cell: ({ row }) => (
-      <div className="text-center text-muted-foreground">
+      <div className="text-center text-gray-600">
         {row.original.brand?.nama || "-"}
       </div>
     ),
   },
   {
     accessorKey: "harga",
-    header: () => <div className="text-right">Harga</div>,
+    header: () => <div className="text-right font-semibold">Harga</div>,
     cell: ({ row }) => (
-      <div className="text-right font-medium">
+      <div className="text-right font-medium text-gray-900">
         {formatCurrency(row.original.harga)}
       </div>
     ),
   },
   {
     accessorKey: "stok",
-    header: () => <div className="text-center">Stok</div>,
+    header: () => <div className="text-center font-semibold">Stok</div>,
     cell: ({ row }) => (
-      <div className="text-center font-medium">{row.original.stok}</div>
+      <div className="text-center">
+        <span className={`font-semibold ${row.original.stok <= 10 ? 'text-red-600' : 'text-gray-900'}`}>
+          {row.original.stok}
+        </span>
+      </div>
     ),
   },
   {
     accessorKey: "totalTerjual",
-    header: () => <div className="text-center">Total Terjual</div>,
+    header: () => <div className="text-center font-semibold">Terjual</div>,
     cell: ({ row }) => (
-      <div className="text-center font-medium text-green-600">
-        {row.original.totalTerjual}
+      <div className="text-center">
+        <span className="font-semibold text-emerald-600">
+          {row.original.totalTerjual}
+        </span>
       </div>
     ),
   },
   {
     accessorKey: "nilaiStok",
-    header: () => <div className="text-right">Nilai Stok</div>,
+    header: () => <div className="text-right font-semibold">Nilai Stok</div>,
     cell: ({ row }) => (
-      <div className="text-right font-medium">
+      <div className="text-right font-medium text-gray-900">
         {formatCurrency(row.original.nilaiStok)}
       </div>
     ),
   },
   {
     accessorKey: "status",
-    header: () => <div className="text-center">Status</div>,
+    header: () => <div className="text-center font-semibold">Status</div>,
     cell: ({ row }) => (
       <div className="flex justify-center">
         <Badge
-          variant={
+          className={
             row.original.status === "aktif"
-              ? "default"
+              ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
               : row.original.status === "stok habis"
-              ? "secondary"
-              : "outline"
+              ? "bg-red-100 text-red-700 hover:bg-red-100"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-100"
           }
         >
           {row.original.status === "aktif"
@@ -277,111 +296,171 @@ export function LaporanProdukTable() {
   };
 
   if (loading) {
-    return <div className="text-center py-8">Memuat data laporan...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <p className="text-gray-500">Memuat data laporan...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-lg border bg-card">
-          <div className="text-sm text-muted-foreground">Total Produk</div>
-          <div className="text-2xl font-bold">{stats.totalProduk}</div>
-        </div>
-        <div className="p-4 rounded-lg border bg-card">
-          <div className="text-sm text-muted-foreground">Total Stok</div>
-          <div className="text-2xl font-bold">{stats.totalStok}</div>
-        </div>
-        <div className="p-4 rounded-lg border bg-card">
-          <div className="text-sm text-muted-foreground">Total Terjual</div>
-          <div className="text-2xl font-bold text-green-600">{stats.totalTerjual}</div>
-        </div>
-        <div className="p-4 rounded-lg border bg-card">
-          <div className="text-sm text-muted-foreground">Nilai Stok</div>
-          <div className="text-2xl font-bold">{formatCurrency(stats.totalNilaiStok)}</div>
-        </div>
+    <div className="w-full space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-0 shadow-md rounded-xl overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+                <Package className="w-5 h-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Produk</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalProduk}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md rounded-xl overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                <Boxes className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Stok</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalStok}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md rounded-xl overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Total Terjual</p>
+                <p className="text-2xl font-bold text-emerald-600">{stats.totalTerjual}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md rounded-xl overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Nilai Stok</p>
+                <p className="text-xl font-bold text-gray-900">{formatCurrency(stats.totalNilaiStok)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="flex items-center justify-between py-4">
-        <Input
-          placeholder="Cari produk..."
-          value={(table.getColumn("nama")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("nama")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <Button onClick={exportToCSV} variant="outline">
-          <IconDownload className="w-4 h-4 mr-2" />
+      {/* Search and Export */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Input
+            placeholder="Cari produk..."
+            value={(table.getColumn("nama")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("nama")?.setFilterValue(event.target.value)
+            }
+            className="pl-10 h-11 rounded-xl border-gray-200 focus:border-orange-500"
+          />
+        </div>
+        <Button 
+          onClick={exportToCSV} 
+          className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-11 gap-2"
+        >
+          <Download className="w-4 h-4" />
           Export CSV
         </Button>
       </div>
 
-      <div className="rounded-md border overflow-x-auto shadow-sm">
-        <Table>
-          <TableHeader className="bg-muted/40">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="py-3 text-sm font-semibold">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="even:bg-muted/20 hover:bg-muted/40 transition">
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-sm py-3">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+      {/* Table */}
+      <Card className="border-0 shadow-md rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className="bg-gray-50 border-b">
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id} className="py-4 text-gray-700">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
                   ))}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Tidak ada data produk.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="flex items-center justify-between py-4">
-        <div className="text-sm text-muted-foreground">
-          Menampilkan {table.getFilteredRowModel().rows.length} produk
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row, index) => (
+                  <TableRow 
+                    key={row.id} 
+                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-orange-50/50 transition-colors`}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="py-4">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                    Tidak ada data produk.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
-        <div className="flex items-center space-x-2">
+      </Card>
+
+      {/* Pagination */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-sm text-gray-500">
+          Menampilkan {table.getFilteredRowModel().rows.length} produk
+        </p>
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            className="rounded-lg gap-1"
           >
-            <IconChevronLeft className="w-4 h-4 mr-2" />
+            <ChevronLeft className="w-4 h-4" />
             Sebelumnya
           </Button>
-          <div className="text-sm">
-            Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
-            {table.getPageCount()}
+          <div className="px-3 py-1 text-sm bg-gray-100 rounded-lg">
+            {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            className="rounded-lg gap-1"
           >
             Selanjutnya
-            <IconChevronRight className="w-4 h-4 ml-2" />
+            <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
       </div>

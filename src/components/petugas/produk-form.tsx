@@ -5,6 +5,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import {
+  Package,
+  FileText,
+  DollarSign,
+  Layers,
+  Tag,
+  Award,
+  ToggleLeft,
+  Image as ImageIcon,
+  Upload,
+  X,
+  Loader2,
+  Plus,
+  Save,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +29,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -78,20 +94,19 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
   const [loading, setLoading] = React.useState(false);
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = React.useState<string[]>([]);
-  const [deletedImages, setDeletedImages] = React.useState<string[]>([]); // Track deleted existing images
+  const [deletedImages, setDeletedImages] = React.useState<string[]>([]);
   const [hargaDisplay, setHargaDisplay] = React.useState<string>("");
   const [stokDisplay, setStokDisplay] = React.useState<string>("");
+  const [isDragOver, setIsDragOver] = React.useState(false);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Format number to rupiah display
   const formatRupiah = (value: number): string => {
     return value.toLocaleString("id-ID");
   };
 
-  // Parse rupiah string to number
   const parseRupiah = (value: string): number => {
-    const cleaned = value.replace(/\D/g, ""); // Remove all non-digits
+    const cleaned = value.replace(/\D/g, "");
     return cleaned === "" ? 0 : parseInt(cleaned, 10);
   };
 
@@ -129,7 +144,6 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
     fetchData();
   }, []);
 
-  // Initialize harga and stok display
   React.useEffect(() => {
     if (produk?.harga) {
       setHargaDisplay(formatRupiah(produk.harga));
@@ -139,7 +153,6 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
     }
   }, [produk]);
 
-  // Reset form when produk changes (for edit)
   React.useEffect(() => {
     if (produk) {
       form.reset({
@@ -154,36 +167,49 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
           (produk.status as "aktif" | "nonaktif" | "stok habis") || "aktif",
         gambar: [],
       });
-      setDeletedImages([]); // Reset deleted images when editing a different product
+      setDeletedImages([]);
     }
   }, [produk, form]);
 
-  // Clean up preview URLs
   React.useEffect(() => {
     return () => {
       previewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [previewUrls]);
 
-  // Initialize preview URLs for existing images when editing
-  React.useEffect(() => {
-    if (produk?.gambar) {
-      // For existing images, we don't create object URLs, just use the image URLs directly
-      // This is handled in the render section
-    }
-  }, [produk]);
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
+    addFiles(files);
+  };
 
-    // Add new files to existing selected files
+  const addFiles = (files: File[]) => {
     const updatedFiles = [...selectedFiles, ...files];
     setSelectedFiles(updatedFiles);
     form.setValue("gambar", updatedFiles);
 
-    // Create preview URLs for new files
     const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
     setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const files = Array.from(e.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/')
+    );
+    if (files.length > 0) {
+      addFiles(files);
+    }
   };
 
   const removeFile = async (
@@ -192,10 +218,8 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
     imageUrl?: string
   ) => {
     if (isExistingImage && imageUrl && produk) {
-      // Delete from backend immediately
       try {
         await deleteGambarProduk(produk.id, imageUrl);
-        // Add to deleted images list to hide from UI
         setDeletedImages((prev) => [...prev, imageUrl]);
         toast.success("Gambar berhasil dihapus");
       } catch (error) {
@@ -204,13 +228,11 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
         return;
       }
     } else {
-      // Remove from selected files
       const newFiles = [...selectedFiles];
       newFiles.splice(index, 1);
       setSelectedFiles(newFiles);
       form.setValue("gambar", newFiles);
 
-      // Update preview URLs
       const newPreviewUrls = [...previewUrls];
       URL.revokeObjectURL(newPreviewUrls[index]);
       newPreviewUrls.splice(index, 1);
@@ -219,15 +241,10 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
   };
 
   const clearAllFiles = () => {
-    // Revoke all object URLs
     previewUrls.forEach((url) => URL.revokeObjectURL(url));
-
-    // Clear files and previews
     setSelectedFiles([]);
     setPreviewUrls([]);
     form.setValue("gambar", []);
-
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -237,7 +254,6 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
     setLoading(true);
     try {
       if (produk) {
-        // Update
         await updateProduk(produk.id, {
           nama: data.nama,
           deskripsi: data.deskripsi,
@@ -251,7 +267,6 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
         toast.success("Produk berhasil diperbarui");
         triggerProductRefresh();
       } else {
-        // Create
         await createProduk({
           ...data,
           gambar: selectedFiles,
@@ -268,24 +283,42 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
     }
   };
 
-  // Count total images (existing + new), excluding deleted ones
   const existingImages =
     produk?.gambar?.filter((img) => !deletedImages.includes(img)) || [];
   const totalImages = existingImages.length + selectedFiles.length;
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        
+        {/* Section 1: Informasi Dasar */}
+        <div className="space-y-4">
+          <h3 className="font-medium text-gray-900 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+              <Package className="w-4 h-4 text-orange-600" />
+            </div>
+            Informasi Dasar
+          </h3>
+          
+          <div className="space-y-4">
             <FormField
               control={form.control}
               name="nama"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama Produk</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                    Nama Produk
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Masukkan nama produk" {...field} />
+                    <div className="relative">
+                      <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        placeholder="Masukkan nama produk" 
+                        className="pl-10 rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-colors"
+                        {...field} 
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -296,43 +329,67 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
               control={form.control}
               name="deskripsi"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Deskripsi</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                    Deskripsi
+                  </FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Masukkan deskripsi produk"
-                      className="min-h-[120px]"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                      <Textarea
+                        placeholder="Masukkan deskripsi produk"
+                        className="pl-10 min-h-[120px] rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-colors resize-none"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+          </div>
+        </div>
 
+        {/* Section 2: Harga & Stok */}
+        <div className="space-y-4">
+          <h3 className="font-medium text-gray-900 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+              <DollarSign className="w-4 h-4 text-green-600" />
+            </div>
+            Harga & Stok
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="harga"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Harga (Rp)</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    Harga (Rp)
+                  </FormLabel>
                   <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Masukkan harga"
-                      value={hargaDisplay}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setHargaDisplay(value);
-                        const numericValue = parseRupiah(value);
-                        field.onChange(numericValue);
-                      }}
-                      onBlur={() => {
-                        // Format on blur
-                        const numericValue = form.getValues("harga");
-                        setHargaDisplay(formatRupiah(numericValue));
-                      }}
-                    />
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Masukkan harga"
+                        className="pl-10 rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-colors"
+                        value={hargaDisplay}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setHargaDisplay(value);
+                          const numericValue = parseRupiah(value);
+                          field.onChange(numericValue);
+                        }}
+                        onBlur={() => {
+                          const numericValue = form.getValues("harga");
+                          setHargaDisplay(formatRupiah(numericValue));
+                        }}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -343,43 +400,61 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
               control={form.control}
               name="stok"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Stok</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    Stok
+                  </FormLabel>
                   <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="Masukkan jumlah stok"
-                      value={stokDisplay}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setStokDisplay(value);
-                        const numericValue = parseRupiah(value);
-                        field.onChange(numericValue);
-                      }}
-                      onBlur={() => {
-                        // Format on blur
-                        const numericValue = form.getValues("stok");
-                        setStokDisplay(numericValue.toString());
-                      }}
-                    />
+                    <div className="relative">
+                      <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        type="text"
+                        placeholder="Masukkan jumlah stok"
+                        className="pl-10 rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-colors"
+                        value={stokDisplay}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setStokDisplay(value);
+                          const numericValue = parseRupiah(value);
+                          field.onChange(numericValue);
+                        }}
+                        onBlur={() => {
+                          const numericValue = form.getValues("stok");
+                          setStokDisplay(numericValue.toString());
+                        }}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+        </div>
 
-          <div className="space-y-6">
+        {/* Section 3: Kategori & Brand */}
+        <div className="space-y-4">
+          <h3 className="font-medium text-gray-900 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+              <Layers className="w-4 h-4 text-blue-600" />
+            </div>
+            Kategori & Brand
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="kategori_id"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Kategori Olahraga</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                    Kategori Olahraga
+                  </FormLabel>
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value);
-                      // Filter subkategori based on selected kategori
                       getSubkategoriPeralatanByKategoriOlahraga(value).then(
                         setSubkategoris
                       );
@@ -387,7 +462,8 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20">
+                        <Tag className="w-4 h-4 text-gray-400 mr-2" />
                         <SelectValue placeholder="Pilih kategori olahraga" />
                       </SelectTrigger>
                     </FormControl>
@@ -403,18 +479,23 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="subkategori_id"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subkategori (Alat)</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                    Subkategori (Alat)
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20">
+                        <Layers className="w-4 h-4 text-gray-400 mr-2" />
                         <SelectValue placeholder="Pilih subkategori" />
                       </SelectTrigger>
                     </FormControl>
@@ -435,14 +516,18 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
               control={form.control}
               name="brand_id"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Brand</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                    Brand
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20">
+                        <Award className="w-4 h-4 text-gray-400 mr-2" />
                         <SelectValue placeholder="Pilih brand" />
                       </SelectTrigger>
                     </FormControl>
@@ -463,14 +548,18 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
               control={form.control}
               name="status"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                    Status
+                  </FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20">
+                        <ToggleLeft className="w-4 h-4 text-gray-400 mr-2" />
                         <SelectValue placeholder="Pilih status" />
                       </SelectTrigger>
                     </FormControl>
@@ -487,108 +576,151 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
           </div>
         </div>
 
-        <div className="space-y-4 rounded-lg border p-4">
+        {/* Section 4: Gambar Produk */}
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <FormLabel className="text-base font-semibold">
+            <h3 className="font-medium text-gray-900 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                <ImageIcon className="w-4 h-4 text-purple-600" />
+              </div>
               Gambar Produk
-            </FormLabel>
+            </h3>
             {selectedFiles.length > 0 && (
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={clearAllFiles}
-                className="h-8 px-2 text-xs"
+                className="text-xs text-gray-500 hover:text-red-500"
               >
-                Hapus Semua Gambar Baru
+                <X className="w-3 h-3 mr-1" />
+                Hapus Semua Baru
               </Button>
             )}
           </div>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-2">
-              <Input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleFileChange}
-                className="cursor-pointer"
-              />
-              <p className="text-sm text-muted-foreground">
-                Anda dapat memilih lebih dari satu gambar. Format yang didukung:
-                JPG, PNG, WEBP.
-                {totalImages > 0 && (
-                  <span className="ml-1">Total gambar: {totalImages}</span>
-                )}
-              </p>
+          
+          {/* Drag & Drop Area */}
+          <div 
+            className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-200 cursor-pointer ${
+              isDragOver 
+                ? "border-orange-400 bg-orange-50" 
+                : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/30"
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center mx-auto mb-4">
+              <Upload className="w-8 h-8 text-purple-500" />
             </div>
-
-            {/* Preview all images (existing + new) */}
-            {totalImages > 0 && (
-              <div className="space-y-2">
-                <div className="text-sm text-muted-foreground">
-                  Total: {totalImages} gambar ({selectedFiles.length} baru,{" "}
-                  {existingImages.length} existing)
-                </div>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                  {/* Existing images (filtered to exclude deleted ones) */}
-                  {existingImages.map((imageUrl, index) => (
-                    <div key={`existing-${index}`} className="relative">
-                      <div className="aspect-square overflow-hidden rounded-md border">
-                        <img
-                          src={imageUrl}
-                          alt={`Existing image ${index + 1}`}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(index, true, imageUrl)}
-                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground"
-                      >
-                        ×
-                      </button>
-                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 py-1 text-center text-[10px] text-white">
-                        Existing
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* New selected files */}
-                  {selectedFiles.map((file, index) => (
-                    <div key={`new-${index}`} className="relative">
-                      <div className="aspect-square overflow-hidden rounded-md border">
-                        <img
-                          src={previewUrls[index]}
-                          alt={`Preview ${file.name}`}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(index)}
-                        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs text-destructive-foreground"
-                      >
-                        ×
-                      </button>
-                      <div className="mt-1 truncate text-xs text-muted-foreground">
-                        {file.name}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <p className="text-gray-600 mb-2">
+              Drag & drop gambar atau <span className="text-orange-500 font-medium">klik untuk upload</span>
+            </p>
+            <p className="text-xs text-gray-400">
+              Format: JPG, PNG, WEBP
+            </p>
+            <Input 
+              ref={fileInputRef}
+              type="file" 
+              multiple 
+              accept="image/*" 
+              className="hidden" 
+              onChange={handleFileChange}
+            />
           </div>
+
+          {/* Image Previews */}
+          {totalImages > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-500">
+                  Total: {totalImages} gambar
+                  {selectedFiles.length > 0 && existingImages.length > 0 && (
+                    <span className="text-xs ml-1">
+                      ({selectedFiles.length} baru, {existingImages.length} existing)
+                    </span>
+                  )}
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                {/* Existing images */}
+                {existingImages.map((imageUrl, index) => (
+                  <div key={`existing-${index}`} className="relative group">
+                    <div className="aspect-square overflow-hidden rounded-xl border-2 border-gray-100 bg-gray-50">
+                      <img
+                        src={imageUrl}
+                        alt={`Existing image ${index + 1}`}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index, true, imageUrl)}
+                      className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/50 py-1 text-center text-[10px] text-white rounded-b-xl">
+                      Existing
+                    </div>
+                  </div>
+                ))}
+
+                {/* New selected files */}
+                {selectedFiles.map((file, index) => (
+                  <div key={`new-${index}`} className="relative group">
+                    <div className="aspect-square overflow-hidden rounded-xl border-2 border-orange-200 bg-orange-50">
+                      <img
+                        src={previewUrls[index]}
+                        alt={`Preview ${file.name}`}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index)}
+                      className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                    <div className="absolute bottom-0 left-0 right-0 bg-orange-500 py-1 text-center text-[10px] text-white rounded-b-xl">
+                      Baru
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={loading} className="w-full sm:w-auto">
-            {loading
-              ? "Menyimpan..."
-              : produk
-              ? "Perbarui Produk"
-              : "Buat Produk"}
+        {/* Submit Section */}
+        <div className="flex items-center justify-between pt-6 border-t">
+          <p className="text-sm text-gray-500 hidden sm:block">
+            <span className="text-orange-500">*</span> Semua field wajib diisi
+          </p>
+          <Button 
+            type="submit" 
+            disabled={loading}
+            className="bg-orange-500 hover:bg-orange-600 rounded-xl gap-2 px-8 w-full sm:w-auto shadow-sm"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Menyimpan...
+              </>
+            ) : produk ? (
+              <>
+                <Save className="w-4 h-4" />
+                Perbarui Produk
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                Buat Produk
+              </>
+            )}
           </Button>
         </div>
       </form>
