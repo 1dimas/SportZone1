@@ -83,23 +83,13 @@ export function RegisterForm({
         <div className="grid md:grid-cols-2 min-h-[600px]">
           
           {/* Left Side - Image/Decoration */}
-          <div className="hidden md:block relative bg-orange-50/50 overflow-hidden order-2 md:order-1 border-r border-gray-100">
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-orange-100/40 via-transparent to-transparent" />
-            <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-orange-100/40 via-transparent to-transparent" />
-            
-            <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-               {/* Background Loop */}
-              
-
-              {/* Foreground Image */}
-              <div className="relative z-10 w-64 h-64 opacity-20 grayscale transition-all duration-700 hover:opacity-40 hover:grayscale-0 hover:scale-110">
-                 <img src="/images/logo2.png" alt="SportZone Watermark" className="w-full h-full object-contain" />
-              </div>
-            </div>
-            
-            {/* Abstract Shapes */}
-            <div className="absolute top-1/3 right-10 w-4 h-4 rounded-full bg-orange-400/20 blur-sm" />
-            <div className="absolute bottom-1/4 left-10 w-6 h-6 rounded-full bg-red-400/10 blur-sm" />
+          <div className="hidden md:block relative overflow-hidden order-2 md:order-1 border-r border-gray-100">
+            {/* Full-size Banner Image */}
+            <img 
+              src="/images/banner.png" 
+              alt="SportZone Banner" 
+              className="absolute inset-0 w-full h-full object-cover"
+            />
           </div>
 
           {/* Right Side - Form */}

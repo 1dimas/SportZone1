@@ -6,6 +6,7 @@ import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import ShinyText from "@/components/ShinyText";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -48,7 +49,14 @@ export const BannerCarousel = () => {
 
   if (loading) {
     return (
-      <div className="w-full h-[300px] md:h-[450px] lg:h-[550px] bg-gradient-to-r from-orange-100 to-orange-50 animate-pulse rounded-2xl" />
+      <div className="w-full h-[300px] md:h-[450px] lg:h-[550px] bg-gradient-to-br from-orange-100 via-orange-50 to-amber-50 rounded-2xl flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
+        <ShinyText 
+          text="Loading banners..." 
+          speed={3} 
+          className="text-lg font-semibold text-orange-600"
+        />
+      </div>
     );
   }
 
