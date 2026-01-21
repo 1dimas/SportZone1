@@ -13,10 +13,10 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Download, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
   Search,
   Package,
   Boxes,
@@ -166,15 +166,15 @@ const columns: ColumnDef<ProdukReport>[] = [
             row.original.status === "aktif"
               ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
               : row.original.status === "stok habis"
-              ? "bg-red-100 text-red-700 hover:bg-red-100"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-100"
+                ? "bg-red-100 text-red-700 hover:bg-red-100"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-100"
           }
         >
           {row.original.status === "aktif"
             ? "Aktif"
             : row.original.status === "nonaktif"
-            ? "Nonaktif"
-            : "Stok Habis"}
+              ? "Nonaktif"
+              : "Stok Habis"}
         </Badge>
       </div>
     ),
@@ -378,8 +378,8 @@ export function LaporanProdukTable() {
             className="pl-10 h-11 rounded-xl border-gray-200 focus:border-orange-500"
           />
         </div>
-        <Button 
-          onClick={exportToCSV} 
+        <Button
+          onClick={exportToCSV}
           className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-11 gap-2"
         >
           <Download className="w-4 h-4" />
@@ -391,17 +391,17 @@ export function LaporanProdukTable() {
       <Card className="border-0 shadow-md rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-orange-100">
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="bg-gray-50 border-b">
+                <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="py-4 text-gray-700">
+                    <TableHead key={header.id} className="py-3 text-sm font-semibold text-orange-900">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -409,13 +409,13 @@ export function LaporanProdukTable() {
             </TableHeader>
             <TableBody>
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row, index) => (
-                  <TableRow 
-                    key={row.id} 
-                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-orange-50/50 transition-colors`}
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="even:bg-orange-50/30 hover:bg-orange-50/50 transition"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-4">
+                      <TableCell key={cell.id} className="py-3 text-sm">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -423,7 +423,7 @@ export function LaporanProdukTable() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center text-gray-500">
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
                     Tidak ada data produk.
                   </TableCell>
                 </TableRow>

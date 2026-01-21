@@ -16,6 +16,7 @@ import {
 import { z } from "zod";
 import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -182,15 +183,15 @@ const columns: ColumnDef<Produk>[] = [
             row.original.status === "aktif"
               ? "default"
               : row.original.status === "stok habis"
-              ? "secondary"
-              : "outline"
+                ? "secondary"
+                : "outline"
           }
         >
           {row.original.status === "aktif"
             ? "Aktif"
             : row.original.status === "nonaktif"
-            ? "Nonaktif"
-            : "Stok Habis"}
+              ? "Nonaktif"
+              : "Stok Habis"}
         </Badge>
       </div>
     ),
@@ -323,20 +324,20 @@ export function ProdukTableReadonly() {
       {/* Table */}
       <div className="rounded-md border overflow-x-auto shadow-sm">
         <Table className="table-fixed w-full">
-          <TableHeader className="bg-muted/40">
+          <TableHeader className="bg-orange-100">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="py-3 text-sm font-semibold text-center"
+                    className="py-3 text-sm font-semibold text-center text-orange-900"
                   >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -348,7 +349,7 @@ export function ProdukTableReadonly() {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="even:bg-muted/20 hover:bg-muted/40 transition"
+                  className="even:bg-orange-50/30 hover:bg-orange-50/50 transition"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
