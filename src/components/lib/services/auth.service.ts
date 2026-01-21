@@ -50,12 +50,12 @@ export async function login(email: string, password: string) {
   }
 
   const data = await response.json();
-  // Ambil token dari berbagai kemungkinan field
+
   const token = data.token || data.access_token || data.accessToken;
   if (!token) {
     throw new Error("Token tidak ditemukan");
   }
-  // simpan token ke localStorage
+
   localStorage.setItem("token", token);
   return { ...data, token };
 }

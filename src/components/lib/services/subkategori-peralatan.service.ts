@@ -10,40 +10,29 @@ const getToken = () => localStorage.getItem("token");
 // =====================
 export async function getAllSubkategoriPeralatan() {
   const token = getToken();
-  if (!token) throw new Error("Belum login");
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
 
   const response = await fetch(`${API_URL}/subkategori-peralatan`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Gagal mengambil data subkategori peralatan: ${response.status} ${response.statusText} - ${errorText}`);
+    throw new Error(
+      `Gagal mengambil data subkategori peralatan: ${response.status} ${response.statusText} - ${errorText}`
+    );
   }
 
-  const data = await response.json();
+  return response.json();
   // Transform the data to match the frontend schema
-  return Array.isArray(data)
-    ? data.map(item => ({
-        ...item,
-        nama: item.nama,
-        kategori_olahraga_id: item.kategori_olahraga_id,
-        created_at: item.created_at,
-        updated_at: item.updated_at,
-        kategoriOlahraga: item.kategoriOlahraga
-      }))
-    : {
-        ...data,
-        nama: data.nama,
-        kategori_olahraga_id: data.kategori_olahraga_id,
-        created_at: data.created_at,
-        updated_at: data.updated_at,
-        kategoriOlahraga: data.kategoriOlahraga
-      };
 }
 
 // =====================

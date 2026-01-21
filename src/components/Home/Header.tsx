@@ -135,6 +135,13 @@ export default function Header() {
     }
   };
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -193,9 +200,9 @@ export default function Header() {
                 className="relative p-2 text-gray-700 hover:text-orange-500 transition-colors"
               >
                 <FiShoppingCart size={22} />
-                {cartItemCount > 0 && (
+                {mounted && cartItemCount > 0 && (
                   <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg animate-pulse">
-                    {cartItemCount > 99 ? '99+' : cartItemCount}
+                    {cartItemCount > 99 ? "99+" : cartItemCount}
                   </span>
                 )}
               </Link>
@@ -266,7 +273,7 @@ export default function Header() {
         </div>
 
         {isSearchOpen && (
-           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center h-20 gap-4">
               <Link href="/" className="flex items-center gap-2 flex-shrink-0">
                 <Image
@@ -332,12 +339,20 @@ export default function Header() {
               {menuLoading ? (
                 <p className="text-sm text-gray-500 p-3">Loading...</p>
               ) : menuError ? (
-                <p className="text-sm text-red-500 p-3">Gagal memuat kategori.</p>
+                <p className="text-sm text-red-500 p-3">
+                  Gagal memuat kategori.
+                </p>
               ) : (
                 sportsMenuItem?.columns.map((column) => (
                   <div key={column.heading}>
                     <button
-                      onClick={() => setOpenCategory(openCategory === column.heading ? null : column.heading)}
+                      onClick={() =>
+                        setOpenCategory(
+                          openCategory === column.heading
+                            ? null
+                            : column.heading
+                        )
+                      }
                       className="w-full flex justify-between items-center py-2.5 px-3 rounded-lg text-base text-gray-700 hover:bg-gray-100 hover:text-orange-500 transition-colors"
                     >
                       <span>{column.heading}</span>

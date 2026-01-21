@@ -64,23 +64,29 @@ export function NavUser({
         >
           <Avatar className="h-9 w-9 rounded-lg border-2 border-orange-200">
             <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="rounded-lg bg-orange-500 text-white font-semibold">OF</AvatarFallback>
+            <AvatarFallback className="rounded-lg bg-orange-500 text-white font-semibold">
+              OF
+            </AvatarFallback>
           </Avatar>
+
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold text-gray-900">{user.name}</span>
-            <span className="text-gray-500 truncate text-xs">
-              {user.email}
+            <span className="truncate font-semibold text-gray-900">
+              {user.name}
             </span>
+            <span className="text-gray-500 truncate text-xs">{user.email}</span>
           </div>
-          <button
+
+          <div
             onClick={handleLogout}
-            className="ml-auto p-1.5 rounded-md hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
+            className="ml-auto p-1.5 rounded-md hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
             title="Keluar"
+            role="button"
+            tabIndex={0}
           >
             <IconLogout className="size-5" />
-          </button>
+          </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
