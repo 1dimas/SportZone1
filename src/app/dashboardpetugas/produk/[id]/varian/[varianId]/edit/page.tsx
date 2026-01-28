@@ -96,8 +96,6 @@ export default function VarianEditPage() {
                   <Skeleton className="h-20 w-full rounded-xl" />
                 </div>
               </div>
-              {/* SKU */}
-              <Skeleton className="h-20 w-full rounded-xl" />
               {/* Button */}
               <div className="flex justify-end pt-4 border-t">
                 <Skeleton className="h-10 w-32 rounded-xl" />

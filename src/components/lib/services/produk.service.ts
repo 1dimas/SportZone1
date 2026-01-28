@@ -247,7 +247,6 @@ export async function createVarian(data: {
   warna?: string;
   stok: number;
   harga?: number;
-  sku?: string;
 }) {
   const token = getToken();
   if (!token) throw new Error("Belum login");
@@ -272,7 +271,6 @@ export async function updateVarian(
     warna?: string;
     stok?: number;
     harga?: number;
-    sku?: string;
     produk_id?: string;
   }
 ) {
@@ -410,4 +408,49 @@ export async function getTotalSoldByProduct(produkId: string): Promise<number> {
   }
 }
 
+// =====================
+// EXPORT TO EXCEL
+// =====================
+export async function exportProdukToExcel() {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Belum login");
+  }
+
+  const response = await fetch(`${API_URL}/produk/export/excel`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Gagal export produk ke Excel: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  // Convert response to blob and trigger download
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  const contentDisposition = response.headers.get('content-disposition');
+  let fileName = `data-produk-${new Date().toISOString().split('T')[0]}.xlsx`;
+
+  if (contentDisposition) {
+    const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);
+    if (fileNameMatch != null) {
+      fileName = fileNameMatch[1];
+    }
+  }
+
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
 

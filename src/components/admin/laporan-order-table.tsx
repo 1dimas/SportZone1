@@ -16,12 +16,16 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   FileSpreadsheet,
   Search,
   Package,
   Boxes,
   TrendingUp,
   DollarSign,
+  CreditCard,
+  Calendar,
+  User,
   Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -37,46 +41,22 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  getAllProduk,
-  getVarianByProduk,
-  getTotalSoldByProduct,
-  exportProdukToExcel,
-} from "@/components/lib/services/produk.service";
+  getAllOrders,
+  exportOrderToExcel,
+} from "@/components/lib/services/order.service";
+import { getAllPembayaran } from "@/components/lib/services/pembayaran.service";
 
-interface ProdukReport {
+interface OrderReport {
   id: string;
-  nama: string;
-  harga: number;
-  stok: number;
-  status: string;
-  subkategori?: {
-    nama: string;
-    kategoriOlahraga?: {
-      nama: string;
-    };
-  };
-  brand?: {
-    nama: string;
-  };
-  totalTerjual: number;
-  nilaiStok: number;
-}
-
-interface ProdukData {
-  id: string;
-  nama: string;
-  harga: number;
-  stok: number;
-  status: string;
-  subkategori?: {
-    nama: string;
-    kategoriOlahraga?: {
-      nama: string;
-    };
-  };
-  brand?: {
-    nama: string;
-  };
+  username: string;
+  email: string;
+  tanggal: string;
+  lokasi: string;
+  total_harga: number;
+  status_pesanan: string;
+  jumlah_item: number;
+  metode_pembayaran: string;
+  status_pembayaran: string;
 }
 
 const formatCurrency = (amount: number) => {
@@ -87,112 +67,157 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-const columns: ColumnDef<ProdukReport>[] = [
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const columns: ColumnDef<OrderReport>[] = [
   {
-    accessorKey: "nama",
-    header: () => <div className="text-left font-semibold">Nama Produk</div>,
+    accessorKey: "id",
+    header: () => <div className="text-left font-semibold">ID Pesanan</div>,
     cell: ({ row }) => (
-      <div className="font-medium truncate max-w-[200px] text-gray-900">
-        {row.original.nama}
+      <div className="font-mono text-sm text-gray-900">
+        {row.original.id}
       </div>
     ),
   },
   {
-    accessorKey: "subkategori.kategoriOlahraga.nama",
-    header: () => <div className="text-center font-semibold">Kategori</div>,
+    accessorKey: "username",
+    header: () => <div className="text-center font-semibold">Username</div>,
+    cell: ({ row }) => (
+      <div className="text-center text-gray-900">
+        {row.original.username}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "email",
+    header: () => <div className="text-center font-semibold">Email</div>,
+    cell: ({ row }) => (
+      <div className="text-center text-gray-600">
+        {row.original.email}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "tanggal",
+    header: () => <div className="text-center font-semibold">Tanggal</div>,
+    cell: ({ row }) => (
+      <div className="text-center">
+        {row.original.tanggal}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "lokasi",
+    header: () => <div className="text-center font-semibold">Lokasi</div>,
     cell: ({ row }) => (
       <div className="text-center">
         <Badge variant="outline" className="font-normal">
-          {row.original.subkategori?.kategoriOlahraga?.nama || "-"}
+          {row.original.lokasi}
         </Badge>
       </div>
     ),
   },
   {
-    accessorKey: "brand.nama",
-    header: () => <div className="text-center font-semibold">Brand</div>,
-    cell: ({ row }) => (
-      <div className="text-center text-gray-600">
-        {row.original.brand?.nama || "-"}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "harga",
-    header: () => <div className="text-right font-semibold">Harga</div>,
+    accessorKey: "total_harga",
+    header: () => <div className="text-right font-semibold">Total Harga</div>,
     cell: ({ row }) => (
       <div className="text-right font-medium text-gray-900">
-        {formatCurrency(row.original.harga)}
+        {formatCurrency(row.original.total_harga)}
       </div>
     ),
   },
   {
-    accessorKey: "stok",
-    header: () => <div className="text-center font-semibold">Stok</div>,
-    cell: ({ row }) => (
-      <div className="text-center">
-        <span className={`font-semibold ${row.original.stok <= 10 ? 'text-red-600' : 'text-gray-900'}`}>
-          {row.original.stok}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "totalTerjual",
-    header: () => <div className="text-center font-semibold">Terjual</div>,
-    cell: ({ row }) => (
-      <div className="text-center">
-        <span className="font-semibold text-emerald-600">
-          {row.original.totalTerjual}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "nilaiStok",
-    header: () => <div className="text-right font-semibold">Nilai Stok</div>,
-    cell: ({ row }) => (
-      <div className="text-right font-medium text-gray-900">
-        {formatCurrency(row.original.nilaiStok)}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "status",
-    header: () => <div className="text-center font-semibold">Status</div>,
+    accessorKey: "status_pesanan",
+    header: () => <div className="text-center font-semibold">Status Pesanan</div>,
     cell: ({ row }) => (
       <div className="flex justify-center">
         <Badge
           className={
-            row.original.status === "aktif"
-              ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
-              : row.original.status === "stok habis"
-                ? "bg-red-100 text-red-700 hover:bg-red-100"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-100"
+            row.original.status_pesanan === "diproses"
+              ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+              : row.original.status_pesanan === "dikirim"
+                ? "bg-blue-100 text-blue-700 hover:bg-blue-100"
+                : row.original.status_pesanan === "selesai"
+                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+                  : "bg-red-100 text-red-700 hover:bg-red-100"
           }
         >
-          {row.original.status === "aktif"
-            ? "Aktif"
-            : row.original.status === "nonaktif"
-              ? "Nonaktif"
-              : "Stok Habis"}
+          {row.original.status_pesanan === "diproses"
+            ? "Diproses"
+            : row.original.status_pesanan === "dikirim"
+              ? "Dikirim"
+              : row.original.status_pesanan === "selesai"
+                ? "Selesai"
+                : "Dibatalkan"}
+        </Badge>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "jumlah_item",
+    header: () => <div className="text-center font-semibold">Jumlah Item</div>,
+    cell: ({ row }) => (
+      <div className="text-center font-semibold">
+        {row.original.jumlah_item}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "metode_pembayaran",
+    header: () => <div className="text-center font-semibold">Metode Pembayaran</div>,
+    cell: ({ row }) => (
+      <div className="text-center">
+        <Badge variant="secondary" className="capitalize">
+          {row.original.metode_pembayaran}
+        </Badge>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "status_pembayaran",
+    header: () => <div className="text-center font-semibold">Status Pembayaran</div>,
+    cell: ({ row }) => (
+      <div className="flex justify-center">
+        <Badge
+          className={
+            row.original.status_pembayaran === "berhasil"
+              ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+              : row.original.status_pembayaran === "pending"
+                ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                : "bg-red-100 text-red-700 hover:bg-red-100"
+          }
+        >
+          {row.original.status_pembayaran === "berhasil"
+            ? "Berhasil"
+            : row.original.status_pembayaran === "pending"
+              ? "Pending"
+              : "Gagal"}
         </Badge>
       </div>
     ),
   },
 ];
 
-export function LaporanProdukTable() {
+export function LaporanOrderTable() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [data, setData] = React.useState<ProdukReport[]>([]);
+  const [data, setData] = React.useState<OrderReport[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [stats, setStats] = React.useState({
-    totalProduk: 0,
-    totalStok: 0,
-    totalNilaiStok: 0,
-    totalTerjual: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    totalItems: 0,
+    completedOrders: 0,
   });
 
   React.useEffect(() => {
@@ -202,52 +227,43 @@ export function LaporanProdukTable() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const produkData = await getAllProduk();
+      const orderData = await getAllOrders();
 
-      const enrichedData = await Promise.all(
-        produkData.map(async (produk: ProdukData) => {
-          let totalStok = produk.stok || 0;
+      const transformedData = orderData.map((order: any) => ({
+        id: order.id,
+        username: order.user?.username || '-',
+        email: order.user?.email || '-',
+        tanggal: order.tanggal_pesanan
+          ? formatDate(order.tanggal_pesanan)
+          : '-',
+        lokasi: `${order.kota || '-'}/${order.provinsi || '-'}`,
+        total_harga: Number(order.total_harga || 0),
+        status_pesanan: order.status || 'diproses',
+        jumlah_item: order.pesanan_items?.length || 0,
+        metode_pembayaran: order.pembayaran?.metode || '-',
+        status_pembayaran: order.pembayaran?.status || '-',
+      }));
 
-          try {
-            const varian = await getVarianByProduk(produk.id);
-            if (varian.length > 0) {
-              totalStok = varian.reduce((sum, v) => sum + (v.stok || 0), 0);
-            }
-          } catch (error) {
-            console.error(`Error fetching variants for ${produk.id}:`, error);
-          }
+      setData(transformedData);
 
-          const totalTerjual = await getTotalSoldByProduct(produk.id);
-          const nilaiStok = totalStok * (produk.harga || 0);
+      // Fetch payment data to calculate revenue like in dashboard admin
+      const pembayaranData = await getAllPembayaran();
+      const paidPayments = pembayaranData.filter(p => p.status === "sudah bayar");
+      const totalRevenue = paidPayments.reduce((sum, p) => {
+        const amount = Number(p.pesanan?.total_harga) || 0;
+        return sum + amount;
+      }, 0);
 
-          return {
-            id: produk.id,
-            nama: produk.nama,
-            harga: produk.harga || 0,
-            stok: totalStok,
-            status: produk.status,
-            subkategori: produk.subkategori,
-            brand: produk.brand,
-            totalTerjual,
-            nilaiStok,
-          };
-        })
-      );
-
-      setData(enrichedData);
-
-      const totalStok = enrichedData.reduce((sum, p) => sum + p.stok, 0);
-      const totalNilaiStok = enrichedData.reduce((sum, p) => sum + p.nilaiStok, 0);
-      const totalTerjual = enrichedData.reduce((sum, p) => sum + p.totalTerjual, 0);
+      const completedOrders = transformedData.filter(order => order.status_pesanan === 'selesai').length;
 
       setStats({
-        totalProduk: enrichedData.length,
-        totalStok,
-        totalNilaiStok,
-        totalTerjual,
+        totalOrders: transformedData.length,
+        totalRevenue,
+        totalItems: transformedData.reduce((sum, order) => sum + order.jumlah_item, 0),
+        completedOrders,
       });
     } catch (error) {
-      console.error("Error fetching product report:", error);
+      console.error("Error fetching order report:", error);
     } finally {
       setLoading(false);
     }
@@ -272,7 +288,7 @@ export function LaporanProdukTable() {
 
   const exportToExcel = async () => {
     try {
-      await exportProdukToExcel();
+      await exportOrderToExcel();
     } catch (error) {
       console.error("Error exporting to Excel:", error);
       alert("Gagal mengexport data ke Excel. Silakan coba lagi.");
@@ -299,8 +315,8 @@ export function LaporanProdukTable() {
                 <Package className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Produk</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalProduk}</p>
+                <p className="text-sm text-gray-500">Total Orders</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalOrders}</p>
               </div>
             </div>
           </CardContent>
@@ -310,11 +326,11 @@ export function LaporanProdukTable() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <Boxes className="w-5 h-5 text-purple-600" />
+                <DollarSign className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Stok</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalStok}</p>
+                <p className="text-sm text-gray-500">Total Pendapatan</p>
+                <p className="text-xl font-bold text-gray-900">{formatCurrency(stats.totalRevenue)}</p>
               </div>
             </div>
           </CardContent>
@@ -324,11 +340,11 @@ export function LaporanProdukTable() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-emerald-600" />
+                <Boxes className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Terjual</p>
-                <p className="text-2xl font-bold text-emerald-600">{stats.totalTerjual}</p>
+                <p className="text-sm text-gray-500">Total Items</p>
+                <p className="text-2xl font-bold text-emerald-600">{stats.totalItems}</p>
               </div>
             </div>
           </CardContent>
@@ -338,11 +354,11 @@ export function LaporanProdukTable() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-amber-600" />
+                <TrendingUp className="w-5 h-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Nilai Stok</p>
-                <p className="text-xl font-bold text-gray-900">{formatCurrency(stats.totalNilaiStok)}</p>
+                <p className="text-sm text-gray-500">Selesai</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.completedOrders}</p>
               </div>
             </div>
           </CardContent>
@@ -354,10 +370,10 @@ export function LaporanProdukTable() {
         <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
-            placeholder="Cari produk..."
-            value={(table.getColumn("nama")?.getFilterValue() as string) ?? ""}
+            placeholder="Cari order..."
+            value={(table.getColumn("id")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("nama")?.setFilterValue(event.target.value)
+              table.getColumn("id")?.setFilterValue(event.target.value)
             }
             className="pl-10 h-11 rounded-xl border-gray-200 focus:border-orange-500"
           />
@@ -408,7 +424,7 @@ export function LaporanProdukTable() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Tidak ada data produk.
+                    Tidak ada data order.
                   </TableCell>
                 </TableRow>
               )}
@@ -420,7 +436,7 @@ export function LaporanProdukTable() {
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-gray-500">
-          Menampilkan {table.getFilteredRowModel().rows.length} produk
+          Menampilkan {table.getFilteredRowModel().rows.length} order
         </p>
         <div className="flex items-center gap-2">
           <Button

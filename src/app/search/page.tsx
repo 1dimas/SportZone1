@@ -2,28 +2,42 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { getAllProduk, getTotalSoldByProduct } from "@/components/lib/services/produk.service";
-import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
-import Header from "@/components/Home/Header";
-import { FiStar } from "react-icons/fi";
-import { formatRupiah } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
+import { FiStar } from "react-icons/fi";
 
-export default function SearchPage({ searchParams }: any) {
-  const q = (searchParams.q || "").toLowerCase();
+import Header from "@/components/Home/Header";
+import {
+  getAllProduk,
+  getTotalSoldByProduct,
+} from "@/components/lib/services/produk.service";
+import { getAverageRatingPublic } from "@/components/lib/services/rating.service";
+import { formatRupiah } from "@/lib/utils";
+
+export default function SearchPage() {
+  const searchParams = useSearchParams();
+  const q = (searchParams.get("q") || "").toLowerCase();
+
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [productRatings, setProductRatings] = useState<Record<string, number>>({});
-  const [productSoldCounts, setProductSoldCounts] = useState<Record<string, number>>({});
+  const [productRatings, setProductRatings] = useState<Record<string, number>>(
+    {},
+  );
+  const [productSoldCounts, setProductSoldCounts] = useState<
+    Record<string, number>
+  >({});
 
+  // Fetch & filter products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         const allProducts = await getAllProduk();
+
         const filteredProducts = allProducts.filter((item: any) =>
-          item.nama.toLowerCase().includes(q)
+          item.nama.toLowerCase().includes(q),
         );
+
         setProducts(filteredProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -35,33 +49,34 @@ export default function SearchPage({ searchParams }: any) {
     fetchProducts();
   }, [q]);
 
-  // Fetch ratings and total sold when products change
+  // Fetch ratings & total sold
   useEffect(() => {
     const fetchRatingsAndSold = async () => {
-      if (products.length > 0) {
-        const ratings: Record<string, number> = {};
-        const soldCounts: Record<string, number> = {};
-        
-        await Promise.all(
-          products.map(async (product) => {
-            try {
-              const [rating, totalSold] = await Promise.all([
-                getAverageRatingPublic(product.id),
-                getTotalSoldByProduct(product.id),
-              ]);
-              ratings[product.id] = rating;
-              soldCounts[product.id] = totalSold;
-            } catch (error) {
-              console.error(`Error fetching data for product ${product.id}:`, error);
-              ratings[product.id] = 0;
-              soldCounts[product.id] = 0;
-            }
-          })
-        );
-        
-        setProductRatings(ratings);
-        setProductSoldCounts(soldCounts);
-      }
+      if (products.length === 0) return;
+
+      const ratings: Record<string, number> = {};
+      const soldCounts: Record<string, number> = {};
+
+      await Promise.all(
+        products.map(async (product) => {
+          try {
+            const [rating, totalSold] = await Promise.all([
+              getAverageRatingPublic(product.id),
+              getTotalSoldByProduct(product.id),
+            ]);
+
+            ratings[product.id] = rating;
+            soldCounts[product.id] = totalSold;
+          } catch (error) {
+            console.error(`Error product ${product.id}:`, error);
+            ratings[product.id] = 0;
+            soldCounts[product.id] = 0;
+          }
+        }),
+      );
+
+      setProductRatings(ratings);
+      setProductSoldCounts(soldCounts);
     };
 
     fetchRatingsAndSold();
@@ -71,8 +86,8 @@ export default function SearchPage({ searchParams }: any) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="max-w-6xl mx-auto px-4 py-8 flex justify-center items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600" />
         </div>
       </div>
     );
@@ -83,15 +98,13 @@ export default function SearchPage({ searchParams }: any) {
       <Header />
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header Title Area */}
+        {/* Title */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Hasil pencarian:{" "}
-            <span className="text-orange-600">"{q}"</span>
+          <h1 className="text-2xl font-bold">
+            Hasil pencarian: <span className="text-orange-600">"{q}"</span>
           </h1>
-          <p className="text-gray-600 mt-1 text-sm">
-            Menampilkan{" "}
-            <span className="font-semibold">{products.length}</span> produk ditemukan
+          <p className="text-sm text-gray-600 mt-1">
+            Menampilkan <b>{products.length}</b> produk ditemukan
           </p>
         </div>
 
@@ -101,7 +114,7 @@ export default function SearchPage({ searchParams }: any) {
             <Link
               key={product.id}
               href={`/product/${product.id}`}
-              className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition-all"
+              className="bg-white border rounded-lg overflow-hidden hover:shadow-md transition"
             >
               {/* Image */}
               <div className="relative w-full h-48 bg-gray-100">
@@ -117,15 +130,15 @@ export default function SearchPage({ searchParams }: any) {
                 />
 
                 {product.diskon && (
-                  <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                  <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
                     {product.diskon}%
-                  </div>
+                  </span>
                 )}
               </div>
 
               {/* Content */}
               <div className="p-2">
-                <h3 className="text-xs font-medium text-gray-800 line-clamp-2 h-8">
+                <h3 className="text-xs font-medium line-clamp-2 h-8">
                   {product.nama}
                 </h3>
 
@@ -134,22 +147,33 @@ export default function SearchPage({ searchParams }: any) {
                 </p>
 
                 {product.diskon && (
-                  <p className="text-[10px] text-gray-400 line-through -mt-0.5">
+                  <p className="text-[10px] text-gray-400 line-through">
                     {formatRupiah(product.harga / (1 - product.diskon / 100))}
                   </p>
                 )}
 
-                <div className="mt-0.5 flex items-center text-[11px] text-gray-600">
-                  <FiStar className="text-yellow-400 mr-1 fill-yellow-400" size={12} />
+                <div className="mt-1 flex items-center text-[11px] text-gray-600">
+                  <FiStar
+                    className="text-yellow-400 fill-yellow-400 mr-1"
+                    size={12}
+                  />
+
                   <span>
-                    {productRatings[product.id] !== undefined && productRatings[product.id] > 0 
-                      ? productRatings[product.id].toFixed(1) 
+                    {productRatings[product.id] > 0
+                      ? productRatings[product.id].toFixed(1)
                       : "Belum ada rating"}
                   </span>
-                  {productSoldCounts[product.id] !== undefined && productSoldCounts[product.id] > 0 && (
+
+                  {productSoldCounts[product.id] > 0 && (
                     <>
                       <span className="mx-1">•</span>
-                      <span>Terjual {productSoldCounts[product.id] >= 1000 ? `${(productSoldCounts[product.id] / 1000).toFixed(1)}rb` : productSoldCounts[product.id]}+</span>
+                      <span>
+                        Terjual{" "}
+                        {productSoldCounts[product.id] >= 1000
+                          ? `${(productSoldCounts[product.id] / 1000).toFixed(1)}rb`
+                          : productSoldCounts[product.id]}
+                        +
+                      </span>
                     </>
                   )}
                 </div>
@@ -159,8 +183,8 @@ export default function SearchPage({ searchParams }: any) {
         </div>
 
         {products.length === 0 && (
-          <div className="mt-12 text-center text-gray-500 text-lg">
-            Tidak ada produk ditemukan.
+          <div className="text-center text-gray-500 mt-16 text-lg">
+            Tidak ada produk ditemukan
           </div>
         )}
       </div>

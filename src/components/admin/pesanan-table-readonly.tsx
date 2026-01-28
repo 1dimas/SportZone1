@@ -50,6 +50,10 @@ import { toast } from "sonner";
 // Utility Functions
 // ==============================
 
+const FINAL_PESANAN_STATUS = ["selesai", "dibatalkan", "dikembalikan"];
+const FINAL_PEMBAYARAN_STATUS = ["sudah bayar", "gagal", "dikembalikan"];
+
+
 // Status badge colors
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -88,159 +92,162 @@ const formatDate = (dateString: string) => {
 // ==============================
 // Table Columns Definition
 // ==============================
-export const columns: ColumnDef<
-  Pesanan & { pembayaran?: PembayaranType | null }
->[] = [
-    {
-      accessorKey: "id",
-      header: "ID Pesanan",
-      cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.original.id.slice(0, 8)}...</div>
-      ),
-    },
-    {
-      id: "customer",
-      header: "Pelanggan",
-      cell: ({ row }) => (
-        <div>
-          <div className="font-medium">
-            {row.original.user?.username || "N/A"}
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {row.original.user?.email || ""}
-          </div>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "tanggal_pesanan",
-      header: "Tanggal",
-      cell: ({ row }) => (
-        <div className="text-sm">{formatDate(row.original.tanggal_pesanan)}</div>
-      ),
-    },
-    {
-      id: "lokasi",
-      header: "Kota/Provinsi",
-      cell: ({ row }) => {
-        const kota = row.original.kota;
-        const provinsi = row.original.provinsi;
-        const lokasi = [kota, provinsi].filter(Boolean).join(", ");
-        return (
-          <div className="text-sm text-muted-foreground">
-            {lokasi || "-"}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "total_harga",
-      header: "Total",
-      cell: ({ row }) => (
+export const columns: ColumnDef<Pesanan & { pembayaran?: PembayaranType | null }>[] = [
+  {
+    accessorKey: "id",
+    header: "ID Pesanan",
+    cell: ({ row }) => (
+      <div className="font-mono text-sm">{row.original.id.slice(0, 8)}...</div>
+    ),
+  },
+  {
+    id: "customer",
+    header: "Pelanggan",
+    cell: ({ row }) => (
+      <div>
         <div className="font-medium">
-          {formatCurrency(row.original.total_harga)}
+          {row.original.user?.username || "N/A"}
         </div>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <Badge className={getStatusColor(row.original.status)}>
-          {row.original.status.charAt(0).toUpperCase() +
-            row.original.status.slice(1)}
-        </Badge>
-      ),
-    },
-    {
-      id: "items",
-      header: "Jumlah Item",
-      cell: ({ row }) => (
-        <div className="text-center">
-          {row.original.pesanan_items?.length || 0}
+        <div className="text-sm text-muted-foreground">
+          {row.original.user?.email || ""}
         </div>
-      ),
+      </div>
+    ),
+  },
+  {
+    accessorKey: "tanggal_pesanan",
+    header: "Tanggal",
+    cell: ({ row }) => (
+      <div className="text-sm">{formatDate(row.original.tanggal_pesanan)}</div>
+    ),
+  },
+  {
+    id: "lokasi",
+    header: "Kota/Provinsi",
+    cell: ({ row }) => {
+      const kota = row.original.kota;
+      const provinsi = row.original.provinsi;
+      const lokasi = [kota, provinsi].filter(Boolean).join(", ");
+      return (
+        <div className="text-sm text-muted-foreground">{lokasi || "-"}</div>
+      );
     },
-    {
-      id: "metode_pembayaran",
-      header: "Metode Pembayaran",
-      cell: ({ row }) => {
-        const metode = row.original.pembayaran?.metode || null;
-        const label = metode ? metode.toUpperCase() : "-";
-        return <div className="text-sm">{label}</div>;
-      },
+  },
+  {
+    accessorKey: "total_harga",
+    header: "Total",
+    cell: ({ row }) => (
+      <div className="font-medium">
+        {formatCurrency(row.original.total_harga)}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => (
+      <Badge className={getStatusColor(row.original.status)}>
+        {row.original.status.charAt(0).toUpperCase() +
+          row.original.status.slice(1)}
+      </Badge>
+    ),
+  },
+  {
+    id: "items",
+    header: "Jumlah Item",
+    cell: ({ row }) => (
+      <div className="text-center">
+        {row.original.pesanan_items?.length || 0}
+      </div>
+    ),
+  },
+  {
+    id: "metode_pembayaran",
+    header: "Metode Pembayaran",
+    cell: ({ row }) => {
+      const metode = row.original.pembayaran?.metode || null;
+      const label = metode ? metode.toUpperCase() : "-";
+      return <div className="text-sm">{label}</div>;
     },
-    {
-      id: "status_pembayaran",
-      header: "Status Pembayaran",
-      cell: ({ row }) => {
-        const status = row.original.pembayaran?.status;
-        if (!status) return <div className="text-sm">-</div>;
+  },
+  {
+    id: "status_pembayaran",
+    header: "Status Pembayaran",
+    cell: ({ row }) => {
+      const status = row.original.pembayaran?.status;
+      if (!status) return <div className="text-sm">-</div>;
 
-        const color =
-          status === "sudah bayar"
-            ? "bg-green-100 text-green-800 border-green-200"
-            : status === "belum bayar"
-              ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-              : status === "gagal"
-                ? "bg-red-100 text-red-800 border-red-200"
-                : "bg-gray-100 text-gray-800 border-gray-200";
+      const color =
+        status === "sudah bayar"
+          ? "bg-green-100 text-green-800 border-green-200"
+          : status === "belum bayar"
+            ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+            : status === "gagal"
+              ? "bg-red-100 text-red-800 border-red-200"
+              : "bg-gray-100 text-gray-800 border-gray-200";
 
-        return <Badge className={color}>{status}</Badge>;
-      },
+      return <Badge className={color}>{status}</Badge>;
     },
-    {
-      id: "aksi_pembayaran",
-      header: "Aksi Pembayaran",
-      cell: ({ row, table }) => {
-        const pembayaran = row.original.pembayaran;
-        if (
-          !pembayaran ||
-          pembayaran.metode !== "cod" ||
-          pembayaran.status === "sudah bayar" ||
-          pembayaran.status === "gagal"
-        )
-          return <div className="text-sm">-</div>;
+  },
+  {
+    id: "aksi_pembayaran",
+    header: "Aksi Pembayaran",
+    cell: ({ row, table }) => {
+      const pembayaran = row.original.pembayaran;
+      const statusPesanan = row.original.status;
 
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={async () => {
-                try {
-                  await updatePembayaranStatus(pembayaran.id, "sudah bayar");
-                  toast.success("Status pembayaran COD diubah ke 'sudah bayar'");
-                  await new Promise((r) => setTimeout(r, 200));
-                  await (table.options.meta as any)?.refetch?.();
-                } catch (e: any) {
-                  toast.error(e?.message || "Gagal mengubah status pembayaran");
-                }
-              }}
-            >
-              Tandai Lunas
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={async () => {
-                try {
-                  await updatePembayaranStatus(pembayaran.id, "gagal");
-                  toast.success("Status pembayaran COD diubah ke 'gagal'");
-                  await new Promise((r) => setTimeout(r, 200));
-                  await (table.options.meta as any)?.refetch?.();
-                } catch (e: any) {
-                  toast.error(e?.message || "Gagal mengubah status pembayaran");
-                }
-              }}
-            >
-              Tandai Gagal
-            </Button>
-          </div>
-        );
-      },
+      const isFinalPesanan = FINAL_PESANAN_STATUS.includes(statusPesanan);
+      const isFinalPembayaran =
+        !pembayaran || FINAL_PEMBAYARAN_STATUS.includes(pembayaran.status);
+
+      if (
+        !pembayaran ||
+        pembayaran.metode !== "cod" ||
+        isFinalPesanan ||
+        isFinalPembayaran
+      ) {
+        return <div className="text-sm">-</div>;
+      }
+
+      // ✅ Aman tampilkan tombol
+      return (
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={async () => {
+              try {
+                await updatePembayaranStatus(pembayaran.id, "sudah bayar");
+                toast.success("Status pembayaran COD diubah ke 'sudah bayar'");
+                await (table.options.meta as any)?.refetch?.();
+              } catch (e: any) {
+                toast.error(e?.message || "Gagal mengubah status pembayaran");
+              }
+            }}
+          >
+            Tandai Lunas
+          </Button>
+
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={async () => {
+              try {
+                await updatePembayaranStatus(pembayaran.id, "gagal");
+                toast.success("Status pembayaran COD diubah ke 'gagal'");
+                await (table.options.meta as any)?.refetch?.();
+              } catch (e: any) {
+                toast.error(e?.message || "Gagal mengubah status pembayaran");
+              }
+            }}
+          >
+            Tandai Gagal
+          </Button>
+        </div>
+      );
     },
-  ];
+  },
+];
 
 // ==============================
 // Component: PesananTableReadonly

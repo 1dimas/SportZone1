@@ -61,8 +61,6 @@ export const petugasSchema = z.object({
   role: z.object({
     name: z.string(),
   }),
-  createdAt: z.string(),
-  updatedAt: z.string(),
 })
 
 // Define columns for the table
@@ -83,14 +81,6 @@ export const columns: ColumnDef<z.infer<typeof petugasSchema>>[] = [
         {row.original.role?.name || "N/A"}
       </div>
     ),
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: ({ row }) => {
-      const date = new Date(row.original.createdAt)
-      return date.toLocaleDateString()
-    },
   },
   {
     id: "actions",

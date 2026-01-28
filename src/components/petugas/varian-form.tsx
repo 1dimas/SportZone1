@@ -39,7 +39,6 @@ const varianSchema = z.object({
   warna: z.string().optional(),
   stok: z.number().min(0, "Stok minimal 0"),
   harga: z.number().optional().nullable(),
-  sku: z.string().optional(),
 })
 
 type VarianFormData = z.infer<typeof varianSchema>
@@ -54,7 +53,6 @@ interface VarianFormProps {
     warna?: string
     stok: number
     harga?: number
-    sku?: string
   }
   onSuccess: () => void
 }
@@ -69,7 +67,6 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
       warna: varian?.warna || "",
       stok: varian?.stok || 0,
       harga: varian?.harga || undefined,
-      sku: varian?.sku || "",
     },
   })
 
@@ -83,7 +80,6 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
         harga: (data.harga === 0 || data.harga === null || data.harga === undefined) && hargaProduk
           ? hargaProduk
           : data.harga,
-        sku: data.sku && data.sku.trim() !== "" ? data.sku.trim() : undefined,
       }
 
       console.log("Submitting varian data:", cleanData)
@@ -246,43 +242,6 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
               )}
             />
           </div>
-        </div>
-
-        {/* Section: SKU */}
-        <div className="space-y-4">
-          <h3 className="font-medium text-gray-900 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
-              <Barcode className="w-4 h-4 text-blue-600" />
-            </div>
-            Kode Produk
-          </h3>
-          
-          <FormField
-            control={form.control}
-            name="sku"
-            render={({ field }) => (
-              <FormItem className="space-y-2">
-                <FormLabel className="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                  SKU (Stock Keeping Unit)
-                </FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input 
-                      placeholder="Contoh: PRD-001-XL-RED" 
-                      className="pl-10 rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-colors"
-                      {...field} 
-                    />
-                  </div>
-                </FormControl>
-                <FormDescription className="text-xs">
-                  Kode unik untuk identifikasi varian (opsional)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
         {/* Submit Section */}

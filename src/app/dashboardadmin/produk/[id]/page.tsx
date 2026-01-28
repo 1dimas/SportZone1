@@ -52,7 +52,6 @@ interface VarianItem {
   warna?: string;
   stok: number;
   harga?: number;
-  sku?: string;
 }
 
 export default function AdminProdukDetailPage() {
@@ -292,9 +291,6 @@ export default function AdminProdukDetailPage() {
                       <th className="px-6 py-4 text-left font-medium text-gray-500">
                         Varian
                       </th>
-                      <th className="px-6 py-4 text-left font-medium text-gray-500">
-                        SKU
-                      </th>
                       <th className="px-6 py-4 text-right font-medium text-gray-500">
                         Harga
                       </th>
@@ -313,9 +309,6 @@ export default function AdminProdukDetailPage() {
                           {item.ukuran}{" "}
                           <span className="text-gray-300 mx-1">/</span>{" "}
                           {item.warna}
-                        </td>
-                        <td className="px-6 py-4 font-mono text-gray-500 text-xs">
-                          {item.sku || "-"}
                         </td>
                         <td className="px-6 py-4 text-right text-gray-600">
                           {item.harga ? formatCurrency(item.harga) : "-"}
