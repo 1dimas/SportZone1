@@ -17,14 +17,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
-import { 
-  ArrowLeft, 
-  User, 
-  Mail, 
-  Phone, 
-  Edit2, 
-  Save, 
-  X, 
+import {
+  ArrowLeft,
+  User,
+  Mail,
+  Phone,
+  Edit2,
+  Save,
+  X,
   Loader2,
   AlertCircle,
   CheckCircle
@@ -328,7 +328,7 @@ export default function ProfilePage() {
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-400 mt-8">
-          © {new Date().getFullYear()} SportZone. All rights reserved.
+          © {new Date().getFullYear()} SportZone. Hak Cipta Dilindungi.
         </p>
       </div>
     </div>

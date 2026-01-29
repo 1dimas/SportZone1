@@ -76,8 +76,8 @@ export default function EditKategoriOlahragaPage({ params }: { params: { id: str
               <div className="px-4 lg:px-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-2xl font-bold">Edit Kategori Olahraga</h1>
-                    <p className="text-muted-foreground">Update the details for this sports category</p>
+                    <h1 className="text-2xl font-bold">Ubah Kategori Olahraga</h1>
+                    <p className="text-muted-foreground">Perbarui detail kategori olahraga ini</p>
                   </div>
                   <Button onClick={() => router.push("/dashboardadmin/olahraga")}>
                     Back to List

@@ -38,7 +38,7 @@ export function NavDocuments({
 
   return (
     <SidebarGroup className="px-2 py-3 mt-2">
-      <SidebarGroupLabel className="px-2 mb-1.5">Documents</SidebarGroupLabel>
+      <SidebarGroupLabel className="px-2 mb-1.5">Dokumen</SidebarGroupLabel>
       <SidebarMenu className="gap-1.5">
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>

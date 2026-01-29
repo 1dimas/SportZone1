@@ -22,7 +22,7 @@ const Footer = () => {
             >
               Sport
             </Link>
-             <Link
+            <Link
               href="/"
               className="text-3xl font-bold text-orange-500 hover:text-orange-400 transition-colors"
             >
@@ -153,7 +153,7 @@ const Footer = () => {
         {/* Garis bawah */}
         <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-gray-500 text-sm text-center sm:text-left">
-            &copy; {new Date().getFullYear()} SportZone. All Rights Reserved.
+            &copy; {new Date().getFullYear()} SportZone. Hak Cipta Dilindungi.
           </p>
           <div className="text-gray-500 text-sm mt-4 sm:mt-0">
             Pembayaran Aman 💳

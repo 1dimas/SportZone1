@@ -95,7 +95,7 @@ const columns: ColumnDef<Produk>[] = [
           </div>
         ) : (
           <div className="flex h-14 w-14 items-center justify-center rounded-md bg-muted">
-            <span className="text-[10px] text-muted-foreground">No Image</span>
+            <span className="text-[10px] text-muted-foreground">Tidak Ada Gambar</span>
           </div>
         )}
       </div>
@@ -121,10 +121,10 @@ const columns: ColumnDef<Produk>[] = [
           <button
             onClick={() => {
               navigator.clipboard.writeText(id)
-              toast.success("ID copied to clipboard")
+              toast.success("ID berhasil disalin")
             }}
             className="text-xs font-mono text-gray-600 hover:text-gray-900 hover:underline"
-            title={`Click to copy: ${id}`}
+            title={`Klik untuk menyalin: ${id}`}
           >
             {shortId}
           </button>
@@ -194,15 +194,15 @@ const columns: ColumnDef<Produk>[] = [
             row.original.status === "aktif"
               ? "default"
               : row.original.status === "stok habis"
-              ? "secondary"
-              : "outline"
+                ? "secondary"
+                : "outline"
           }
         >
           {row.original.status === "aktif"
             ? "Aktif"
             : row.original.status === "nonaktif"
-            ? "Nonaktif"
-            : "Stok Habis"}
+              ? "Nonaktif"
+              : "Stok Habis"}
         </Badge>
       </div>
     ),
@@ -358,9 +358,9 @@ export function ProdukTable({ data }: ProdukTableProps) {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>

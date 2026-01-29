@@ -65,6 +65,7 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("detail");
+  const [displayPrice, setDisplayPrice] = useState<number>(0);
 
   useEffect(() => {
     const load = async () => {
@@ -161,12 +162,12 @@ export default function ProductDetailPage() {
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-500 mb-6 flex gap-2">
-          <Link href="/" className="hover:text-orange-500">Home</Link>
+          <Link href="/" className="hover:text-orange-500">Beranda</Link>
           <span>/</span>
           <span className="text-gray-900 font-medium truncate max-w-[200px]">{product.nama}</span>
         </nav>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 relative">
-          
+
           {/* KOLOM 1: Gambar (Sticky di Desktop) - 4 Kolom */}
           <div className="lg:col-span-4 h-fit lg:sticky lg:top-24 z-10">
             <div className="space-y-4">
@@ -187,11 +188,10 @@ export default function ProductDetailPage() {
                       key={idx}
                       onMouseEnter={() => setSelectedImageIndex(idx)}
                       onClick={() => setSelectedImageIndex(idx)}
-                      className={`relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border-2 transition-all ${
-                        selectedImageIndex === idx
-                          ? "border-orange-500 opacity-100"
-                          : "border-transparent hover:border-gray-300 opacity-70 hover:opacity-100"
-                      }`}
+                      className={`relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 border-2 transition-all ${selectedImageIndex === idx
+                        ? "border-orange-500 opacity-100"
+                        : "border-transparent hover:border-gray-300 opacity-70 hover:opacity-100"
+                        }`}
                     >
                       <Image
                         src={img}
@@ -212,7 +212,7 @@ export default function ProductDetailPage() {
               <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug">
                 {product.nama}
               </h1>
-              
+
               <div className="flex items-center gap-4 mt-3 text-sm">
                 <div className="flex items-center gap-1">
                   <span className="text-gray-900 font-semibold">{product.totalSold || 0}</span>
@@ -230,7 +230,7 @@ export default function ProductDetailPage() {
 
               <div className="mt-4">
                 <h2 className="text-3xl font-bold text-gray-900">
-                  {formatRupiah(product.harga)}
+                  {formatRupiah(displayPrice || product.harga)}
                 </h2>
               </div>
             </div>
@@ -242,21 +242,19 @@ export default function ProductDetailPage() {
               <div className="flex gap-8 border-b border-gray-200">
                 <button
                   onClick={() => setActiveTab("detail")}
-                  className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${
-                    activeTab === "detail"
-                      ? "text-orange-600 border-orange-600"
-                      : "text-gray-500 border-transparent hover:text-gray-800"
-                  }`}
+                  className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === "detail"
+                    ? "text-orange-600 border-orange-600"
+                    : "text-gray-500 border-transparent hover:text-gray-800"
+                    }`}
                 >
                   Detail
                 </button>
                 <button
                   onClick={() => setActiveTab("info")}
-                  className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${
-                    activeTab === "info"
-                      ? "text-orange-600 border-orange-600"
-                      : "text-gray-500 border-transparent hover:text-gray-800"
-                  }`}
+                  className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${activeTab === "info"
+                    ? "text-orange-600 border-orange-600"
+                    : "text-gray-500 border-transparent hover:text-gray-800"
+                    }`}
                 >
                   Info Penting
                 </button>
@@ -270,12 +268,12 @@ export default function ProductDetailPage() {
                       <p><span className="text-gray-500 min-w-[100px] inline-block">Kondisi:</span> Baru</p>
                       <p><span className="text-gray-500 min-w-[100px] inline-block">Min. Pemesanan:</span> 1 Buah</p>
                       {product.subkategori && (
-                        <p><span className="text-gray-500 min-w-[100px] inline-block">Kategori:</span> 
+                        <p><span className="text-gray-500 min-w-[100px] inline-block">Kategori:</span>
                           <span className="text-orange-600 font-medium cursor-pointer"> {product.subkategori.nama}</span>
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="pt-2">
                       <p className="font-semibold text-gray-900 mb-2 text-sm">Deskripsi produk</p>
                       <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
@@ -289,14 +287,14 @@ export default function ProductDetailPage() {
                       <FiInfo className="mt-0.5 text-orange-500" />
                       <div>
                         <p className="font-semibold text-gray-800 mb-1">Kebijakan Pengembalian</p>
-                        <p>Harap sertakan video unboxing untuk klaim garansi atau retur barang.</p>
+                        <p>Harap sertakan foto barang rusak untuk klaim garansi atau retur barang.</p>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-            
+
             {/* Bagian Ulasan */}
             <div className="pt-6 border-t border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Ulasan Pembeli</h3>
@@ -308,7 +306,7 @@ export default function ProductDetailPage() {
           <div className="lg:col-span-3">
             <div className="sticky top-24 bg-white border border-gray-200 rounded-xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.08)]">
               <h3 className="font-bold text-gray-900 mb-4 text-base">Atur jumlah dan catatan</h3>
-              
+
               <div className="product-actions-sidebar">
                 <ProductActions
                   product={{
@@ -319,6 +317,7 @@ export default function ProductDetailPage() {
                     id: product.id,
                     stock: product.stok,
                   }}
+                  onPriceChange={(price) => setDisplayPrice(price)}
                 />
               </div>
             </div>

@@ -5,11 +5,10 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
-import { 
-  Ruler, 
-  Palette, 
-  Package, 
-  DollarSign, 
+import {
+  Ruler,
+  Palette,
+  Package,
   Barcode,
   Loader2,
   Plus,
@@ -111,7 +110,7 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
         console.log("Validation errors:", errors)
         toast.error("Mohon periksa kembali isian form")
       })} className="space-y-8">
-        
+
         {/* Section: Atribut Varian */}
         <div className="space-y-4">
           <h3 className="font-medium text-gray-900 flex items-center gap-2">
@@ -120,7 +119,7 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
             </div>
             Atribut Varian
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -134,10 +133,10 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
                   <FormControl>
                     <div className="relative">
                       <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <Input 
-                        placeholder="Contoh: XL, 42, L" 
+                      <Input
+                        placeholder="Contoh: XL, 42, L"
                         className="pl-10 rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-colors"
-                        {...field} 
+                        {...field}
                       />
                     </div>
                   </FormControl>
@@ -158,10 +157,10 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
                   <FormControl>
                     <div className="relative">
                       <Palette className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <Input 
-                        placeholder="Contoh: Merah, Biru, Hitam" 
+                      <Input
+                        placeholder="Contoh: Merah, Biru, Hitam"
                         className="pl-10 rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-colors"
-                        {...field} 
+                        {...field}
                       />
                     </div>
                   </FormControl>
@@ -180,7 +179,7 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
             </div>
             Stok & Harga
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -222,7 +221,7 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">Rp</span>
                       <Input
                         type="number"
                         placeholder="Harga varian"
@@ -256,7 +255,7 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
             </div>
             Kode Produk
           </h3>
-          
+
           <FormField
             control={form.control}
             name="sku"
@@ -269,10 +268,10 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
                 <FormControl>
                   <div className="relative">
                     <Barcode className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input 
-                      placeholder="Contoh: PRD-001-XL-RED" 
+                    <Input
+                      placeholder="Contoh: PRD-001-XL-RED"
                       className="pl-10 rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-colors"
-                      {...field} 
+                      {...field}
                     />
                   </div>
                 </FormControl>
@@ -290,8 +289,8 @@ export function VarianForm({ produkId, hargaProduk, varian, onSuccess }: VarianF
           <p className="text-sm text-gray-500 hidden sm:block">
             <span className="text-orange-500">*</span> Isi minimal ukuran atau warna
           </p>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={loading}
             className="bg-orange-500 hover:bg-orange-600 rounded-xl gap-2 px-6 w-full sm:w-auto shadow-sm"
           >

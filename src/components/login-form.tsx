@@ -41,8 +41,8 @@ export function LoginForm({
         localStorage.setItem("token", res.token);
 
         const profile = await getProfile();
-        
-        toast.success(`Welcome back, ${profile?.username || 'User'}!`);
+
+        toast.success(`Selamat datang kembali, ${profile?.username || 'User'}!`);
 
         if (profile?.role?.name === "admin") {
           router.push("/dashboardadmin");
@@ -81,20 +81,20 @@ export function LoginForm({
         <div className="grid md:grid-cols-2 min-h-[600px]">
           {/* Left Side - Form */}
           <div className="p-8 md:p-12 flex flex-col justify-center relative">
-            
+
             <div className="flex flex-col gap-8">
               <div className="flex flex-col gap-2">
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                  Welcome back! 👋
+                  Selamat Datang! 👋
                 </h1>
                 <p className="text-gray-500 text-sm">
-                  Enter your details to access your account.
+                  Masukkan detail akun untuk melanjutkan.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 <div className="flex flex-col gap-2 group">
-                  <Label htmlFor="email" className="font-medium text-gray-700 ml-1">Email Address</Label>
+                  <Label htmlFor="email" className="font-medium text-gray-700 ml-1">Alamat Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -108,12 +108,12 @@ export function LoginForm({
 
                 <div className="flex flex-col gap-2 group">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="font-medium text-gray-700 ml-1">Password</Label>
+                    <Label htmlFor="password" className="font-medium text-gray-700 ml-1">Kata Sandi</Label>
                     <Link
                       href="/forgot-password"
                       className="text-sm font-semibold text-orange-600 hover:text-orange-700 hover:underline"
                     >
-                      Forgot Password?
+                      Lupa Kata Sandi?
                     </Link>
                   </div>
                   <div className="relative">
@@ -148,17 +148,17 @@ export function LoginForm({
                   {loading ? (
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Logging in...
+                      Sedang masuk...
                     </div>
                   ) : (
-                    "Sign In"
+                    "Masuk"
                   )}
                 </Button>
               </form>
 
               <div className="relative flex items-center gap-4 py-2">
                 <span className="h-px bg-gray-200 flex-1" />
-                <span className="text-gray-400 text-sm font-medium uppercase tracking-wider">Or continue with</span>
+                <span className="text-gray-400 text-sm font-medium uppercase tracking-wider">Atau lanjutkan dengan</span>
                 <span className="h-px bg-gray-200 flex-1" />
               </div>
 
@@ -169,14 +169,14 @@ export function LoginForm({
                 className="h-12 rounded-xl border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 text-gray-700 font-bold flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 group"
               >
                 <IconBrandGoogle className="w-5 h-5 text-gray-500 group-hover:text-orange-500 transition-colors" />
-                <span>Google Account</span>
+                <span>Akun Google</span>
               </Button>
 
               <div className="text-center">
                 <p className="text-gray-500">
-                  Don&apos;t have an account?{" "}
+                  Belum punya akun?{" "}
                   <Link href="/register" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">
-                    Create an account
+                    Daftar sekarang
                   </Link>
                 </p>
               </div>
@@ -186,9 +186,9 @@ export function LoginForm({
           {/* Right Side - Image/Decoration */}
           <div className="hidden md:block relative overflow-hidden border-l border-gray-100">
             {/* Full-size Banner Image */}
-            <img 
-              src="/images/banner.png" 
-              alt="SportZone Banner" 
+            <img
+              src="/images/banner.png"
+              alt="SportZone Banner"
               className="absolute inset-0 w-full h-full object-cover"
             />
           </div>

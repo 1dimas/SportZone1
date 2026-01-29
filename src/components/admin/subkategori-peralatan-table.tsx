@@ -69,7 +69,7 @@ export const subkategoriPeralatanSchema = z.object({
 export const columns: ColumnDef<z.infer<typeof subkategoriPeralatanSchema>>[] = [
   {
     accessorKey: "nama",
-    header: "Name",
+    header: "Nama",
   },
   {
     accessorKey: "id",
@@ -81,10 +81,10 @@ export const columns: ColumnDef<z.infer<typeof subkategoriPeralatanSchema>>[] = 
         <button
           onClick={() => {
             navigator.clipboard.writeText(id)
-            toast.success("ID copied to clipboard")
+            toast.success("ID disalin ke papan klip")
           }}
           className="text-xs font-mono text-gray-600 hover:text-gray-900 hover:underline"
-          title={`Click to copy: ${id}`}
+          title={`Klik untuk menyalin: ${id}`}
         >
           {shortId}
         </button>
@@ -102,7 +102,7 @@ export const columns: ColumnDef<z.infer<typeof subkategoriPeralatanSchema>>[] = 
   },
   {
     accessorKey: "created_at",
-    header: "Created At",
+    header: "Dibuat Pada",
     cell: ({ row }) => {
       const date = new Date(row.original.created_at)
       return date.toLocaleDateString()
@@ -116,11 +116,11 @@ export const columns: ColumnDef<z.infer<typeof subkategoriPeralatanSchema>>[] = 
       const handleDelete = async () => {
         try {
           await deleteSubkategoriPeralatan(subkategori.id)
-          toast.success("Subkategori peralatan deleted successfully")
+          toast.success("Subkategori peralatan berhasil dihapus")
           // Refresh the data - this would typically be handled by the parent component
           window.location.reload()
         } catch (error) {
-          toast.error("Failed to delete subkategori peralatan")
+          toast.error("Gagal menghapus subkategori peralatan")
           console.error(error)
         }
       }
@@ -134,7 +134,7 @@ export const columns: ColumnDef<z.infer<typeof subkategoriPeralatanSchema>>[] = 
               size="icon"
             >
               <IconDotsVertical />
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">Buka menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
@@ -149,11 +149,11 @@ export const columns: ColumnDef<z.infer<typeof subkategoriPeralatanSchema>>[] = 
               window.location.href = `/dashboardadmin/subkategori-peralatan/${subkategori.id}/edit`
             }}>
               <IconEdit className="mr-2 size-4" />
-              Edit
+              Ubah
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDelete} className="text-red-600">
               <IconTrash className="mr-2 size-4" />
-              Delete
+              Hapus
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -199,7 +199,7 @@ export function SubkategoriPeralatanTable({ data }: SubkategoriPeralatanTablePro
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Input
-            placeholder="Filter by name..."
+            placeholder="Filter berdasarkan nama..."
             value={(table.getColumn("nama")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
               table.getColumn("nama")?.setFilterValue(event.target.value)
@@ -209,7 +209,7 @@ export function SubkategoriPeralatanTable({ data }: SubkategoriPeralatanTablePro
         </div>
         <Button onClick={() => window.location.href = "/dashboardadmin/subkategori-peralatan/create"}>
           <IconPlus className="mr-2 size-4" />
-          Add Subkategori Peralatan
+          Tambah Subkategori Peralatan
         </Button>
       </div>
       <div className="rounded-md border">
@@ -259,12 +259,12 @@ export function SubkategoriPeralatanTable({ data }: SubkategoriPeralatanTablePro
       </div>
       <div className="flex items-center justify-between px-2">
         <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getFilteredSelectedRowModel().rows.length} dari{" "}
+          {table.getFilteredRowModel().rows.length} baris dipilih.
         </div>
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Rows per page</span>
+            <span className="text-sm font-medium">Baris per halaman</span>
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => {
@@ -284,7 +284,7 @@ export function SubkategoriPeralatanTable({ data }: SubkategoriPeralatanTablePro
             </Select>
           </div>
           <div className="flex items-center justify-center text-sm font-medium">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
             {table.getPageCount()}
           </div>
           <div className="flex items-center gap-2">
@@ -294,7 +294,7 @@ export function SubkategoriPeralatanTable({ data }: SubkategoriPeralatanTablePro
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
-              <span className="sr-only">Go to first page</span>
+              <span className="sr-only">Ke halaman pertama</span>
               <IconChevronsLeft />
             </Button>
             <Button
@@ -304,7 +304,7 @@ export function SubkategoriPeralatanTable({ data }: SubkategoriPeralatanTablePro
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              <span className="sr-only">Go to previous page</span>
+              <span className="sr-only">Ke halaman sebelumnya</span>
               <IconChevronLeft />
             </Button>
             <Button
@@ -314,7 +314,7 @@ export function SubkategoriPeralatanTable({ data }: SubkategoriPeralatanTablePro
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
-              <span className="sr-only">Go to next page</span>
+              <span className="sr-only">Ke halaman berikutnya</span>
               <IconChevronRight />
             </Button>
             <Button
@@ -324,7 +324,7 @@ export function SubkategoriPeralatanTable({ data }: SubkategoriPeralatanTablePro
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
             >
-              <span className="sr-only">Go to last page</span>
+              <span className="sr-only">Ke halaman terakhir</span>
               <IconChevronsRight />
             </Button>
           </div>

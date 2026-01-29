@@ -70,8 +70,8 @@ const columns: ColumnDef<Varian>[] = [
       <div>
         {row.original.warna ? (
           <div className="flex items-center gap-2">
-            <div 
-              className="h-4 w-4 rounded-full border" 
+            <div
+              className="h-4 w-4 rounded-full border"
               style={{ backgroundColor: row.original.warna }}
             ></div>
             <span>{row.original.warna}</span>
@@ -87,7 +87,7 @@ const columns: ColumnDef<Varian>[] = [
     header: "Stok",
     cell: ({ row }) => (
       <div className="text-right">
-        <Badge 
+        <Badge
           variant={row.original.stok === 0 ? "destructive" : row.original.stok < 10 ? "secondary" : "default"}
         >
           {row.original.stok}
@@ -129,7 +129,7 @@ const columns: ColumnDef<Varian>[] = [
             variant="ghost"
             className="h-8 w-8 p-0"
           >
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">Buka menu</span>
             <IconDotsVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -140,7 +140,7 @@ const columns: ColumnDef<Varian>[] = [
             }}
           >
             <IconEdit className="mr-2 h-4 w-4" />
-            Edit
+            Ubah
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
@@ -206,7 +206,7 @@ export function VarianTable({ data, produkId }: VarianTableProps) {
           }
           className="max-w-sm"
         />
-        <Button 
+        <Button
           onClick={() => {
             window.location.href = `/dashboardpetugas/produk/${produkId}/varian/create`
           }}
@@ -227,9 +227,9 @@ export function VarianTable({ data, produkId }: VarianTableProps) {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}

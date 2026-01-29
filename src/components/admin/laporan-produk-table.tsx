@@ -21,8 +21,7 @@ import {
   Package,
   Boxes,
   TrendingUp,
-  DollarSign,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -354,7 +353,7 @@ export function LaporanProdukTable() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-amber-600" />
+                <span className="text-amber-600 font-bold">Rp</span>
               </div>
               <div>
                 <p className="text-sm text-gray-500">Nilai Stok</p>
@@ -383,7 +382,7 @@ export function LaporanProdukTable() {
           className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl h-11 gap-2"
         >
           <Download className="w-4 h-4" />
-          Export CSV
+          Ekspor CSV
         </Button>
       </div>
 

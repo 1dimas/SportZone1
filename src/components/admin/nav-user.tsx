@@ -79,7 +79,7 @@ export function NavUser({
           <div
             onClick={handleLogout}
             className="ml-auto p-1.5 rounded-md hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
-            title="Logout"
+            title="Keluar"
             role="button"
             tabIndex={0}
           >

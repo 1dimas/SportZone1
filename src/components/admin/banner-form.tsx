@@ -114,7 +114,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
           },
           token
         )
-        toast.success("Banner updated successfully")
+        toast.success("Banner berhasil diperbarui")
       } else {
         await createBanner(
           {
@@ -128,14 +128,14 @@ export function BannerForm({ initialData }: BannerFormProps) {
           },
           token
         )
-        toast.success("Banner created successfully")
+        toast.success("Banner berhasil dibuat")
       }
 
       router.push("/dashboardadmin/banner")
     } catch (error: any) {
       console.error(error)
-      setErrorMsg(`Failed to ${initialData?.id ? 'update' : 'create'} banner: ${error.message}`)
-      toast.error(`Failed to ${initialData?.id ? 'update' : 'create'} banner: ${error.message}`)
+      setErrorMsg(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} banner: ${error.message}`)
+      toast.error(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} banner: ${error.message}`)
     } finally {
       setLoading(false)
     }
@@ -149,18 +149,18 @@ export function BannerForm({ initialData }: BannerFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid gap-3">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">Judul</Label>
           <Input
             id="title"
             type="text"
-            placeholder="Enter banner title (optional)"
+            placeholder="Masukkan judul banner (opsional)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
 
         <div className="grid gap-3">
-          <Label htmlFor="image">Banner Image</Label>
+          <Label htmlFor="image">Gambar Banner</Label>
           {imagePreview && (
             <div className="mb-2">
               <img
@@ -177,39 +177,39 @@ export function BannerForm({ initialData }: BannerFormProps) {
             onChange={handleImageChange}
           />
           <p className="text-sm text-muted-foreground">
-            Upload banner image (recommended: 1920x500px)
+            Unggah gambar banner (rekomendasi: 1920x500px)
           </p>
         </div>
 
         <div className="grid gap-3">
-          <Label htmlFor="linkType">Link Type</Label>
+          <Label htmlFor="linkType">Tipe Link</Label>
           <Select value={linkType} onValueChange={(value) => setLinkType(value as LinkType)}>
             <SelectTrigger>
-              <SelectValue placeholder="Select link type" />
+              <SelectValue placeholder="Pilih tipe link" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="product">Product</SelectItem>
-              <SelectItem value="category">Category</SelectItem>
+              <SelectItem value="product">Produk</SelectItem>
+              <SelectItem value="category">Kategori</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="grid gap-3">
           <div className="flex items-center justify-between">
-            <Label htmlFor="linkValue">Link Value</Label>
+            <Label htmlFor="linkValue">Nilai Link</Label>
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setShowHelper(!showHelper)}
             >
-              {showHelper ? "Hide" : "Show"} {linkType === "category" ? "Categories" : "Products"}
+              {showHelper ? "Sembunyikan" : "Tampilkan"} {linkType === "category" ? "Kategori" : "Produk"}
             </Button>
           </div>
 
           {showHelper && linkType === "category" && categories.length > 0 && (
             <div className="border rounded-md p-3 max-h-48 overflow-y-auto bg-gray-50 mb-2">
-              <p className="text-sm font-semibold mb-2">Available Categories (click to select):</p>
+              <p className="text-sm font-semibold mb-2">Kategori yang tersedia (klik untuk memilih):</p>
               <div className="space-y-1">
                 {categories.map((cat) => (
                   <button
@@ -232,7 +232,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
 
           {showHelper && linkType === "product" && products.length > 0 && (
             <div className="border rounded-md p-3 max-h-48 overflow-y-auto bg-gray-50 mb-2">
-              <p className="text-sm font-semibold mb-2">Available Products (click to select):</p>
+              <p className="text-sm font-semibold mb-2">Produk yang tersedia (klik untuk memilih):</p>
               <div className="space-y-1">
                 {products.map((product) => (
                   <button
@@ -257,7 +257,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
           <Input
             id="linkValue"
             type="text"
-            placeholder={`Enter ${linkType} ID or value`}
+            placeholder={`Masukkan ID atau nilai ${linkType === "product" ? "produk" : "kategori"}`}
             value={linkValue || ""}
             onChange={(e) => {
               console.log("Link value changed:", e.target.value)
@@ -267,13 +267,13 @@ export function BannerForm({ initialData }: BannerFormProps) {
             required
           />
           <p className="text-sm text-muted-foreground">
-            {linkType === "product" && "Enter product ID (e.g., abc123-def456). Product ID can be found in the product list."}
-            {linkType === "category" && "Enter category name (e.g., Futsal, Basket). You can select from the list above or type manually."}
+            {linkType === "product" && "Masukkan ID produk (contoh: abc123-def456). ID produk dapat ditemukan di daftar produk."}
+            {linkType === "category" && "Masukkan nama kategori (contoh: Futsal, Basket). Anda dapat memilih dari daftar di atas atau ketik manual."}
           </p>
         </div>
 
         <div className="grid gap-3">
-          <Label htmlFor="startDate">Start Date (Optional)</Label>
+          <Label htmlFor="startDate">Tanggal Mulai (Opsional)</Label>
           <Input
             id="startDate"
             type="datetime-local"
@@ -283,7 +283,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
         </div>
 
         <div className="grid gap-3">
-          <Label htmlFor="endDate">End Date (Optional)</Label>
+          <Label htmlFor="endDate">Tanggal Berakhir (Opsional)</Label>
           <Input
             id="endDate"
             type="datetime-local"
@@ -299,13 +299,13 @@ export function BannerForm({ initialData }: BannerFormProps) {
             onCheckedChange={(checked) => setIsActive(checked as boolean)}
           />
           <Label htmlFor="isActive" className="cursor-pointer">
-            Active
+            Aktif
           </Label>
         </div>
 
         <div className="flex gap-4">
           <Button type="submit" disabled={loading}>
-            {loading ? "Saving..." : initialData?.id ? "Update Banner" : "Create Banner"}
+            {loading ? "Menyimpan..." : initialData?.id ? "Perbarui Banner" : "Buat Banner"}
           </Button>
           <Button
             type="button"
@@ -313,7 +313,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
             onClick={() => router.push("/dashboardadmin/banner")}
             disabled={loading}
           >
-            Cancel
+            Batal
           </Button>
         </div>
       </form>

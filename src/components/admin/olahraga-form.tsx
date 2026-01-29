@@ -20,7 +20,7 @@ interface KategoriOlahragaFormProps {
 
 export function KategoriOlahragaForm({ initialData, onSuccess }: KategoriOlahragaFormProps) {
   const router = useRouter()
-  
+
   const [nama, setNama] = useState(initialData?.nama || "")
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState("")
@@ -36,17 +36,17 @@ export function KategoriOlahragaForm({ initialData, onSuccess }: KategoriOlahrag
         await updateKategoriOlahraga(initialData.id, {
           nama: nama || undefined,
         })
-        toast.success("Kategori olahraga updated successfully")
+        toast.success("Kategori olahraga berhasil diperbarui")
         triggerKategoriOlahragaRefresh()
       } else {
         // Create new kategori olahraga
         await createKategoriOlahraga({
           nama,
         })
-        toast.success("Kategori olahraga created successfully")
+        toast.success("Kategori olahraga berhasil dibuat")
         triggerKategoriOlahragaRefresh()
       }
-      
+
       // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess()
@@ -56,8 +56,8 @@ export function KategoriOlahragaForm({ initialData, onSuccess }: KategoriOlahrag
       }
     } catch (error: any) {
       console.error(error)
-      setErrorMsg(`Failed to ${initialData?.id ? 'update' : 'create'} kategori olahraga: ${error.message}`)
-      toast.error(`Failed to ${initialData?.id ? 'update' : 'create'} kategori olahraga: ${error.message}`)
+      setErrorMsg(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} kategori olahraga: ${error.message}`)
+      toast.error(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} kategori olahraga: ${error.message}`)
     } finally {
       setLoading(false)
     }
@@ -70,31 +70,31 @@ export function KategoriOlahragaForm({ initialData, onSuccess }: KategoriOlahrag
           {errorMsg}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid gap-3">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">Nama</Label>
           <Input
             id="name"
             type="text"
-            placeholder="Enter category name"
+            placeholder="Masukkan nama kategori"
             value={nama}
             onChange={(e) => setNama(e.target.value)}
             required={!initialData?.id} // Required for create, optional for update
           />
         </div>
-        
-        
+
+
         <div className="flex justify-end gap-4">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/dashboardadmin/olahraga")}
           >
-            Cancel
+            Batal
           </Button>
           <Button type="submit" disabled={loading}>
-            {loading ? "Saving..." : initialData?.id ? "Update Category" : "Create Category"}
+            {loading ? "Menyimpan..." : initialData?.id ? "Perbarui Kategori" : "Buat Kategori"}
           </Button>
         </div>
       </form>

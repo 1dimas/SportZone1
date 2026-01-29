@@ -30,10 +30,10 @@ import { getProfile } from "@/components/lib/services/auth.service";
 import { toast } from "sonner";
 
 const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat("id-ID", { 
-    style: "currency", 
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
     currency: "IDR",
-    minimumFractionDigits: 0 
+    minimumFractionDigits: 0
   }).format(amount);
 
 const formatDate = (dateString: string) =>
@@ -82,7 +82,7 @@ export default function PesananHistoryPage() {
       try {
         const me = await getProfile();
         if (me?.id) setUserId(String(me.id));
-      } catch {}
+      } catch { }
     })();
   }, []);
 
@@ -128,7 +128,7 @@ export default function PesananHistoryPage() {
       setCancelingOrderId(orderId);
       await cancelOrder(orderId);
       toast.success("Pesanan berhasil dibatalkan");
-      
+
       const data = await getPesananHistory();
       setOrders(data);
     } catch (err: any) {
@@ -170,15 +170,15 @@ export default function PesananHistoryPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
         <div className="mb-8">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             asChild
             className="mb-4 -ml-2 text-gray-600 hover:text-gray-900"
           >
             <Link href="/">
               <IconArrowLeft className="w-4 h-4 mr-2" />
-              Kembali ke Home
+              Kembali ke Beranda
             </Link>
           </Button>
 
@@ -337,7 +337,7 @@ export default function PesananHistoryPage() {
                                 <h3 className="font-bold text-lg text-gray-900 mb-2">
                                   {firstItem.produk?.nama || "Produk"}
                                 </h3>
-                                
+
                                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                                   <IconPackage className="w-4 h-4" />
                                   <span>
@@ -474,16 +474,14 @@ export default function PesananHistoryPage() {
                                                 key={v}
                                                 disabled={pending}
                                                 onClick={() => setCurrentRating(v)}
-                                                className={`p-1.5 rounded-lg transition-colors ${
-                                                  pending ? "opacity-50" : "hover:bg-gray-100"
-                                                }`}
+                                                className={`p-1.5 rounded-lg transition-colors ${pending ? "opacity-50" : "hover:bg-gray-100"
+                                                  }`}
                                               >
                                                 <IconStar
-                                                  className={`w-6 h-6 ${
-                                                    v <= currentRating
+                                                  className={`w-6 h-6 ${v <= currentRating
                                                       ? "text-yellow-500 fill-yellow-400"
                                                       : "text-gray-300"
-                                                  }`}
+                                                    }`}
                                                 />
                                               </button>
                                             ))}

@@ -65,7 +65,7 @@ export function NavUser({
           <Avatar className="h-9 w-9 rounded-lg border-2 border-orange-200">
             <AvatarImage src={user.avatar} alt={user.name} />
             <AvatarFallback className="rounded-lg bg-orange-500 text-white font-semibold">
-              OF
+              PT
             </AvatarFallback>
           </Avatar>
 

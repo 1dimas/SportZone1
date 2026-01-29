@@ -84,7 +84,7 @@ const columns: ColumnDef<Produk>[] = [
           </div>
         ) : (
           <div className="flex h-14 w-14 items-center justify-center rounded-md bg-muted">
-            <span className="text-[10px] text-muted-foreground">No Image</span>
+            <span className="text-[10px] text-muted-foreground">Tidak Ada Gambar</span>
           </div>
         )}
       </div>
@@ -110,7 +110,7 @@ const columns: ColumnDef<Produk>[] = [
           <button
             onClick={() => {
               navigator.clipboard.writeText(id)
-              toast("ID copied to clipboard", { position: "top-center" })
+              toast("ID berhasil disalin", { position: "top-center" })
             }}
             className="text-xs font-mono text-gray-600 hover:text-gray-900 hover:underline"
             title={`Click to copy: ${id}`}

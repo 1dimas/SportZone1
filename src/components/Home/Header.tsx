@@ -72,11 +72,11 @@ export default function Header() {
     if (token) {
       setIsLoggedIn(true);
       if (storedUserId) setUserId(storedUserId);
-      
+
       // Fetch user profile to get username
       getProfile()
         .then((profile) => {
-          setUsername(profile.username || profile.nama || "User");
+          setUsername(profile.username || (profile as any).nama || "User");
         })
         .catch(() => {
           setUsername("User");
@@ -178,9 +178,9 @@ export default function Header() {
             <div className="flex-1 flex justify-center items-center gap-4">
               <div className="hidden lg:flex items-center">
                 {menuLoading ? (
-                  <p className="text-sm text-gray-500">Loading...</p>
+                  <p className="text-sm text-gray-500">Memuat...</p>
                 ) : menuError ? (
-                  <p className="text-sm text-red-500">Error</p>
+                  <p className="text-sm text-red-500">Gagal</p>
                 ) : (
                   sportsMenuItem && <CascadingMenu menuItem={sportsMenuItem} />
                 )}
@@ -248,7 +248,7 @@ export default function Header() {
                         className="text-red-500"
                       >
                         <FiLogOut className="mr-2 h-4 w-4" />
-                        <span>Logout</span>
+                        <span>Keluar</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -256,7 +256,7 @@ export default function Header() {
                   <Link href="/login">
                     <Button className="bg-orange-600 hover:bg-orange-700 text-white font-semibold">
                       <FiUser size={18} className="mr-0 sm:mr-2" />
-                      <span className="hidden sm:block">Login</span>
+                      <span className="hidden sm:block">Masuk</span>
                     </Button>
                   </Link>
                 )}
@@ -357,9 +357,8 @@ export default function Header() {
                     >
                       <span>{column.heading}</span>
                       <FiChevronDown
-                        className={`transform transition-transform ${
-                          openCategory === column.heading ? "rotate-180" : ""
-                        }`}
+                        className={`transform transition-transform ${openCategory === column.heading ? "rotate-180" : ""
+                          }`}
                       />
                     </button>
                     {openCategory === column.heading && (
@@ -405,7 +404,7 @@ export default function Header() {
                     className="w-full text-red-500 border-red-500"
                     onClick={handleLogout}
                   >
-                    <FiLogOut className="mr-2" /> Logout
+                    <FiLogOut className="mr-2" /> Keluar
                   </Button>
                 </>
               ) : (

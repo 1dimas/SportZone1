@@ -35,60 +35,60 @@ import { Button } from "@/components/ui/button"
 
 const data = {
   user: {
-    name: "Officer",
+    name: "Petugas",
     email: "petugas@sportzone.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
-      title: "Dashboard",
+      title: "Beranda",
       url: "/dashboardpetugas",
       icon: IconDashboard,
     },
     {
-      title: "Products",
+      title: "Produk",
       url: "/dashboardpetugas/produk",
       icon: IconDatabase,
     },
     {
-      title: "Orders",
+      title: "Pesanan",
       url: "/dashboardpetugas/pesanan",
       icon: IconShoppingCart,
     },
     {
-      title: "Returns",
+      title: "Pengembalian",
       url: "/dashboardpetugas/pengembalian",
       icon: IconPackageExport,
     },
     {
-      title: "Damaged Products",
+      title: "Produk Rusak",
       url: "/dashboardpetugas/produk-rusak",
       icon: IconAlertTriangle,
     },
   ],
   navClouds: [
     {
-      title: "Sports Category",
+      title: "Kategori Olahraga",
       icon: IconFolder,
       isActive: true,
       url: "#",
       items: [
         {
-          title: "Soccer",
+          title: "Sepak Bola",
           url: "#",
         },
         {
-          title: "Basketball",
+          title: "Bola Basket",
           url: "#",
         },
         {
-          title: "Badminton",
+          title: "Bulu Tangkis",
           url: "#",
         },
       ],
     },
     {
-      title: "Brand",
+      title: "Merek",
       icon: IconDatabase,
       url: "#",
       items: [
@@ -125,7 +125,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500 text-white">
                   <IconUser className="!size-6" />
                 </div>
-                <span className="text-xl font-bold tracking-tight text-orange-600">Office</span>
+                <span className="text-xl font-bold tracking-tight text-orange-600">Petugas</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

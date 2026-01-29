@@ -39,8 +39,8 @@ export default function CreateKategoriOlahragaPage() {
               <div className="px-4 lg:px-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-2xl font-bold">Create New Kategori Olahraga</h1>
-                    <p className="text-muted-foreground">Fill in the details to create a new sports category</p>
+                    <h1 className="text-2xl font-bold">Buat Kategori Olahraga Baru</h1>
+                    <p className="text-muted-foreground">Isi detail untuk membuat kategori olahraga baru</p>
                   </div>
                   <Button onClick={() => router.push("/dashboardadmin/olahraga")}>
                     Back to List

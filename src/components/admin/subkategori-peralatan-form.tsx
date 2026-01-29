@@ -21,7 +21,7 @@ interface SubkategoriPeralatanFormProps {
 
 export function SubkategoriPeralatanForm({ initialData }: SubkategoriPeralatanFormProps) {
   const router = useRouter()
-  
+
   const [nama, setNama] = useState(initialData?.nama || "")
   const [kategoriOlahragaId, setKategoriOlahragaId] = useState(initialData?.kategori_olahraga_id || "")
   const [kategoriOlahragaList, setKategoriOlahragaList] = useState<{ id: string; nama: string }[]>([])
@@ -36,7 +36,7 @@ export function SubkategoriPeralatanForm({ initialData }: SubkategoriPeralatanFo
         setKategoriOlahragaList(data)
       } catch (error) {
         console.error("Failed to fetch kategori olahraga:", error)
-        toast.error("Failed to load kategori olahraga data")
+        toast.error("Gagal memuat data kategori olahraga")
       }
     }
 
@@ -55,22 +55,22 @@ export function SubkategoriPeralatanForm({ initialData }: SubkategoriPeralatanFo
           nama: nama || undefined,
           kategori_olahraga_id: kategoriOlahragaId || undefined,
         })
-        toast.success("Subkategori peralatan updated successfully")
+        toast.success("Subkategori peralatan berhasil diperbarui")
       } else {
         // Create new subkategori peralatan
         await createSubkategoriPeralatan({
           nama,
           kategori_olahraga_id: kategoriOlahragaId,
         })
-        toast.success("Subkategori peralatan created successfully")
+        toast.success("Subkategori peralatan berhasil dibuat")
       }
-      
+
       // Redirect to subkategori peralatan list
       router.push("/dashboardadmin/subkategori-peralatan")
     } catch (error: any) {
       console.error(error)
-      setErrorMsg(`Failed to ${initialData?.id ? 'update' : 'create'} subkategori peralatan: ${error.message}`)
-      toast.error(`Failed to ${initialData?.id ? 'update' : 'create'} subkategori peralatan: ${error.message}`)
+      setErrorMsg(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} subkategori peralatan: ${error.message}`)
+      toast.error(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} subkategori peralatan: ${error.message}`)
     } finally {
       setLoading(false)
     }
@@ -83,25 +83,25 @@ export function SubkategoriPeralatanForm({ initialData }: SubkategoriPeralatanFo
           {errorMsg}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid gap-3">
-          <Label htmlFor="nama">Name</Label>
+          <Label htmlFor="nama">Nama</Label>
           <Input
             id="nama"
             type="text"
-            placeholder="Enter subcategory name"
+            placeholder="Masukkan nama subkategori"
             value={nama}
             onChange={(e) => setNama(e.target.value)}
             required={!initialData?.id} // Required for create, optional for update
           />
         </div>
-        
+
         <div className="grid gap-3">
           <Label htmlFor="kategori_olahraga_id">Kategori Olahraga</Label>
           <Select value={kategoriOlahragaId} onValueChange={setKategoriOlahragaId} required={!initialData?.id}>
             <SelectTrigger>
-              <SelectValue placeholder="Select a sports category" />
+              <SelectValue placeholder="Pilih kategori olahraga" />
             </SelectTrigger>
             <SelectContent>
               {kategoriOlahragaList.map((kategori) => (
@@ -112,17 +112,17 @@ export function SubkategoriPeralatanForm({ initialData }: SubkategoriPeralatanFo
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="flex justify-end gap-4">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/dashboardadmin/subkategori-peralatan")}
           >
-            Cancel
+            Batal
           </Button>
           <Button type="submit" disabled={loading}>
-            {loading ? "Saving..." : initialData?.id ? "Update Subkategori" : "Create Subkategori"}
+            {loading ? "Menyimpan..." : initialData?.id ? "Perbarui Subkategori" : "Buat Subkategori"}
           </Button>
         </div>
       </form>

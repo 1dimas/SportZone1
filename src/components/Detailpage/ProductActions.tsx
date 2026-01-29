@@ -33,10 +33,12 @@ type ApiVariant = {
 
 type ProductActionsProps = {
   product: ProductData;
+  onPriceChange?: (price: number) => void;
 };
 
 export const ProductActions: React.FC<ProductActionsProps> = ({
   product,
+  onPriceChange,
 }) => {
   const { dispatch } = useCart();
   const router = useRouter();
@@ -79,23 +81,23 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
 
   const virtualVariant = !hasVariants
     ? {
-        id: `virtual-${product.id}`,
-        ukuran: undefined,
-        warna: undefined,
-        stok: product.stock || 0,
-        harga: product.price,
-        size: undefined,
-        color: undefined,
-        stock: product.stock || 0,
-      }
+      id: `virtual-${product.id}`,
+      ukuran: undefined,
+      warna: undefined,
+      stok: product.stock || 0,
+      harga: product.price,
+      size: undefined,
+      color: undefined,
+      stock: product.stock || 0,
+    }
     : null;
 
   const selectedVariant = hasVariants
     ? variants.find(
-        (v) =>
-          (hasSizes ? (v.ukuran || v.size) === selectedSize : true) &&
-          (hasColors ? (v.warna || v.color) === selectedColor : true)
-      )
+      (v) =>
+        (hasSizes ? (v.ukuran || v.size) === selectedSize : true) &&
+        (hasColors ? (v.warna || v.color) === selectedColor : true)
+    )
     : virtualVariant;
 
   useEffect(() => {
@@ -107,6 +109,14 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
         setSelectedColor(firstVariant.warna || firstVariant.color);
     }
   }, [variants, hasSizes, hasColors, selectedSize, selectedColor, loadingVariants]);
+
+  // Notify parent about price change when variant changes
+  useEffect(() => {
+    if (selectedVariant && onPriceChange) {
+      const variantPrice = selectedVariant.harga || product.price;
+      onPriceChange(variantPrice);
+    }
+  }, [selectedVariant, onPriceChange, product.price]);
 
   const handleAddToCart = () => {
     const token = localStorage.getItem("token");
@@ -158,7 +168,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       produk_id: product.id,
       produk_varian_id: varianIdToSend ?? undefined,
       kuantitas: quantity,
-    }).catch(() => {});
+    }).catch(() => { });
     toast.success(`Berhasil menambahkan ${quantity} item ke keranjang`);
   };
 
@@ -196,7 +206,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     };
     try {
       localStorage.setItem("checkout_direct_items", JSON.stringify([directItem]));
-    } catch {}
+    } catch { }
     router.push("/checkout?mode=direct");
   };
 
@@ -230,13 +240,12 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
                   key={idx}
                   onClick={() => available && setSelectedSize(size)}
                   disabled={!available}
-                  className={`px-3 py-1.5 border rounded-md text-xs font-medium transition ${
-                    !available
-                      ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50"
-                      : isSelected
+                  className={`px-3 py-1.5 border rounded-md text-xs font-medium transition ${!available
+                    ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50"
+                    : isSelected
                       ? "bg-orange-500 text-white border-orange-500"
                       : "bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300"
-                  }`}
+                    }`}
                 >
                   {size}
                   {!available && <span className="ml-1 text-[10px]">(Kosong)</span>}
@@ -260,13 +269,12 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
                   key={idx}
                   onClick={() => available && setSelectedColor(color)}
                   disabled={!available}
-                  className={`px-3 py-1.5 border rounded-md text-xs font-medium transition ${
-                    !available
-                      ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50"
-                      : isSelected
+                  className={`px-3 py-1.5 border rounded-md text-xs font-medium transition ${!available
+                    ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50"
+                    : isSelected
                       ? "bg-orange-500 text-white border-orange-500"
                       : "bg-white hover:bg-orange-50 border-gray-300 hover:border-orange-300"
-                  }`}
+                    }`}
                 >
                   {color}
                   {!available && <span className="ml-1 text-[10px]">(Kosong)</span>}
@@ -280,7 +288,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       {/* Informasi Variant yang Dipilih */}
       {selectedVariant && (
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-          <h4 className="text-xs font-medium text-orange-900 mb-1">Variant Dipilih:</h4>
+          <h4 className="text-xs font-medium text-orange-900 mb-1">Varian Dipilih:</h4>
           <div className="text-xs text-orange-800 space-y-0.5">
             {hasSizes && hasColors && (
               <p>
@@ -292,7 +300,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
             <p>Stok tersedia: {selectedVariant.stok}</p>
             {selectedVariant.harga && (
               <p>
-                Harga variant: {formatRupiah(selectedVariant.harga)}
+                Harga varian: {formatRupiah(selectedVariant.harga)}
               </p>
             )}
           </div>
@@ -322,11 +330,10 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
         <button
           onClick={handleAddToCart}
           disabled={!selectedVariant || selectedVariant.stok === 0}
-          className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2 border-2 ${
-            !selectedVariant || selectedVariant.stok === 0
-              ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
-              : "border-orange-500 text-orange-500 bg-white hover:bg-orange-50"
-          }`}
+          className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2 border-2 ${!selectedVariant || selectedVariant.stok === 0
+            ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
+            : "border-orange-500 text-orange-500 bg-white hover:bg-orange-50"
+            }`}
         >
           <FiShoppingCart className="w-4 h-4" />
           <span className="whitespace-nowrap">Tambah ke Keranjang</span>
@@ -336,11 +343,10 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
         <button
           onClick={handleOrderNow}
           disabled={!selectedVariant || selectedVariant.stok === 0}
-          className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition ${
-            !selectedVariant || selectedVariant.stok === 0
-              ? "bg-gray-300 text-gray-100 cursor-not-allowed"
-              : "bg-orange-500 hover:bg-orange-600 text-white"
-          }`}
+          className={`w-full px-4 py-2.5 rounded-lg font-medium text-sm transition ${!selectedVariant || selectedVariant.stok === 0
+            ? "bg-gray-300 text-gray-100 cursor-not-allowed"
+            : "bg-orange-500 hover:bg-orange-600 text-white"
+            }`}
         >
           Pesan Sekarang
         </button>

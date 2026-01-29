@@ -17,11 +17,11 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { 
-  ArrowLeft, 
-  Package, 
-  MapPin, 
-  Truck, 
+import {
+  ArrowLeft,
+  Package,
+  MapPin,
+  Truck,
   Clock,
   CheckCircle2,
   XCircle,
@@ -82,6 +82,18 @@ export function PesananDetail({ id }: PesananDetailProps) {
     }
   };
 
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      pending: "Menunggu",
+      diproses: "Diproses",
+      dikirim: "Dikirim",
+      selesai: "Selesai",
+      dibatalkan: "Dibatalkan",
+      dikembalikan: "Dikembalikan",
+    };
+    return labels[status] || status;
+  };
+
   const getStatusStyle = (status: string) => {
     const styles: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
       pending: { bg: "bg-amber-50", text: "text-amber-600", icon: <Clock className="w-3.5 h-3.5" /> },
@@ -130,11 +142,11 @@ export function PesananDetail({ id }: PesananDetailProps) {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-semibold text-gray-900">
-                Order #{pesanan.id.slice(0, 8)}
+                Pesanan #{pesanan.id.slice(0, 8)}
               </h1>
               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text}`}>
                 {statusStyle.icon}
-                {pesanan.status.charAt(0).toUpperCase() + pesanan.status.slice(1)}
+                {getStatusLabel(pesanan.status)}
               </span>
             </div>
             <p className="text-sm text-gray-500 mt-0.5">
@@ -151,7 +163,7 @@ export function PesananDetail({ id }: PesananDetailProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          
+
           {/* Customer */}
           <div className="bg-white border border-gray-200 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
@@ -189,8 +201,8 @@ export function PesananDetail({ id }: PesananDetailProps) {
                 <Truck className="w-4 h-4 text-gray-400" />
                 <span className="text-gray-600">Estimasi:</span>
                 <span className="font-medium text-gray-900">
-                  {pesanan.eta_min === pesanan.eta_max 
-                    ? `${pesanan.eta_min} hari` 
+                  {pesanan.eta_min === pesanan.eta_max
+                    ? `${pesanan.eta_min} hari`
                     : `${pesanan.eta_min}-${pesanan.eta_max} hari`}
                 </span>
               </div>
@@ -211,12 +223,12 @@ export function PesananDetail({ id }: PesananDetailProps) {
                 // Generate color from product name for variety
                 const productName = item.produk?.nama || "Produk";
                 const firstLetter = productName.charAt(0).toUpperCase();
-                
+
                 // Simple hash function to generate consistent color from name
                 const hashCode = productName.split('').reduce((acc, char) => {
                   return char.charCodeAt(0) + ((acc << 5) - acc);
                 }, 0);
-                
+
                 const colors = [
                   'from-orange-400 to-amber-500',
                   'from-blue-400 to-cyan-500',
@@ -227,10 +239,10 @@ export function PesananDetail({ id }: PesananDetailProps) {
                   'from-yellow-400 to-orange-500',
                   'from-teal-400 to-green-500',
                 ];
-                
+
                 const colorIndex = Math.abs(hashCode) % colors.length;
                 const gradientClass = colors[colorIndex];
-                
+
                 return (
                   <div key={item.id} className="px-5 py-4 flex items-center gap-4">
                     <div className={`w-14 h-14 bg-gradient-to-br ${gradientClass} rounded-lg flex items-center justify-center border border-white shadow-sm`}>
@@ -242,7 +254,7 @@ export function PesananDetail({ id }: PesananDetailProps) {
                       <p className="font-medium text-gray-900 truncate">{productName}</p>
                       {item.produk_varian && (
                         <p className="text-xs text-gray-400 mt-0.5">
-                          {item.produk_varian.warna_varian} • {item.produk_varian.ukuran}
+                          {item.produk_varian.warna} • {item.produk_varian.ukuran}
                         </p>
                       )}
                     </div>
@@ -264,8 +276,8 @@ export function PesananDetail({ id }: PesananDetailProps) {
         {/* Sidebar */}
         <div className="space-y-6">
           <div className="bg-white border border-gray-200 rounded-xl p-5 sticky top-6">
-            <h2 className="text-sm font-medium text-gray-900 mb-4">Update Status</h2>
-            
+            <h2 className="text-sm font-medium text-gray-900 mb-4">Perbarui Status</h2>
+
             <Select
               value={selectedStatus}
               onValueChange={handleStatusChange}
@@ -275,7 +287,7 @@ export function PesananDetail({ id }: PesananDetailProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="pending">Menunggu</SelectItem>
                 <SelectItem value="diproses">Diproses</SelectItem>
                 <SelectItem value="dikirim">Dikirim</SelectItem>
                 <SelectItem value="selesai">Selesai</SelectItem>
@@ -296,7 +308,7 @@ export function PesananDetail({ id }: PesananDetailProps) {
               </div>
             )}
 
-            <Button 
+            <Button
               className="w-full mt-4 h-11 bg-orange-500 hover:bg-orange-600 text-white"
               onClick={handleUpdateStatus}
               disabled={updating || selectedStatus === pesanan.status}
@@ -304,7 +316,7 @@ export function PesananDetail({ id }: PesananDetailProps) {
               {updating ? "Menyimpan..." : "Simpan"}
             </Button>
 
-            <Button 
+            <Button
               variant="outline"
               className="w-full mt-2 border-orange-200 text-orange-600 hover:bg-orange-50"
               onClick={() => router.back()}
@@ -316,10 +328,13 @@ export function PesananDetail({ id }: PesananDetailProps) {
 
           {/* Order Info */}
           <div className="bg-white border border-gray-200 rounded-xl p-5">
-            <h2 className="text-sm font-medium text-gray-900 mb-4">Informasi Order</h2>
+            <h2 className="text-sm font-medium text-gray-900 mb-4">Informasi Pesanan</h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Order ID</span>
+                <span className="text-gray-900 font-mono text-xs">{pesanan.id.slice(0, 12)}...</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">ID Pesanan</span>
                 <span className="text-gray-900 font-mono text-xs">{pesanan.id.slice(0, 12)}...</span>
               </div>
               <div className="flex justify-between">

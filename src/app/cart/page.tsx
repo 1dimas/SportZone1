@@ -19,10 +19,10 @@ export default function CartPage() {
   useEffect(() => {
     const fetchRatings = async () => {
       const ratings: Record<string, number> = {};
-      
+
       // Create unique product IDs (without variant info) to avoid duplicate API calls
       const uniqueProductIds = Array.from(new Set(state.items.map(item => item.productId)));
-      
+
       for (const productId of uniqueProductIds) {
         try {
           const avgRating = await getAverageRatingPublic(productId);
@@ -32,7 +32,7 @@ export default function CartPage() {
           ratings[productId] = 0; // Default to 0 if fetch fails
         }
       }
-      
+
       setProductRatings(ratings);
     };
 
@@ -201,9 +201,9 @@ export default function CartPage() {
                         {(!item.selectedSize || item.selectedSize === "") &&
                           (!item.selectedColor ||
                             item.selectedColor === "") && (
-                            <span>Variant: Default</span>
+                            <span>Varian: Standar</span>
                           )}
-                        
+
                         {/* Rating display */}
                         <CartRatingDisplay rating={productRatings[item.productId] || 0} size="sm" />
                       </div>
@@ -226,11 +226,10 @@ export default function CartPage() {
                               updateQuantity(item.id, item.quantity + 1)
                             }
                             disabled={item.quantity >= item.stock}
-                            className={`px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-md ${
-                              item.quantity >= item.stock
+                            className={`px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-md ${item.quantity >= item.stock
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <FiPlus size={16} />
                           </button>

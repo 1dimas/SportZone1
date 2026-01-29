@@ -10,12 +10,12 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pesanan, getPesananById, cancelOrder } from "@/components/lib/services/pesanan.service";
 import { getPengembalianByUser, Pengembalian } from "@/components/lib/services/pengembalian.service";
-import { 
-  IconCheck, 
-  IconTruck, 
-  IconClock, 
-  IconMapPin, 
-  IconX, 
+import {
+  IconCheck,
+  IconTruck,
+  IconClock,
+  IconMapPin,
+  IconX,
   IconPackageExport,
   IconPackage,
   IconReceipt,
@@ -29,11 +29,11 @@ const formatCurrency = (amount: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(amount);
 
 const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString("id-ID", { 
+  new Date(dateString).toLocaleDateString("id-ID", {
     weekday: 'long',
-    year: "numeric", 
-    month: "long", 
-    day: "numeric" 
+    year: "numeric",
+    month: "long",
+    day: "numeric"
   });
 
 const STATUS_FLOW = ["pending", "diproses", "dikirim", "selesai"] as const;
@@ -57,7 +57,7 @@ function StatusTimeline({ status }: { status: StatusKey }) {
   const returned = status === "dikembalikan";
 
   const items = [
-    { key: "pending", label: "Pending", icon: IconClock },
+    { key: "pending", label: "Menunggu", icon: IconClock },
     { key: "diproses", label: "Diproses", icon: IconCheck },
     { key: "dikirim", label: "Dikirim", icon: IconTruck },
     { key: "selesai", label: "Selesai", icon: IconPackage },
@@ -98,29 +98,26 @@ function StatusTimeline({ status }: { status: StatusKey }) {
           const Icon = item.icon;
           const done = currentIndex >= idx;
           const active = currentIndex === idx;
-          
+
           return (
             <div key={item.key} className="flex flex-col items-center flex-1 relative">
               {/* Connector Line */}
               {idx < items.length - 1 && (
-                <div className={`absolute top-5 left-[50%] w-full h-0.5 ${
-                  done ? 'bg-orange-500' : 'bg-gray-200'
-                }`} style={{ zIndex: 0 }} />
+                <div className={`absolute top-5 left-[50%] w-full h-0.5 ${done ? 'bg-orange-500' : 'bg-gray-200'
+                  }`} style={{ zIndex: 0 }} />
               )}
-              
+
               {/* Icon Circle */}
-              <div className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full transition-all ${
-                done 
-                  ? 'bg-orange-500 shadow-lg shadow-orange-500/30' 
+              <div className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full transition-all ${done
+                  ? 'bg-orange-500 shadow-lg shadow-orange-500/30'
                   : 'bg-white border-2 border-gray-200'
-              }`}>
+                }`}>
                 <Icon className={`w-5 h-5 ${done ? 'text-white' : 'text-gray-400'}`} />
               </div>
-              
+
               {/* Label */}
-              <span className={`mt-2 text-xs font-medium text-center ${
-                active ? 'text-orange-600' : done ? 'text-gray-700' : 'text-gray-400'
-              }`}>
+              <span className={`mt-2 text-xs font-medium text-center ${active ? 'text-orange-600' : done ? 'text-gray-700' : 'text-gray-400'
+                }`}>
                 {item.label}
               </span>
             </div>
@@ -148,14 +145,14 @@ export default function PesananDetailPage() {
         if (!id) return;
         const data = await getPesananById(id);
         if (mounted) setOrder(data);
-        
+
         try {
           const pengembalianList = await getPengembalianByUser();
           const activePengembalian = pengembalianList.find(p => p.pesanan_id === id);
           if (activePengembalian && mounted) {
             setPengembalian(activePengembalian);
           }
-        } catch {}
+        } catch { }
       } catch (err: any) {
         if (mounted) setError(err?.message || "Gagal mengambil detail pesanan");
       } finally {
@@ -182,7 +179,7 @@ export default function PesananDetailPage() {
       setCancelingOrder(true);
       await cancelOrder(id);
       toast.success("Pesanan berhasil dibatalkan");
-      
+
       const data = await getPesananById(id);
       setOrder(data);
     } catch (err: any) {
@@ -206,8 +203,8 @@ export default function PesananDetailPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => router.push("/pesanan/history")}
               className="mb-3 -ml-2 text-gray-600 hover:text-gray-900"
@@ -220,8 +217,8 @@ export default function PesananDetailPage() {
           </div>
 
           {order && (order.status === "pending" || order.status === "diproses") && (
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               disabled={cancelingOrder}
               onClick={handleCancelOrder}
               className="bg-red-500 hover:bg-red-600 shadow-sm"
@@ -339,7 +336,7 @@ export default function PesananDetailPage() {
                     {order.alamat_pengiriman}
                   </p>
                 </div>
-                
+
                 {(order.kota || order.provinsi) && (
                   <>
                     <Separator className="bg-gray-100" />
@@ -351,28 +348,28 @@ export default function PesananDetailPage() {
                     </div>
                   </>
                 )}
-                
+
                 {/* ETA Badge */}
-                {(order.status === "pending" || 
-                  order.status === "diproses" || 
-                  order.status === "dikirim") && 
-                  order.eta_min && 
+                {(order.status === "pending" ||
+                  order.status === "diproses" ||
+                  order.status === "dikirim") &&
+                  order.eta_min &&
                   order.eta_max && (
-                  <>
-                    <Separator className="bg-gray-100" />
-                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                      <IconTruck className="w-5 h-5 text-blue-600" />
-                      <div>
-                        <p className="text-xs font-medium text-blue-900 mb-0.5">Estimasi Tiba</p>
-                        <p className="text-sm font-semibold text-blue-700">
-                          {order.eta_min === order.eta_max 
-                            ? `${order.eta_min} hari kerja`
-                            : `${order.eta_min}-${order.eta_max} hari kerja`}
-                        </p>
+                    <>
+                      <Separator className="bg-gray-100" />
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <IconTruck className="w-5 h-5 text-blue-600" />
+                        <div>
+                          <p className="text-xs font-medium text-blue-900 mb-0.5">Estimasi Tiba</p>
+                          <p className="text-sm font-semibold text-blue-700">
+                            {order.eta_min === order.eta_max
+                              ? `${order.eta_min} hari kerja`
+                              : `${order.eta_min}-${order.eta_max} hari kerja`}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </>
-                )}
+                    </>
+                  )}
               </CardContent>
             </Card>
 
@@ -457,13 +454,13 @@ export default function PesananDetailPage() {
                             <p className="text-xs text-gray-500 mb-2">
                               {item.produk_varian
                                 ? (
-                                    [
-                                      item.produk_varian.warna_varian,
-                                      item.produk_varian.ukuran,
-                                    ]
-                                      .filter((v) => v && String(v).trim().length > 0)
-                                      .join(" • ") || "Varian standar"
-                                  )
+                                  [
+                                    item.produk_varian.warna_varian,
+                                    item.produk_varian.ukuran,
+                                  ]
+                                    .filter((v) => v && String(v).trim().length > 0)
+                                    .join(" • ") || "Varian standar"
+                                )
                                 : "Varian standar"}
                             </p>
                             <div className="flex items-center gap-4 text-sm">
@@ -509,9 +506,9 @@ export default function PesananDetailPage() {
                     {formatCurrency(subtotal)}
                   </span>
                 </div>
-                
+
                 <Separator className="bg-gray-100" />
-                
+
                 <div className="flex items-center justify-between py-3 px-4 bg-orange-50 rounded-xl">
                   <span className="text-base font-semibold text-orange-900">Total</span>
                   <span className="text-xl font-bold text-orange-600">

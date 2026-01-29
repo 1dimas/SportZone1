@@ -147,8 +147,17 @@ export const columns: ColumnDef<
       header: "Status",
       cell: ({ row }) => (
         <Badge className={getStatusColor(row.original.status)}>
-          {row.original.status.charAt(0).toUpperCase() +
-            row.original.status.slice(1)}
+          {row.original.status === "pending"
+            ? "Pending"
+            : row.original.status === "diproses"
+              ? "Diproses"
+              : row.original.status === "dikirim"
+                ? "Dikirim"
+                : row.original.status === "selesai"
+                  ? "Selesai"
+                  : row.original.status === "dibatalkan"
+                    ? "Dibatalkan"
+                    : row.original.status}
         </Badge>
       ),
     },
@@ -186,7 +195,7 @@ export const columns: ColumnDef<
                 ? "bg-red-100 text-red-800 border-red-200"
                 : "bg-gray-100 text-gray-800 border-gray-200";
 
-        return <Badge className={color}>{status}</Badge>;
+        return <Badge className={color}>{status === "sudah bayar" ? "Sudah Bayar" : status === "belum bayar" ? "Belum Bayar" : status === "gagal" ? "Gagal" : status}</Badge>;
       },
     },
     {

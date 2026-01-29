@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   Package,
   FileText,
-  DollarSign,
+
   Layers,
   Tag,
   Award,
@@ -204,7 +204,7 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    const files = Array.from(e.dataTransfer.files).filter(file => 
+    const files = Array.from(e.dataTransfer.files).filter(file =>
       file.type.startsWith('image/')
     );
     if (files.length > 0) {
@@ -290,7 +290,7 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        
+
         {/* Section 1: Informasi Dasar */}
         <div className="space-y-4">
           <h3 className="font-medium text-gray-900 flex items-center gap-2">
@@ -299,7 +299,7 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
             </div>
             Informasi Dasar
           </h3>
-          
+
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -313,10 +313,10 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                   <FormControl>
                     <div className="relative">
                       <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <Input 
-                        placeholder="Masukkan nama produk" 
+                      <Input
+                        placeholder="Masukkan nama produk"
                         className="pl-10 rounded-xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 transition-colors"
-                        {...field} 
+                        {...field}
                       />
                     </div>
                   </FormControl>
@@ -355,11 +355,11 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
         <div className="space-y-4">
           <h3 className="font-medium text-gray-900 flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-              <DollarSign className="w-4 h-4 text-green-600" />
+              <span className="text-green-600 font-bold text-xs">Rp</span>
             </div>
             Harga & Stok
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -372,7 +372,7 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">Rp</span>
                       <Input
                         type="text"
                         placeholder="Masukkan harga"
@@ -441,7 +441,7 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
             </div>
             Kategori & Brand
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -598,14 +598,13 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
               </Button>
             )}
           </div>
-          
+
           {/* Drag & Drop Area */}
-          <div 
-            className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-200 cursor-pointer ${
-              isDragOver 
-                ? "border-orange-400 bg-orange-50" 
-                : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/30"
-            }`}
+          <div
+            className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-200 cursor-pointer ${isDragOver
+              ? "border-orange-400 bg-orange-50"
+              : "border-gray-200 hover:border-orange-300 hover:bg-orange-50/30"
+              }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
@@ -620,12 +619,12 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
             <p className="text-xs text-gray-400">
               Format: JPG, PNG, WEBP
             </p>
-            <Input 
+            <Input
               ref={fileInputRef}
-              type="file" 
-              multiple 
-              accept="image/*" 
-              className="hidden" 
+              type="file"
+              multiple
+              accept="image/*"
+              className="hidden"
               onChange={handleFileChange}
             />
           </div>
@@ -643,7 +642,7 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
                   )}
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                 {/* Existing images */}
                 {existingImages.map((imageUrl, index) => (
@@ -700,8 +699,8 @@ export function ProdukForm({ produk, onSuccess }: ProdukFormProps) {
           <p className="text-sm text-gray-500 hidden sm:block">
             <span className="text-orange-500">*</span> Semua field wajib diisi
           </p>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={loading}
             className="bg-orange-500 hover:bg-orange-600 rounded-xl gap-2 px-8 w-full sm:w-auto shadow-sm"
           >

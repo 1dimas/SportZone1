@@ -76,6 +76,22 @@ export default function CheckoutPage() {
         const userData = await getProfile();
         setUser(userData?.user || userData || null);
 
+        // Load saved address from localStorage
+        const savedAddress = localStorage.getItem("checkout_saved_address");
+        if (savedAddress) {
+          try {
+            const parsed = JSON.parse(savedAddress);
+            setFormData((prev) => ({
+              ...prev,
+              address: parsed.address || "",
+              kota: parsed.kota || "",
+              provinsi: parsed.provinsi || "",
+            }));
+          } catch {
+            // Ignore parse errors
+          }
+        }
+
         if (userData) {
           setFormData((prev) => ({
             ...prev,
@@ -96,7 +112,7 @@ export default function CheckoutPage() {
     try {
       const params = new URLSearchParams(window.location.search);
       const selected = params.get("selected");
-      
+
       if (selected) {
         const ids = selected.split(",").filter(Boolean);
         if (ids.length > 0) setSelectedOnly(ids);
@@ -114,14 +130,14 @@ export default function CheckoutPage() {
       try {
         const raw = localStorage.getItem("checkout_direct_items");
         if (raw) return JSON.parse(raw);
-      } catch {}
+      } catch { }
     }
-    
+
     // If selected items, filter cart
     if (selectedOnly) {
       return state.items.filter((i) => selectedOnly.includes(i.id));
     }
-    
+
     // Otherwise, use all cart items
     return state.items;
   })();
@@ -208,7 +224,7 @@ export default function CheckoutPage() {
         produk_varian_id:
           isValidUUID(item.variantId) && !item.variantId?.startsWith("virtual-")
             ? item.variantId
-            : undefined, 
+            : undefined,
         kuantitas: item.quantity,
         harga_satuan: item.price,
       }));
@@ -229,6 +245,13 @@ export default function CheckoutPage() {
       const order = await createPesanan(orderData);
       console.log("Order created:", order);
       console.log("Order kota:", order.kota, "provinsi:", order.provinsi);
+
+      // Save address to localStorage for auto-fill next time
+      localStorage.setItem("checkout_saved_address", JSON.stringify({
+        address: formData.address,
+        kota: formData.kota,
+        provinsi: formData.provinsi,
+      }));
 
       if (formData.paymentMethod === "cod") {
         await createCodPayment(order.id);
@@ -326,14 +349,14 @@ export default function CheckoutPage() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                 
+
                   d="M15 19l-7-7 7-7"
                 />
               </svg>
-              Back to Product Details
+              Kembali ke Detail Produk
             </button>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">Pembayaran</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Checkout Form */}
@@ -382,25 +405,6 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="mb-6">
-                    <label
-                      htmlFor="address"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Alamat Lengkap *
-                    </label>
-                    <textarea
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      required
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                      placeholder="Masukkan alamat lengkap pengiriman"
-                    />
-                  </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                       <label
@@ -439,6 +443,25 @@ export default function CheckoutPage() {
                         placeholder="Contoh: Jawa Barat"
                       />
                     </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label
+                      htmlFor="address"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Alamat Lengkap *
+                    </label>
+                    <textarea
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      required
+                      rows={3}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                      placeholder="Masukkan alamat lengkap pengiriman"
+                    />
                   </div>
 
                   <div className="mt-8">
@@ -527,7 +550,7 @@ export default function CheckoutPage() {
                           Ukuran: {item.size}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Qty: {item.quantity}
+                          Jml: {item.quantity}
                         </p>
                       </div>
                       <p className="text-sm font-semibold text-gray-900">

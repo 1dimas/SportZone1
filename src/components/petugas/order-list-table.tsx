@@ -58,7 +58,7 @@ export function OrderListTable() {
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; className: string }> = {
-      "pending": { label: "Pending", className: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200" },
+      "pending": { label: "Menunggu", className: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200" },
       "diproses": { label: "Diproses", className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" },
       "dikirim": { label: "Dikirim", className: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" },
       "selesai": { label: "Selesai", className: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" },
@@ -99,7 +99,7 @@ export function OrderListTable() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Daftar Pesanan</h2>
       </div>
-      
+
       <div className="overflow-hidden rounded-lg border">
         <Table>
           <TableHeader className="bg-muted">
@@ -137,8 +137,8 @@ export function OrderListTable() {
                     {new Date(order.tanggal_pesanan).toLocaleDateString('id-ID')}
                   </TableCell>
                   <TableCell>
-                    {order.kota && order.provinsi 
-                      ? `${order.kota}, ${order.provinsi}` 
+                    {order.kota && order.provinsi
+                      ? `${order.kota}, ${order.provinsi}`
                       : order.kota || order.provinsi || "N/A"}
                   </TableCell>
                   <TableCell className="text-right font-semibold">

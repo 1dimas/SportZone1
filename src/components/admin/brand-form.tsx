@@ -39,9 +39,9 @@ export function BrandForm({ initialData }: BrandFormProps) {
         await updateBrand(initialData.id, {
           nama,
           deskripsi,
-          logo: logoFile, 
+          logo: logoFile,
         });
-        toast.success("Brand updated successfully")
+        toast.success("Brand berhasil diperbarui")
       } else {
         // Create new brand
         await createBrand({
@@ -49,15 +49,15 @@ export function BrandForm({ initialData }: BrandFormProps) {
           deskripsi,
           logo: logoFile || undefined,
         });
-        toast.success("Brand created successfully")
+        toast.success("Brand berhasil dibuat")
       }
 
       // Redirect to brand list
       router.push("/dashboardadmin/brand")
     } catch (error: any) {
       console.error(error)
-      setErrorMsg(`Failed to ${initialData?.id ? 'update' : 'create'} brand: ${error.message}`)
-      toast.error(`Failed to ${initialData?.id ? 'update' : 'create'} brand: ${error.message}`)
+      setErrorMsg(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} brand: ${error.message}`)
+      toast.error(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} brand: ${error.message}`)
     } finally {
       setLoading(false)
     }
@@ -71,11 +71,11 @@ export function BrandForm({ initialData }: BrandFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid gap-3">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">Nama</Label>
           <Input
             id="name"
             type="text"
-            placeholder="Enter brand name"
+            placeholder="Masukkan nama brand"
             value={nama}
             onChange={(e) => setNama(e.target.value)}
             required={!initialData?.id} // Required for create, optional for update
@@ -83,11 +83,11 @@ export function BrandForm({ initialData }: BrandFormProps) {
         </div>
 
         <div className="grid gap-3">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">Deskripsi</Label>
           <Input
             id="description"
             type="text"
-            placeholder="Enter brand description"
+            placeholder="Masukkan deskripsi brand"
             value={deskripsi}
             onChange={(e) => setDeskripsi(e.target.value)}
           />
@@ -103,14 +103,14 @@ export function BrandForm({ initialData }: BrandFormProps) {
               const file = e.target.files?.[0];
               if (file) {
                 setLogoFile(file);
-                setLogo(URL.createObjectURL(file)); 
+                setLogo(URL.createObjectURL(file));
               }
             }}
           />
           {logo && (
             <img
               src={logo}
-              alt="Logo Preview"
+              alt="Pratinjau Logo"
               className="mt-2 w-24 h-24 object-cover rounded"
             />
           )}
@@ -122,14 +122,14 @@ export function BrandForm({ initialData }: BrandFormProps) {
             variant="outline"
             onClick={() => router.push("/dashboardadmin/brand")}
           >
-            Cancel
+            Batal
           </Button>
           <Button type="submit" disabled={loading}>
             {loading
-              ? "Saving..."
+              ? "Menyimpan..."
               : initialData?.id
-              ? "Update Brand"
-              : "Create Brand"}
+                ? "Perbarui Brand"
+                : "Buat Brand"}
           </Button>
         </div>
       </form>

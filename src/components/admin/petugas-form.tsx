@@ -19,7 +19,7 @@ interface PetugasFormProps {
 
 export function PetugasForm({ initialData }: PetugasFormProps) {
   const router = useRouter()
-  
+
   const [username, setUsername] = useState(initialData?.username || "")
   const [email, setEmail] = useState(initialData?.email || "")
   const [password, setPassword] = useState("")
@@ -39,7 +39,7 @@ export function PetugasForm({ initialData }: PetugasFormProps) {
           email: email || undefined,
           password: password || undefined,
         })
-        toast.success("Petugas updated successfully")
+        toast.success("Petugas berhasil diperbarui")
       } else {
         // Create new petugas
         await createPetugas({
@@ -47,15 +47,15 @@ export function PetugasForm({ initialData }: PetugasFormProps) {
           email,
           password,
         })
-        toast.success("Petugas created successfully")
+        toast.success("Petugas berhasil dibuat")
       }
-      
+
       // Redirect to petugas list
       router.push("/dashboardadmin/petugas")
     } catch (error: any) {
       console.error(error)
-      setErrorMsg(`Failed to ${initialData?.id ? 'update' : 'create'} petugas`)
-      toast.error(`Failed to ${initialData?.id ? 'update' : 'create'} petugas`)
+      setErrorMsg(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} petugas`)
+      toast.error(`Gagal ${initialData?.id ? 'memperbarui' : 'membuat'} petugas`)
     } finally {
       setLoading(false)
     }
@@ -68,56 +68,56 @@ export function PetugasForm({ initialData }: PetugasFormProps) {
           {errorMsg}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid gap-3">
           <Label htmlFor="username">Username</Label>
           <Input
             id="username"
             type="text"
-            placeholder="Enter username"
+            placeholder="Masukkan username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required={!initialData?.id} // Required for create, optional for update
           />
         </div>
-        
+
         <div className="grid gap-3">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             type="email"
-            placeholder="Enter email"
+            placeholder="Masukkan email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required={!initialData?.id} // Required for create, optional for update
           />
         </div>
-        
+
         <div className="grid gap-3">
           <Label htmlFor="password">
-            {initialData?.id ? "New Password (optional)" : "Password"}
+            {initialData?.id ? "Kata Sandi Baru (opsional)" : "Kata Sandi"}
           </Label>
           <Input
             id="password"
             type="password"
-            placeholder={initialData?.id ? "Enter new password" : "Enter password"}
+            placeholder={initialData?.id ? "Masukkan kata sandi baru" : "Masukkan kata sandi"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required={!initialData?.id} // Required for create, optional for update
           />
         </div>
-        
+
         <div className="flex justify-end gap-4">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push("/dashboardadmin/petugas")}
           >
-            Cancel
+            Batal
           </Button>
           <Button type="submit" disabled={loading}>
-            {loading ? "Saving..." : initialData?.id ? "Update Petugas" : "Create Petugas"}
+            {loading ? "Menyimpan..." : initialData?.id ? "Perbarui Petugas" : "Buat Petugas"}
           </Button>
         </div>
       </form>

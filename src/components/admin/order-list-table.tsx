@@ -99,7 +99,7 @@ export function OrderListTable() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Daftar Pesanan</h2>
       </div>
-      
+
       <div className="overflow-hidden rounded-lg border">
         <Table>
           <TableHeader className="bg-muted">
@@ -137,8 +137,8 @@ export function OrderListTable() {
                     {new Date(order.tanggal_pesanan).toLocaleDateString('id-ID')}
                   </TableCell>
                   <TableCell>
-                    {order.kota && order.provinsi 
-                      ? `${order.kota}, ${order.provinsi}` 
+                    {order.kota && order.provinsi
+                      ? `${order.kota}, ${order.provinsi}`
                       : order.kota || order.provinsi || "N/A"}
                   </TableCell>
                   <TableCell className="text-right font-semibold">

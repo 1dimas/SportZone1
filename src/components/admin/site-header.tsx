@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 
 export function SiteHeader() {
   const { toggleSidebar, state } = useSidebar()
-  
+
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) bg-white">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -21,7 +21,7 @@ export function SiteHeader() {
           ) : (
             <ChevronsLeft className="h-5 w-5" />
           )}
-          <span className="sr-only">Toggle Sidebar</span>
+          <span className="sr-only">Buka/Tutup Sidebar</span>
         </Button>
         <div className="ml-auto flex items-center gap-2">
         </div>

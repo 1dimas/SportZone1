@@ -119,7 +119,7 @@ export function PengembalianTable() {
     },
     {
       id: "customer",
-      header: "Customer",
+      header: "Pelanggan",
       cell: ({ row }) => (
         <div>
           <div className="font-medium">
@@ -252,9 +252,9 @@ export function PengembalianTable() {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>

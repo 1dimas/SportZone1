@@ -69,12 +69,12 @@ export default function ForgotPasswordPage() {
       <div className="flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Password Reset Successful</CardTitle>
+            <CardTitle>Reset Kata Sandi Berhasil</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center mb-4">Your password has been reset successfully.</p>
+            <p className="text-center mb-4">Kata sandi berhasil direset.</p>
             <Button onClick={() => router.push("/login")} className="w-full">
-              Back to Login
+              Kembali ke Login
             </Button>
           </CardContent>
         </Card>
@@ -87,9 +87,9 @@ export default function ForgotPasswordPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>
-            {step === "email" && "Forgot Password"}
-            {step === "otp" && "Verify OTP"}
-            {step === "password" && "Reset Password"}
+            {step === "email" && "Lupa Kata Sandi"}
+            {step === "otp" && "Verifikasi OTP"}
+            {step === "password" && "Reset Kata Sandi"}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Sending..." : "Send OTP"}
+                {loading ? "Mengirim..." : "Kirim OTP"}
               </Button>
             </form>
           )}
@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
           {step === "otp" && (
             <form onSubmit={handleVerifyOtp}>
               <div className="grid gap-3 mb-4">
-                <Label htmlFor="otp">OTP Code</Label>
+                <Label htmlFor="otp">Kode OTP</Label>
                 <Input
                   id="otp"
                   type="text"
@@ -133,7 +133,7 @@ export default function ForgotPasswordPage() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Verifying..." : "Verify OTP"}
+                {loading ? "Memverifikasi..." : "Verifikasi OTP"}
               </Button>
             </form>
           )}
@@ -141,11 +141,11 @@ export default function ForgotPasswordPage() {
           {step === "password" && (
             <form onSubmit={handleResetPassword}>
               <div className="grid gap-3 mb-4">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor="newPassword">Kata Sandi Baru</Label>
                 <Input
                   id="newPassword"
                   type="password"
-                  placeholder="New password"
+                  placeholder="Kata sandi baru"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
@@ -153,7 +153,7 @@ export default function ForgotPasswordPage() {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Resetting..." : "Reset Password"}
+                {loading ? "Mereset..." : "Reset Kata Sandi"}
               </Button>
             </form>
           )}
@@ -164,7 +164,7 @@ export default function ForgotPasswordPage() {
               onClick={() => router.push("/login")}
               className="underline underline-offset-4"
             >
-              Back to Login
+              Kembali ke Login
             </button>
           </div>
         </CardContent>

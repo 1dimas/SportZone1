@@ -58,17 +58,17 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Customer",
+      title: "Pelanggan",
       url: "/dashboardadmin/customers",
       icon: IconListDetails,
     },
     {
-      title: "Officer",
+      title: "Petugas",
       url: "/dashboardadmin/petugas",
       icon: IconUsers,
     },
     {
-      title: "Sports",
+      title: "Olahraga",
       url: "/dashboardadmin/olahraga",
       icon: IconTrophy,
     },
@@ -83,27 +83,27 @@ const data = {
       icon: IconFileDescription,
     },
     {
-      title: "Products",
+      title: "Produk",
       url: "/dashboardadmin/produk",
       icon: IconBox,
     },
     {
-      title: "Orders",
+      title: "Pesanan",
       url: "/dashboardadmin/pesanan",
       icon: IconListDetails,
     },
     {
-      title: "Returns",
+      title: "Pengembalian",
       url: "/dashboardadmin/pengembalian",
       icon: IconPackageExport,
     },
     {
-      title: "Damaged Products",
+      title: "Produk Rusak",
       url: "/dashboardadmin/produk-rusak",
       icon: IconAlertTriangle,
     },
     {
-      title: "Equipment Subcategories",
+      title: "Subkategori Peralatan",
       url: "/dashboardadmin/subkategori-peralatan",
       icon: IconChartBar,
     },
@@ -158,7 +158,7 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Search",
+      title: "Cari",
       url: "#",
       icon: IconSearch,
     },

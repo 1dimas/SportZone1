@@ -119,7 +119,7 @@ export function PengembalianTable() {
     },
     {
       id: "customer",
-      header: "Customer",
+      header: "Pelanggan",
       cell: ({ row }) => (
         <div>
           <div className="font-medium">

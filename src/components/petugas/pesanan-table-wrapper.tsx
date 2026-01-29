@@ -26,7 +26,7 @@ export function PesananTableWrapper() {
     } catch (err) {
       console.error("Failed to fetch pesanan:", err)
       const errorMessage = err instanceof Error ? err.message : "Unknown error"
-      toast.error(`Failed to load pesanan data: ${errorMessage}`)
+      toast.error(`Gagal memuat data pesanan: ${errorMessage}`)
     }
   }
 
