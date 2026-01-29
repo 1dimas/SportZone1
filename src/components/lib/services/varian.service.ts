@@ -61,7 +61,6 @@ export async function createVarian(data: {
   warna?: string;
   stok: number;
   harga?: number;
-  sku?: string;
 }) {
   const token = getToken();
   if (!token) throw new Error("Belum login");
@@ -89,7 +88,6 @@ export async function updateVarian(
     warna?: string;
     stok?: number;
     harga?: number;
-    sku?: string;
     produk_id?: string;
   }
 ) {

@@ -114,7 +114,7 @@ const Footer = () => {
             <ul className="flex flex-col gap-3 mt-4">
               <li>
                 <Link
-                  href="/sports/football"
+                  href="/sports/Sepak Bola"
                   className="hover:text-white transition-colors"
                 >
                   Sepak Bola

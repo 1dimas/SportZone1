@@ -169,6 +169,11 @@ const data = {
       url: "/dashboardadmin/laporan-produk",
       icon: IconReport,
     },
+    {
+      name: "Laporan Order",
+      url: "/dashboardadmin/laporan-order",
+      icon: IconReport,
+    },
   ],
 };
 

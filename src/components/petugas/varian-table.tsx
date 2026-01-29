@@ -48,7 +48,6 @@ export const varianSchema = z.object({
   warna: z.string().optional(),
   stok: z.number(),
   harga: z.number().optional(),
-  sku: z.string().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 })
@@ -102,13 +101,6 @@ const columns: ColumnDef<Varian>[] = [
       <div className="text-right font-medium">
         {row.original.harga ? `Rp ${row.original.harga.toLocaleString('id-ID')}` : "-"}
       </div>
-    ),
-  },
-  {
-    accessorKey: "sku",
-    header: "SKU",
-    cell: ({ row }) => (
-      <div className="font-mono text-sm">{row.original.sku || "-"}</div>
     ),
   },
   {

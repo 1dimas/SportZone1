@@ -535,9 +535,6 @@ export default function ProdukDetailPage() {
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-gray-500">
-                              SKU: {item.sku || "-"}
-                            </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-6">
