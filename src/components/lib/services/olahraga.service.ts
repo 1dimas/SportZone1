@@ -139,7 +139,7 @@ export async function updateKategoriOlahraga(
 }
 
 // =====================
-// DELETE KATEGORI OLAHRAGA
+// DELETE KATEGORI OLAHRAGA (FIXED)
 // =====================
 export async function deleteKategoriOlahraga(id: string) {
   const token = getToken();
@@ -149,14 +149,15 @@ export async function deleteKategoriOlahraga(id: string) {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
     },
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Gagal menghapus kategori olahraga: ${response.status} ${response.statusText} - ${errorText}`);
+    throw new Error(
+      `Gagal menghapus kategori olahraga: ${response.status} ${response.statusText} - ${errorText}`
+    );
   }
 
-  return response.json();
+  return true;
 }

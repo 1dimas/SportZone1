@@ -296,12 +296,12 @@ export default function CheckoutPage() {
             } else {
               dispatch({ type: "CLEAR_CART" });
             }
-            router.push("/pesanan");
+            router.push("/pesanan/history");
           },
           onPending: function (result: SnapPaymentResult) {
             console.log("Payment pending:", result);
             toast.info("Pembayaran sedang diproses. Silakan selesaikan pembayaran.");
-            router.push("/pesanan");
+            router.push("/pesanan/history");
           },
           onError: function (result: SnapPaymentResult) {
             console.log("Payment error:", result);
