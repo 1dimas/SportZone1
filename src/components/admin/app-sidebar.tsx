@@ -13,7 +13,6 @@ import {
   IconHelp,
   IconBriefcase,
   IconListDetails,
-  IconReport,
   IconSearch,
   IconSettings,
   IconUsers,
@@ -27,7 +26,6 @@ import {
   IconChevronsRight,
 } from "@tabler/icons-react"
 
-import { NavDocuments } from "@/components/admin/nav-documents"
 import { NavMain } from "@/components/admin/nav-main"
 import { NavSecondary } from "@/components/admin/nav-secondary"
 import { NavUser } from "@/components/admin/nav-user"
@@ -163,18 +161,6 @@ const data = {
       icon: IconSearch,
     },
   ],
-  documents: [
-    {
-      name: "Laporan Produk",
-      url: "/dashboardadmin/laporan-produk",
-      icon: IconReport,
-    },
-    {
-      name: "Laporan Order",
-      url: "/dashboardadmin/laporan-order",
-      icon: IconReport,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -199,8 +185,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-
       </SidebarContent>
       <SidebarFooter className="mt-auto pt-8 border-t border-gray-200">
         <NavUser user={data.user} />

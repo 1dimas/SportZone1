@@ -306,7 +306,7 @@ export function ProdukTableReadonly() {
 
   return (
     <div className="w-full">
-      {/* Search Bar */}
+      {/* Search */}
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Cari produk..."

@@ -11,14 +11,23 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import {
   Pengembalian,
   getPengembalianById,
   approvePengembalian,
   rejectPengembalian,
 } from "@/components/lib/services/pengembalian.service";
-import { ArrowLeft, CheckCircle, XCircle, User, Package, Calendar, FileText } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, User, Package, Calendar, FileText, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 const formatCurrency = (amount: number) =>
@@ -54,6 +63,8 @@ export default function PengembalianDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [catatanAdmin, setCatatanAdmin] = useState("");
+  const [showApproveDialog, setShowApproveDialog] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -73,12 +84,12 @@ export default function PengembalianDetailPage() {
 
   const handleApprove = async () => {
     if (!pengembalian) return;
-    if (!confirm("Apakah Anda yakin ingin menyetujui pengembalian ini?")) return;
-
+    
     try {
       setProcessing(true);
       await approvePengembalian(pengembalian.id, catatanAdmin.trim() || undefined);
       toast.success("Pengembalian berhasil disetujui");
+      setShowApproveDialog(false);
       loadData();
     } catch (err: any) {
       toast.error(err?.message || "Gagal menyetujui pengembalian");
@@ -93,12 +104,12 @@ export default function PengembalianDetailPage() {
       toast.warning("Silakan isi catatan penolakan");
       return;
     }
-    if (!confirm("Apakah Anda yakin ingin menolak pengembalian ini?")) return;
-
+    
     try {
       setProcessing(true);
       await rejectPengembalian(pengembalian.id, catatanAdmin.trim());
       toast.success("Pengembalian berhasil ditolak");
+      setShowRejectDialog(false);
       loadData();
     } catch (err: any) {
       toast.error(err?.message || "Gagal menolak pengembalian");
@@ -267,7 +278,7 @@ export default function PengembalianDetailPage() {
                                       {item.kuantitas}x {formatCurrency(item.harga_satuan)}
                                       {item.produk_varian && (
                                         <span className="ml-1">
-                                          ({[item.produk_varian.warna, item.produk_varian.ukuran].filter(Boolean).join(" / ")})
+                                          ({[item.produk_varian.warna_varian, item.produk_varian.ukuran].filter(Boolean).join(" / ")})
                                         </span>
                                       )}
                                     </p>
@@ -298,7 +309,7 @@ export default function PengembalianDetailPage() {
                             </div>
                             <div className="flex flex-col gap-2">
                               <Button
-                                onClick={handleApprove}
+                                onClick={() => setShowApproveDialog(true)}
                                 disabled={processing}
                                 className="bg-green-600 hover:bg-green-700"
                               >
@@ -306,7 +317,7 @@ export default function PengembalianDetailPage() {
                                 Setujui Pengembalian
                               </Button>
                               <Button
-                                onClick={handleReject}
+                                onClick={() => setShowRejectDialog(true)}
                                 disabled={processing}
                                 variant="destructive"
                               >
@@ -325,6 +336,60 @@ export default function PengembalianDetailPage() {
           </div>
         </div>
       </SidebarInset>
+
+      {/* Approve Dialog */}
+      <AlertDialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                Setujui Pengembalian?
+              </div>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menyetujui pengembalian ini? Stok produk akan dikembalikan ke inventaris.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={processing}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleApprove}
+              disabled={processing}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {processing ? "Memproses..." : "Ya, Setujui"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reject Dialog */}
+      <AlertDialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-amber-500" />
+                Tolak Pengembalian?
+              </div>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin menolak pengembalian ini? Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={processing}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleReject}
+              disabled={processing}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {processing ? "Memproses..." : "Ya, Tolak"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarProvider>
   );
 }

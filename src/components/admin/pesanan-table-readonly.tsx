@@ -45,6 +45,7 @@ import {
   updatePembayaranStatus,
 } from "@/components/lib/services/pembayaran.service";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // ==============================
 // Utility Functions
@@ -203,11 +204,21 @@ export const columns: ColumnDef<
       header: "Aksi Pembayaran",
       cell: ({ row, table }) => {
         const pembayaran = row.original.pembayaran;
+        const statusPesanan = row.original.status;
+        
+        // Sembunyikan tombol aksi pembayaran jika:
+        // - Tidak ada data pembayaran
+        // - Bukan metode COD
+        // - Status pembayaran sudah lunas atau gagal
+        // - Status pesanan adalah dikembalikan, dibatalkan, atau selesai
         if (
           !pembayaran ||
           pembayaran.metode !== "cod" ||
           pembayaran.status === "sudah bayar" ||
-          pembayaran.status === "gagal"
+          pembayaran.status === "gagal" ||
+          statusPesanan === "dikembalikan" ||
+          statusPesanan === "dibatalkan" ||
+          statusPesanan === "selesai"
         )
           return <div className="text-sm">-</div>;
 
@@ -249,12 +260,27 @@ export const columns: ColumnDef<
         );
       },
     },
+    {
+      id: "aksi",
+      header: "Aksi",
+      cell: ({ row, table }) => (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => (table.options.meta as any)?.onViewDetail?.(row.original.id)}
+          className="border-orange-200 text-orange-600 hover:bg-orange-50"
+        >
+          Lihat Detail
+        </Button>
+      ),
+    },
   ];
 
 // ==============================
 // Component: PesananTableReadonly
 // ==============================
 export function PesananTableReadonly() {
+  const router = useRouter();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -269,6 +295,10 @@ export function PesananTableReadonly() {
     (Pesanan & { pembayaran?: PembayaranType | null })[]
   >([]);
   const [loading, setLoading] = React.useState(true);
+
+  const handleViewDetail = (id: string) => {
+    router.push(`/dashboardadmin/pesanan/${id}`);
+  };
 
   const refetch = React.useCallback(async () => {
     try {
@@ -314,7 +344,6 @@ export function PesananTableReadonly() {
     };
   }, [refetch]);
 
-
   const table = useReactTable({
     data,
     columns,
@@ -332,7 +361,7 @@ export function PesananTableReadonly() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    meta: { refetch },
+    meta: { refetch, onViewDetail: handleViewDetail },
   });
 
   if (loading) {
@@ -341,7 +370,7 @@ export function PesananTableReadonly() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Search and Info */}
+      {/* Search */}
       <div className="flex items-center justify-between">
         <Input
           placeholder="Cari berdasarkan nama pelanggan..."

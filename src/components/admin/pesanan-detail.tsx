@@ -5,31 +5,25 @@ import { useRouter } from "next/navigation";
 import {
   Pesanan,
   getPesananById,
-  updatePesananStatus,
-  StatusPesanan,
 } from "@/components/lib/services/pesanan.service";
 import { getProdukById } from "@/components/lib/services/produk.service";
+import { getPembayaranByPesananId, Pembayaran } from "@/components/lib/services/pembayaran.service";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   Package,
   MapPin,
   Truck,
-  Clock,
   CheckCircle2,
   XCircle,
   RotateCcw,
   AlertCircle,
   User,
-  Mail
+  Mail,
+  Calendar,
+  Clock
 } from "lucide-react";
 
 interface PesananDetailProps {
@@ -39,9 +33,8 @@ interface PesananDetailProps {
 export function PesananDetail({ id }: PesananDetailProps) {
   const [pesanan, setPesanan] = useState<Pesanan | null>(null);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [productImages, setProductImages] = useState<Record<string, string>>({});
+  const [pembayaran, setPembayaran] = useState<Pembayaran | null>(null);
   const router = useRouter();
 
   const fetchPesanan = async () => {
@@ -49,7 +42,14 @@ export function PesananDetail({ id }: PesananDetailProps) {
       setLoading(true);
       const data = await getPesananById(id);
       setPesanan(data);
-      setSelectedStatus(data.status);
+      
+      // Fetch pembayaran data
+      try {
+        const pembayaranData = await getPembayaranByPesananId(id);
+        setPembayaran(pembayaranData);
+      } catch (err) {
+        console.error("Failed to fetch pembayaran:", err);
+      }
       
       // Fetch product images for each item
       if (data.pesanan_items && data.pesanan_items.length > 0) {
@@ -92,26 +92,6 @@ export function PesananDetail({ id }: PesananDetailProps) {
     fetchPesanan();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  const handleStatusChange = (newStatus: string) => {
-    setSelectedStatus(newStatus);
-  };
-
-  const handleUpdateStatus = async () => {
-    if (!pesanan) return;
-    try {
-      setUpdating(true);
-      await updatePesananStatus(pesanan.id, selectedStatus as StatusPesanan);
-      toast.success("Status pesanan berhasil diperbarui");
-      fetchPesanan();
-    } catch (err) {
-      console.error("Failed to update status:", err);
-      const errorMessage = err instanceof Error ? err.message : "Gagal memperbarui status pesanan";
-      toast.error(errorMessage);
-    } finally {
-      setUpdating(false);
-    }
-  };
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
@@ -164,12 +144,6 @@ export function PesananDetail({ id }: PesananDetailProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          {/* <button 
-            onClick={() => router.back()}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-500" />
-          </button> */}
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-semibold text-gray-900">
@@ -298,59 +272,8 @@ export function PesananDetail({ id }: PesananDetailProps) {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <div className="bg-white border border-gray-200 rounded-xl p-5 sticky top-6">
-            <h2 className="text-sm font-medium text-gray-900 mb-4">Perbarui Status</h2>
-
-            <Select
-              value={selectedStatus}
-              onValueChange={handleStatusChange}
-              disabled={updating}
-            >
-              <SelectTrigger className="w-full h-11 bg-gray-50 border-gray-200">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">Menunggu</SelectItem>
-                <SelectItem value="diproses">Diproses</SelectItem>
-                <SelectItem value="dikirim">Dikirim</SelectItem>
-                <SelectItem value="selesai">Selesai</SelectItem>
-                <SelectItem value="dibatalkan">Dibatalkan</SelectItem>
-                <SelectItem value="dikembalikan">Dikembalikan</SelectItem>
-              </SelectContent>
-            </Select>
-
-            {(pesanan.status === 'dikirim' || pesanan.status === 'selesai') && selectedStatus === 'dikembalikan' && (
-              <div className="mt-3 p-3 bg-amber-50 rounded-lg text-xs text-amber-700">
-                Stok produk akan dikembalikan ke inventaris.
-              </div>
-            )}
-
-            {pesanan.status !== 'dikirim' && pesanan.status !== 'selesai' && selectedStatus === 'dikembalikan' && (
-              <div className="mt-3 p-3 bg-red-50 rounded-lg text-xs text-red-700">
-                Hanya pesanan yang sudah dikirim atau selesai yang bisa dikembalikan.
-              </div>
-            )}
-
-            <Button
-              className="w-full mt-4 h-11 bg-orange-500 hover:bg-orange-600 text-white"
-              onClick={handleUpdateStatus}
-              disabled={updating || selectedStatus === pesanan.status}
-            >
-              {updating ? "Menyimpan..." : "Simpan"}
-            </Button>
-
-            <Button
-              variant="outline"
-              className="w-full mt-2 border-orange-200 text-orange-600 hover:bg-orange-50"
-              onClick={() => router.back()}
-              disabled={updating}
-            >
-              Kembali
-            </Button>
-          </div>
-
           {/* Order Info */}
-          <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="bg-white border border-gray-200 rounded-xl p-5 sticky top-6">
             <h2 className="text-sm font-medium text-gray-900 mb-4">Informasi Pesanan</h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
@@ -365,6 +288,41 @@ export function PesananDetail({ id }: PesananDetailProps) {
               </div>
             </div>
           </div>
+
+          {/* Payment Info */}
+          <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <h2 className="text-sm font-medium text-gray-900 mb-4">Informasi Pembayaran</h2>
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Metode</span>
+                <span className="text-gray-900 font-medium">
+                  {pembayaran?.metode ? pembayaran.metode.toUpperCase() : pesanan?.metode_pembayaran?.toUpperCase() || "-"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Status</span>
+                <Badge className={
+                  pembayaran?.status === "sudah bayar"
+                    ? "bg-green-100 text-green-800 border-green-200"
+                    : pembayaran?.status === "belum bayar"
+                      ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                      : pembayaran?.status === "gagal"
+                        ? "bg-red-100 text-red-800 border-red-200"
+                        : "bg-gray-100 text-gray-800 border-gray-200"
+                }>
+                  {pembayaran?.status || pesanan?.status_pembayaran || "-"}
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
+            onClick={() => router.back()}
+          >
+            Kembali
+          </Button>
         </div>
       </div>
     </div>

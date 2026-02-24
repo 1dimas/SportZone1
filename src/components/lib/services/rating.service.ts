@@ -129,6 +129,31 @@ export async function getRatingsByUser(userId: string) {
   return res.json();
 }
 
+/**
+ * Get all product IDs that the user has rated
+ * Returns an array of product IDs
+ */
+export async function getRatedProductIdsByUser(userId: string): Promise<string[]> {
+  const token = getToken();
+  if (!token) return [];
+
+  try {
+    const ratings = await getRatingsByUser(userId);
+    // ratings is expected to be an array of rating objects with nested produk object
+    if (Array.isArray(ratings)) {
+      const productIds = ratings.map(r => {
+        // Try multiple possible structures: produk.id, produkId, produk_id, productId
+        return r.produk?.id || r.produkId || r.produk_id || r.productId;
+      }).filter(Boolean);
+      return productIds;
+    }
+    return [];
+  } catch (err) {
+    console.error(`getRatedProductIdsByUser error:`, err);
+    return [];
+  }
+}
+
 export async function checkUserRating(userId: string, produkId: string): Promise<boolean> {
   const token = getToken();
   if (!token) return false;
@@ -144,8 +169,9 @@ export async function checkUserRating(userId: string, produkId: string): Promise
 
     if (!res.ok) return false;
     const data = await res.json();
-    return data?.hasRated === true;
-  } catch {
+    // Try multiple possible response formats
+    return data?.hasRated === true || data?.has_rated === true || data?.rated === true || false;
+  } catch (err) {
     return false;
   }
 }

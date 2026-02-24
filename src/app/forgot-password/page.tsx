@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { forgotPassword, verifyOtp, resetPassword } from "@/components/lib/services/auth.service";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,65 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Step = "email" | "otp" | "password" | "success";
+
+function OtpInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const otpLength = 6;
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (!/^\d*$/.test(val)) return;
+
+    const newOtp = value.split("");
+    newOtp[index] = val.slice(-1);
+    onChange(newOtp.join(""));
+
+    if (val && index < otpLength - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !value[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").slice(0, otpLength);
+    if (!/^\d+$/.test(pastedData)) return;
+
+    onChange(pastedData);
+    const focusIndex = Math.min(pastedData.length, otpLength - 1);
+    inputRefs.current[focusIndex]?.focus();
+  };
+
+  return (
+    <div className="flex gap-2 justify-center">
+      {Array.from({ length: otpLength }).map((_, index) => (
+        <Input
+          key={index}
+          ref={(el) => (inputRefs.current[index] = el)}
+          type="text"
+          inputMode="numeric"
+          value={value[index] || ""}
+          onChange={(e) => handleChange(index, e)}
+          onKeyDown={(e) => handleKeyDown(index, e)}
+          onPaste={handlePaste}
+          className="w-12 h-12 text-center text-xl font-semibold"
+          maxLength={1}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -36,6 +95,12 @@ export default function ForgotPasswordPage() {
 
   async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
+    
+    if (otp.length !== 6) {
+      setErrorMsg("Masukkan 6 digit kode OTP");
+      return;
+    }
+    
     setLoading(true);
     setErrorMsg("");
 
@@ -122,15 +187,7 @@ export default function ForgotPasswordPage() {
             <form onSubmit={handleVerifyOtp}>
               <div className="grid gap-3 mb-4">
                 <Label htmlFor="otp">Kode OTP</Label>
-                <Input
-                  id="otp"
-                  type="text"
-                  placeholder="123456"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  required
-                  maxLength={6}
-                />
+                <OtpInput value={otp} onChange={setOtp} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Memverifikasi..." : "Verifikasi OTP"}

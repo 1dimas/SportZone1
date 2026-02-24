@@ -89,7 +89,7 @@ export function ProdukRusakTable() {
           {row.original.produk_varian && (
             <div className="text-sm text-muted-foreground">
               {[
-                row.original.produk_varian.warna,
+                row.original.produk_varian.warna_varian,
                 row.original.produk_varian.ukuran,
               ]
                 .filter(Boolean)

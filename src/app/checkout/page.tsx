@@ -2,6 +2,7 @@
 
 import { useCart } from "@/context/cart-context";
 import { formatRupiah } from "@/lib/utils";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { FiMapPin, FiUser, FiCreditCard } from "react-icons/fi";
@@ -43,6 +44,10 @@ declare global {
 export default function CheckoutPage() {
   const { state, dispatch } = useCart();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [itemsForCheckout, setItemsForCheckout] = useState<typeof state.items>(
+    [],
+  );
   const [isProcessing, setIsProcessing] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<{
@@ -122,25 +127,34 @@ export default function CheckoutPage() {
     }
   }, []);
 
-  const itemsForCheckout = (() => {
-    // If direct mode, use items from localStorage
-    const params = new URLSearchParams(window.location.search);
-    const mode = params.get("mode");
+  useEffect(() => {
+    const mode = searchParams.get("mode");
+    const selected = searchParams.get("selected");
+
+    // Direct checkout
     if (mode === "direct") {
       try {
         const raw = localStorage.getItem("checkout_direct_items");
-        if (raw) return JSON.parse(raw);
-      } catch { }
+        if (raw) {
+          setItemsForCheckout(JSON.parse(raw));
+          return;
+        }
+      } catch (err) {
+        console.error("Direct checkout parse error:", err);
+      }
     }
 
-    // If selected items, filter cart
-    if (selectedOnly) {
-      return state.items.filter((i) => selectedOnly.includes(i.id));
+    // Selected items only
+    if (selected) {
+      const ids = selected.split(",").filter(Boolean);
+      const filtered = state.items.filter((i) => ids.includes(i.id));
+      setItemsForCheckout(filtered);
+      return;
     }
 
-    // Otherwise, use all cart items
-    return state.items;
-  })();
+    // Default: all cart items
+    setItemsForCheckout(state.items);
+  }, [searchParams, state.items]);
 
   if (itemsForCheckout.length === 0) {
     return (
@@ -546,9 +560,26 @@ export default function CheckoutPage() {
                         <h3 className="text-sm font-medium text-gray-900">
                           {item.name}
                         </h3>
-                        <p className="text-xs text-gray-500">
-                          Ukuran: {item.size}
-                        </p>
+                        {item.selectedColor && item.selectedSize && (
+                          <p className="text-xs text-gray-500">
+                            {item.selectedColor} • {item.selectedSize}
+                          </p>
+                        )}
+                        {item.selectedColor && !item.selectedSize && (
+                          <p className="text-xs text-gray-500">
+                            Warna: {item.selectedColor}
+                          </p>
+                        )}
+                        {item.selectedSize && !item.selectedColor && (
+                          <p className="text-xs text-gray-500">
+                            Ukuran: {item.selectedSize}
+                          </p>
+                        )}
+                        {!item.selectedColor && !item.selectedSize && item.size && item.size !== "Default" && (
+                          <p className="text-xs text-gray-500">
+                            Ukuran: {item.size}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500">
                           Jml: {item.quantity}
                         </p>

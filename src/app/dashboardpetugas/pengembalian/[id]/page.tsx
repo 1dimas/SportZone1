@@ -226,7 +226,7 @@ export default function PengembalianDetailPage() {
                                       {item.kuantitas}x {formatCurrency(item.harga_satuan)}
                                       {item.produk_varian && (
                                         <span className="ml-1">
-                                          ({[item.produk_varian.warna, item.produk_varian.ukuran].filter(Boolean).join(" / ")})
+                                          ({[item.produk_varian.warna_varian, item.produk_varian.ukuran].filter(Boolean).join(" / ")})
                                         </span>
                                       )}
                                     </p>

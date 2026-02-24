@@ -2,16 +2,26 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import {
   getPesananHistory,
   Pesanan,
   cancelOrder,
+  finishOrder,
 } from "@/components/lib/services/pesanan.service";
 import {
   IconArrowLeft,
@@ -23,9 +33,10 @@ import {
   IconTruck,
   IconLoader2,
   IconAlertCircle,
-  IconBox
+  IconBox,
+  IconCheck
 } from "@tabler/icons-react";
-import { createRating, checkUserRating } from "@/components/lib/services/rating.service";
+import { createRating, checkUserRating, getRatedProductIdsByUser } from "@/components/lib/services/rating.service";
 import { getProfile } from "@/components/lib/services/auth.service";
 import { toast } from "sonner";
 
@@ -75,7 +86,11 @@ export default function PesananHistoryPage() {
   const [pending, setPending] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [cancelingOrderId, setCancelingOrderId] = useState<string | null>(null);
+  const [finishingOrderId, setFinishingOrderId] = useState<string | null>(null);
   const [ratedItems, setRatedItems] = useState<Record<string, boolean>>({});
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showFinishDialog, setShowFinishDialog] = useState(false);
+  const [orderToAction, setOrderToAction] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -119,14 +134,17 @@ export default function PesananHistoryPage() {
       .sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
   }, [orders, tab]);
 
-  const handleCancelOrder = async (orderId: string) => {
-    if (!confirm("Apakah Anda yakin ingin membatalkan pesanan ini?")) {
-      return;
-    }
+  const handleCancelOrder = (orderId: string) => {
+    setOrderToAction(orderId);
+    setShowCancelDialog(true);
+  };
 
+  const handleConfirmCancel = async () => {
+    if (!orderToAction) return;
+    
     try {
-      setCancelingOrderId(orderId);
-      await cancelOrder(orderId);
+      setCancelingOrderId(orderToAction);
+      await cancelOrder(orderToAction);
       toast.success("Pesanan berhasil dibatalkan");
 
       const data = await getPesananHistory();
@@ -135,24 +153,61 @@ export default function PesananHistoryPage() {
       toast.error(err?.message || "Gagal membatalkan pesanan");
     } finally {
       setCancelingOrderId(null);
+      setShowCancelDialog(false);
+      setOrderToAction(null);
+    }
+  };
+
+  const handleFinishOrder = (orderId: string) => {
+    setOrderToAction(orderId);
+    setShowFinishDialog(true);
+  };
+
+  const handleConfirmFinish = async () => {
+    if (!orderToAction) return;
+    
+    try {
+      setFinishingOrderId(orderToAction);
+      await finishOrder(orderToAction);
+      toast.success("Pesanan berhasil diselesaikan. Terima kasih!");
+
+      const data = await getPesananHistory();
+      setOrders(data);
+    } catch (err: any) {
+      toast.error(err?.message || "Gagal menyelesaikan pesanan");
+    } finally {
+      setFinishingOrderId(null);
+      setShowFinishDialog(false);
+      setOrderToAction(null);
     }
   };
 
   // Check which items have already been rated by the user
   const checkRatedItems = async (orders: Pesanan[], userId: string) => {
+    // Get all rated product IDs at once (more efficient)
+    const ratedProductIds = await getRatedProductIdsByUser(userId);
+    
+    const ratedItemsSet = new Set(ratedProductIds);
     const ratedItems: Record<string, boolean> = {};
 
     for (const order of orders) {
       if (order.pesanan_items) {
         for (const item of order.pesanan_items) {
-          // Create a unique key for each order-item combination
           const itemKey = `${order.id}-${item.id_produk}`;
-          ratedItems[itemKey] = await checkUserRating(userId, item.id_produk);
+          // Check if this product ID is in the rated set
+          ratedItems[itemKey] = item.id_produk ? ratedItemsSet.has(item.id_produk) : false;
         }
       }
     }
 
     return ratedItems;
+  };
+
+  // Refresh rated items after rating is submitted
+  const refreshRatedItems = async (orders: Pesanan[]) => {
+    if (!userId || orders.length === 0) return;
+    const ratedItemsCheck = await checkRatedItems(orders, userId);
+    setRatedItems(ratedItemsCheck);
   };
 
   const statusTabs = [
@@ -438,6 +493,28 @@ export default function PesananHistoryPage() {
                                 </Button>
                               )}
 
+                              {/* Finish Order Button (for status: dikirim) */}
+                              {order.status === "dikirim" && (
+                                <Button
+                                  size="sm"
+                                  disabled={finishingOrderId === order.id}
+                                  onClick={() => handleFinishOrder(order.id)}
+                                  className="bg-green-600 hover:bg-green-700 shadow-sm"
+                                >
+                                  {finishingOrderId === order.id ? (
+                                    <>
+                                      <IconLoader2 className="w-4 h-4 mr-2 animate-spin" />
+                                      Memproses...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <IconCheck className="w-4 h-4 mr-2" />
+                                      Pesanan Diterima
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+
                               {/* Detail Button */}
                               <Link href={`/pesanan/${order.id}`}>
                                 <Button
@@ -454,93 +531,107 @@ export default function PesananHistoryPage() {
                                 <div className="w-full sm:w-auto">
                                   {order.pesanan_items && order.pesanan_items.length > 0 ? (
                                     (() => {
-                                      const firstItem = order.pesanan_items[0];
-                                      const itemKey = `${order.id}-${firstItem.id_produk}`;
-                                      const hasRated = ratedItems[itemKey] || false;
+                                      // Check if ALL items in this order have been rated
+                                      const allItemsRated = order.pesanan_items.every(item => {
+                                        if (!item.id_produk) return false;
+                                        const itemKey = `${order.id}-${item.id_produk}`;
+                                        return ratedItems[itemKey] === true;
+                                      });
 
-                                      return hasRated ? (
-                                        <div key={itemKey} className="inline-flex items-center gap-2 text-sm text-green-600">
-                                          <IconStar className="w-4 h-4 text-green-500" />
-                                          <span>Terima kasih atas ulasan Anda!</span>
-                                        </div>
-                                      ) : activeReviewOrderId === order.id ? (
-                                        <div className="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 mt-3">
-                                          <p className="text-sm font-semibold text-gray-900 mb-3">
-                                            Beri Rating & Ulasan
-                                          </p>
-                                          <div className="flex items-center gap-1 mb-3">
-                                            {[1, 2, 3, 4, 5].map((v) => (
-                                              <button
-                                                key={v}
-                                                disabled={pending}
-                                                onClick={() => setCurrentRating(v)}
-                                                className={`p-1.5 rounded-lg transition-colors ${pending ? "opacity-50" : "hover:bg-gray-100"
-                                                  }`}
-                                              >
-                                                <IconStar
-                                                  className={`w-6 h-6 ${v <= currentRating
-                                                      ? "text-yellow-500 fill-yellow-400"
-                                                      : "text-gray-300"
-                                                    }`}
-                                                />
-                                              </button>
-                                            ))}
+                                      // If all items are rated, show thank you message
+                                      if (allItemsRated) {
+                                        return (
+                                          <div className="inline-flex items-center gap-2 text-sm text-green-600">
+                                            <IconStar className="w-4 h-4 text-green-500" />
+                                            <span>Terima kasih atas ulasan Anda!</span>
                                           </div>
-                                          <Textarea
-                                            placeholder="Bagikan pengalaman Anda (opsional)"
-                                            value={currentReview}
-                                            onChange={(e) => setCurrentReview(e.target.value)}
-                                            className="mb-3 bg-white"
-                                            rows={3}
-                                          />
-                                          <div className="flex justify-end gap-2">
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              disabled={pending}
-                                              onClick={() => {
-                                                setActiveReviewOrderId(null);
-                                                setCurrentRating(0);
-                                                setCurrentReview("");
-                                              }}
-                                            >
-                                              Batal
-                                            </Button>
-                                            <Button
-                                              size="sm"
-                                              disabled={pending}
-                                              className="bg-orange-600 hover:bg-orange-700"
-                                              onClick={async () => {
-                                                if (!userId) return toast.warning("Silakan login kembali");
-                                                if (!currentRating) return toast.warning("Pilih rating 1-5");
-                                                if (!firstItem.id_produk) return toast.error("Produk tidak ditemukan");
-                                                try {
-                                                  setPending(true);
-                                                  await createRating({
-                                                    userId,
-                                                    produkId: firstItem.id_produk,
-                                                    rating: currentRating,
-                                                    review: currentReview.trim() || undefined,
-                                                  });
-                                                  toast.success("Terima kasih atas ulasan Anda!");
+                                        );
+                                      }
+
+                                      // If review form is active
+                                      if (activeReviewOrderId === order.id) {
+                                        const firstItem = order.pesanan_items[0];
+                                        return (
+                                          <div className="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 mt-3">
+                                            <p className="text-sm font-semibold text-gray-900 mb-3">
+                                              Beri Rating & Ulasan
+                                            </p>
+                                            <div className="flex items-center gap-1 mb-3">
+                                              {[1, 2, 3, 4, 5].map((v) => (
+                                                <button
+                                                  key={v}
+                                                  disabled={pending}
+                                                  onClick={() => setCurrentRating(v)}
+                                                  className={`p-1.5 rounded-lg transition-colors ${pending ? "opacity-50" : "hover:bg-gray-100"
+                                                    }`}
+                                                >
+                                                  <IconStar
+                                                    className={`w-6 h-6 ${v <= currentRating
+                                                        ? "text-yellow-500 fill-yellow-400"
+                                                        : "text-gray-300"
+                                                      }`}
+                                                  />
+                                                </button>
+                                              ))}
+                                            </div>
+                                            <Textarea
+                                              placeholder="Bagikan pengalaman Anda (opsional)"
+                                              value={currentReview}
+                                              onChange={(e) => setCurrentReview(e.target.value)}
+                                              className="mb-3 bg-white"
+                                              rows={3}
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                              <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={pending}
+                                                onClick={() => {
                                                   setActiveReviewOrderId(null);
                                                   setCurrentRating(0);
                                                   setCurrentReview("");
-                                                  // Update the rated items state after successful rating
-                                                  const itemKey = `${order.id}-${firstItem.id_produk}`;
-                                                  setRatedItems(prev => ({ ...prev, [itemKey]: true }));
-                                                } catch (e: any) {
-                                                  toast.error(e?.message || "Gagal mengirim ulasan");
-                                                } finally {
-                                                  setPending(false);
-                                                }
-                                              }}
-                                            >
-                                              Kirim Ulasan
-                                            </Button>
+                                                }}
+                                              >
+                                                Batal
+                                              </Button>
+                                              <Button
+                                                size="sm"
+                                                disabled={pending}
+                                                className="bg-orange-600 hover:bg-orange-700"
+                                                onClick={async () => {
+                                                  if (!userId) return toast.warning("Silakan login kembali");
+                                                  if (!currentRating) return toast.warning("Pilih rating 1-5");
+                                                  if (!firstItem.id_produk) return toast.error("Produk tidak ditemukan");
+                                                  try {
+                                                    setPending(true);
+                                                    await createRating({
+                                                      userId,
+                                                      produkId: firstItem.id_produk,
+                                                      rating: currentRating,
+                                                      review: currentReview.trim() || undefined,
+                                                    });
+                                                    toast.success("Terima kasih atas ulasan Anda!");
+                                                    setActiveReviewOrderId(null);
+                                                    setCurrentRating(0);
+                                                    setCurrentReview("");
+                                                    // Refresh rated items from server after successful rating
+                                                    await refreshRatedItems(orders);
+                                                  } catch (e: any) {
+                                                    toast.error(e?.message || "Gagal mengirim ulasan");
+                                                  } finally {
+                                                    setPending(false);
+                                                  }
+                                                }}
+                                              >
+                                                Kirim Ulasan
+                                              </Button>
+                                            </div>
                                           </div>
-                                        </div>
-                                      ) : (
+                                        );
+                                      }
+
+                                      // Show review button if not all items are rated
+                                      return (
                                         <Button
                                           size="sm"
                                           variant="outline"
@@ -571,6 +662,60 @@ export default function PesananHistoryPage() {
           </Tabs>
         )}
       </div>
+
+      {/* Cancel Order Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <div className="flex items-center gap-2">
+                <IconAlertCircle className="w-5 h-5 text-amber-500" />
+                Batalkan Pesanan?
+              </div>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!cancelingOrderId}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmCancel}
+              disabled={!!cancelingOrderId}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {cancelingOrderId ? "Membatalkan..." : "Ya, Batalkan"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Finish Order Dialog */}
+      <AlertDialog open={showFinishDialog} onOpenChange={setShowFinishDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <div className="flex items-center gap-2">
+                <IconCheck className="w-5 h-5 text-green-500" />
+                Selesaikan Pesanan?
+              </div>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin sudah menerima pesanan ini? Pastikan Anda telah menerima produk dengan baik.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!finishingOrderId}>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmFinish}
+              disabled={!!finishingOrderId}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {finishingOrderId ? "Menyimpan..." : "Ya, Selesaikan"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

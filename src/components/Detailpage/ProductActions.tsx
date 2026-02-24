@@ -24,6 +24,7 @@ type ApiVariant = {
   id: string;
   ukuran?: string;
   size?: string;
+  warna_varian?: string;
   warna?: string;
   color?: string;
   stok: number;
@@ -69,20 +70,21 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
   const variants = apiVariants.length > 0 ? apiVariants : product.variants;
 
   const hasSizes = variants.some((v) => v.ukuran !== undefined || v.size !== undefined);
-  const hasColors = variants.some((v) => v.warna !== undefined || v.color !== undefined);
+  const hasColors = variants.some((v) => v.warna_varian !== undefined || v.warna !== undefined || v.color !== undefined);
   const hasVariants = variants.length > 0 && (hasSizes || hasColors);
 
   const availableSizes = hasSizes
     ? [...new Set(variants.map((v) => v.ukuran || v.size).filter(Boolean))]
     : [];
   const availableColors = hasColors
-    ? [...new Set(variants.map((v) => v.warna || v.color).filter(Boolean))]
+    ? [...new Set(variants.map((v) => v.warna_varian || v.warna || v.color).filter(Boolean))]
     : [];
 
   const virtualVariant = !hasVariants
     ? {
       id: `virtual-${product.id}`,
       ukuran: undefined,
+      warna_varian: undefined,
       warna: undefined,
       stok: product.stock || 0,
       harga: product.price,
@@ -96,7 +98,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     ? variants.find(
       (v) =>
         (hasSizes ? (v.ukuran || v.size) === selectedSize : true) &&
-        (hasColors ? (v.warna || v.color) === selectedColor : true)
+        (hasColors ? (v.warna_varian || v.warna || v.color) === selectedColor : true)
     )
     : virtualVariant;
 
@@ -106,7 +108,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       if (hasSizes && selectedSize === undefined)
         setSelectedSize(firstVariant.ukuran || firstVariant.size);
       if (hasColors && selectedColor === undefined)
-        setSelectedColor(firstVariant.warna || firstVariant.color);
+        setSelectedColor(firstVariant.warna_varian || firstVariant.warna || firstVariant.color);
     }
   }, [variants, hasSizes, hasColors, selectedSize, selectedColor, loadingVariants]);
 
@@ -136,8 +138,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       return;
     }
 
-    let variantType: "size" | "color" | "default" = "default";
-    if (hasSizes && selectedSize !== undefined) variantType = "size";
+    let variantType: "size" | "color" | "both" | "default" = "default";
+    if (hasSizes && hasColors) variantType = "both";
+    else if (hasSizes && selectedSize !== undefined) variantType = "size";
     else if (hasColors && selectedColor !== undefined) variantType = "color";
 
     dispatch({
@@ -148,9 +151,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
           name: product.name,
           price: selectedVariant.harga || product.price,
           image: product.image,
-          size: selectedSize?.toString() || selectedColor || "Default",
-          selectedSize: selectedSize?.toString(),
-          selectedColor: selectedColor,
+          size: hasSizes ? selectedSize?.toString() : "Default",
+          selectedSize: hasSizes ? selectedSize?.toString() : undefined,
+          selectedColor: hasColors ? selectedColor : undefined,
           variantType,
           variantId: selectedVariant.id,
           quantity,
@@ -199,7 +202,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
       name: product.name,
       price: selectedVariant.harga || product.price,
       image: product.image,
-      size: selectedSize?.toString() || selectedColor || "Default",
+      size: hasSizes ? selectedSize?.toString() : "Default",
+      selectedSize: hasSizes ? selectedSize?.toString() : undefined,
+      selectedColor: hasColors ? selectedColor : undefined,
       variantId: variantIdStr,
       quantity,
       stock: selectedVariant.stok,
@@ -214,7 +219,7 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
     variants.some((v) => (v.ukuran || v.size) === size && v.stok > 0);
 
   const isColorAvailable = (color: string) =>
-    variants.some((v) => (v.warna || v.color) === color && v.stok > 0);
+    variants.some((v) => (v.warna_varian || v.warna || v.color) === color && v.stok > 0);
 
   if (loadingVariants) {
     return (

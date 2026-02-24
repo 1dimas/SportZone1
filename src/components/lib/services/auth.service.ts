@@ -148,11 +148,13 @@ export async function verifyOtp(email: string, otp: string) {
   const response = await fetch(`${API_URL}/auth/verify-otp`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, otp }),
+    body: JSON.stringify({ email, otp: parseInt(otp, 10) }),
   });
 
   if (!response.ok) {
-    throw new Error("OTP tidak valid");
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Verify OTP error response:", errorData);
+    throw new Error(errorData.message || errorData.error || "OTP tidak valid");
   }
 
   return response.json();
@@ -169,11 +171,13 @@ export async function resetPassword(
   const response = await fetch(`${API_URL}/auth/reset-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, otp, newPassword }),
+    body: JSON.stringify({ email, otp: parseInt(otp, 10), newPassword }),
   });
 
   if (!response.ok) {
-    throw new Error("Gagal reset password");
+    const errorData = await response.json().catch(() => ({}));
+    console.error("Reset password error response:", errorData);
+    throw new Error(errorData.message || errorData.error || "Gagal reset password");
   }
 
   return response.json();
